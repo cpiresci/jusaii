@@ -3,113 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustAII | Law Engine v2.8</title>
+    <title>JustAII | Law Engine v2.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
-        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .credit-badge { background: linear-gradient(90deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-        @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        .scanning::after { content: ""; position: absolute; width: 100%; height: 2px; background: #3b82f6; left: 0; animation: scan 2s infinite linear; box-shadow: 0 0 15px #3b82f6; z-index: 10; }
+        body { background: #020617; color: #f8fafc; font-family: sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
         .loader { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="flex flex-col items-center p-6 md:p-12">
+<body class="flex flex-col items-center p-6 md:p-12 min-h-screen">
 
-    <header class="w-full max-w-5xl flex justify-between items-center mb-16 border-b border-white/5 pb-8">
-        <div>
-            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase">JustAII</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Mechanical Authority • v2.8</p>
-        </div>
-        <div class="credit-badge px-6 py-2 rounded-2xl flex items-center gap-3">
-            <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Créditos:</span>
-            <span id="credit-count" class="font-black text-white text-lg">--</span>
+    <header class="w-full max-w-4xl flex justify-between items-center mb-16 border-b border-white/5 pb-8">
+        <h1 class="text-3xl font-black italic text-blue-500 uppercase tracking-tighter">JUSTAII</h1>
+        <div class="bg-blue-600/20 px-6 py-2 rounded-2xl border border-blue-500/30 text-[10px] font-bold">
+            CRÉDITOS: <span id="c-display">--</span>
         </div>
     </header>
 
     <main class="w-full max-w-4xl space-y-10">
-        <section class="glass rounded-[2.5rem] p-2 relative" id="input-section">
-            <div id="scanner" class="hidden scanning"></div>
-            <div class="rounded-[2rem] overflow-hidden bg-black/40">
-                <textarea id="prompt" class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva os factos para análise jurídica..."></textarea>
-            </div>
-            <div class="p-6 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span id="status" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Motor Online</span>
-                </div>
-                <button onclick="analisar()" id="btn" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl shadow-blue-600/30">
-                    Iniciar Orquestração
+        <section class="glass p-8 rounded-[2.5rem]">
+            <textarea id="p-input" class="w-full h-64 bg-transparent border-none outline-none text-lg resize-none text-slate-200" placeholder="Introduza os factos do caso..."></textarea>
+            <div class="p-6 flex justify-between items-center border-t border-white/5 mt-4">
+                <span id="st" class="text-[9px] font-bold text-green-500 uppercase tracking-widest">Motor Online</span>
+                <button onclick="executar()" id="p-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20">
+                    Analisar Factos
                 </button>
             </div>
         </section>
 
-        <div id="loading" class="hidden flex flex-col items-center py-10 space-y-4">
-            <div class="loader"></div>
-            <p class="text-[10px] uppercase tracking-[0.3em] text-blue-400 animate-pulse font-bold">A processar agentes jurídicos...</p>
+        <div id="p-ld" class="hidden flex flex-col items-center py-10">
+            <div class="loader mb-4"></div>
+            <p class="text-[10px] uppercase font-bold text-blue-400 animate-pulse tracking-widest">A aguardar resposta dos agentes...</p>
         </div>
 
-        <section id="results" class="space-y-8 pb-40"></section>
+        <div id="p-res" class="space-y-6 pb-40 w-full"></div>
     </main>
 
     <script>
-        // MUDAR PARA O SEU LINK DO RENDER (Sem a barra final e SEM porta :5000)
+        // COLOQUE AQUI O SEU LINK DO RENDER (SEM A PORTA :5000)
         const API_URL = "https://jusaii-app.onrender.com/api/analyze";
         
-        let credits = parseInt(localStorage.getItem('justaii_credits_final') || "5");
-        document.getElementById('credit-count').innerText = credits;
+        let credits = parseInt(localStorage.getItem('j_v29_c') || "5");
+        const update = () => { document.getElementById('c-display').innerText = credits; localStorage.setItem('j_v29_c', credits); }
+        update();
 
-        async function analisar() {
-            if (credits <= 0) return alert("Ciclos de energia esgotados.");
-            
-            const prompt = document.getElementById('prompt').value.trim();
-            if (!prompt) return alert("Por favor, introduza os factos.");
+        async function executar() {
+            if(credits <= 0) return alert("Ciclos insuficientes.");
+            const input = document.getElementById('p-input').value.trim();
+            if(!input) return;
 
-            const btn = document.getElementById('btn');
-            const loading = document.getElementById('loading');
-            const scanner = document.getElementById('scanner');
-            const status = document.getElementById('status');
-            const results = document.getElementById('results');
+            const btn = document.getElementById('p-btn');
+            const ld = document.getElementById('p-ld');
+            const res = document.getElementById('p-res');
 
             btn.disabled = true;
-            loading.classList.remove('hidden');
-            scanner.classList.remove('hidden');
-            status.innerText = "Em Orquestração...";
+            ld.classList.remove('hidden');
 
             try {
-                const response = await fetch(API_URL, {
+                const r = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ prompt: input })
                 });
 
-                if (!response.ok) throw new Error("Timeout/Error");
+                if (!r.ok) throw new Error("Erro de resposta");
 
-                const data = await response.json();
+                const d = await r.json();
 
-                if (data.agents) {
-                    credits--;
-                    localStorage.setItem('justaii_credits_final', credits);
-                    document.getElementById('credit-count').innerText = credits;
-
-                    data.agents.forEach(a => {
+                if(d.agents) {
+                    credits--; update();
+                    d.agents.forEach(a => {
                         const card = document.createElement('div');
-                        card.className = "glass p-12 rounded-[3.5rem] border-l-4 border-blue-600 mb-6";
-                        card.innerHTML = `<h3 class="text-blue-400 font-black mb-6 text-[10px] uppercase tracking-widest">${a.area}</h3>
-                                          <div class="text-slate-200 leading-relaxed text-sm">${a.analysis.replace(/\n/g, '<br>')}</div>`;
-                        results.prepend(card);
+                        card.className = "glass p-10 rounded-[3rem] border-l-4 border-blue-600 mb-6 w-full";
+                        card.innerHTML = `<h3 class="text-blue-400 font-bold mb-4 uppercase text-[10px] tracking-widest">${a.area}</h3>
+                                         <div class="text-slate-300 text-sm leading-relaxed">${a.analysis.replace(/\n/g, '<br>')}</div>`;
+                        res.prepend(card);
                     });
-                    document.getElementById('prompt').value = "";
+                    document.getElementById('p-input').value = "";
                 }
-            } catch (error) {
-                alert("O motor está a acordar (Plano Gratuito do Render). Aguarde 30 segundos e tente de novo.");
+            } catch (e) {
+                alert("O servidor está a acordar (Cold Start). Aguarde 20 segundos e tente novamente.");
             } finally {
                 btn.disabled = false;
-                loading.classList.add('hidden');
-                scanner.classList.add('hidden');
-                status.innerText = "Motor Online";
+                ld.classList.add('hidden');
             }
         }
     </script>
