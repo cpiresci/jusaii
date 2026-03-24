@@ -1,102 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustAII | Law Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #020617; color: #f8fafc; font-family: sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="p-4 md:p-10 min-h-screen flex flex-col items-center">
+// SUBSTITUA pela sua URL real do Render (sem a barra / no final e sem :5000)
+const API_BASE_URL = "https://seu-app-no-render.onrender.com"; 
 
-    <header class="w-full max-w-4xl flex justify-between items-center mb-10">
-        <h1 class="text-2xl font-black text-blue-500 uppercase italic">JustAII <span class="text-xs text-white opacity-30">V2.7</span></h1>
-        <div class="bg-blue-600/20 border border-blue-500/50 px-4 py-1 rounded-full text-xs font-bold">
-            CRÉDITOS: <span id="creditos-val">--</span>
-        </div>
-    </header>
+async function enviarAnalise() {
+    const prompt = document.getElementById('userPrompt').value;
+    const responseContainer = document.getElementById('response');
+    
+    // Mostrar carregamento
+    responseContainer.innerHTML = "A analisar com IA SambaNova... Por favor aguarde.";
 
-    <main class="w-full max-w-4xl space-y-6">
-        <div class="glass p-6 rounded-3xl">
-            <textarea id="input-prompt" class="w-full h-40 bg-transparent border-none focus:ring-0 text-lg resize-none" placeholder="Descreva o caso..."></textarea>
-            <div class="flex justify-between items-center mt-4 border-t border-white/5 pt-4">
-                <span id="status-text" class="text-[10px] uppercase tracking-widest opacity-50 text-green-400">Motor Pronto</span>
-                <button onclick="iniciar()" id="btn-main" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold text-xs uppercase transition-all">
-                    Iniciar Orquestração
-                </button>
-            </div>
-        </div>
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt })
+        });
 
-        <div id="loading" class="hidden flex flex-col items-center py-10">
-            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-800 h-12 w-12 mb-4"></div>
-            <p class="text-xs uppercase tracking-widest animate-pulse text-blue-400">Orquestrando Agentes Jurídicos...</p>
-        </div>
-
-        <div id="results" class="space-y-4"></div>
-    </main>
-
-    <script>
-        const API_URL = "https://jusaii-app.onrender.com/api/analyze";
-        let credits = parseInt(localStorage.getItem('j_credits') || "5");
-
-        function updateUI() {
-            document.getElementById('creditos-val').innerText = credits;
-            localStorage.setItem('j_credits', credits);
+        if (!response.ok) {
+            throw new Error(`Erro no Servidor: ${response.status}`);
         }
-        updateUI();
 
-        async function iniciar() {
-            if(credits <= 0) return alert("Sem créditos!");
-            
-            const prompt = document.getElementById('input-prompt').value;
-            if(!prompt) return;
-
-            const btn = document.getElementById('btn-main');
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('results');
-
-            btn.disabled = true;
-            loading.classList.remove('hidden');
-            document.getElementById('status-text').innerText = "Processando...";
-
-            try {
-                const resp = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ prompt: prompt })
-                });
-
-                const data = await resp.json();
-
-                if(data.agents) {
-                    credits--;
-                    updateUI();
-                    
-                    data.agents.forEach(a => {
-                        const div = document.createElement('div');
-                        div.className = "glass p-8 rounded-3xl border-l-4 border-blue-500 animate-in fade-in duration-700";
-                        div.innerHTML = `<h3 class="text-blue-400 text-xs font-bold mb-4 uppercase">${a.area}</h3>
-                                         <div class="leading-relaxed opacity-90">${a.analysis.replace(/\n/g, '<br>')}</div>`;
-                        results.prepend(div);
-                    });
-                    document.getElementById('input-prompt').value = "";
-                } else {
-                    throw new Error();
-                }
-            } catch (e) {
-                alert("O servidor está a acordar (o Render desliga após inatividade). Tente novamente em 30 segundos.");
-            } finally {
-                btn.disabled = false;
-                loading.classList.add('hidden');
-                document.getElementById('status-text').innerText = "Motor Online";
-            }
+        const data = await response.json();
+        
+        // Exibir a resposta baseada no formato do backend que criámos
+        if (data.agents && data.agents.length > 0) {
+            responseContainer.innerHTML = `<h3>${data.agents[0].area}</h3><p>${data.agents[0].analysis}</p>`;
         }
-    </script>
-</body>
-</html>
+    } catch (error) {
+        responseContainer.innerHTML = `Erro de ligação: ${error.message}. Verifique se o backend no Render está 'Live'.`;
+        console.error("Erro detalhado:", error);
+    }
+}
 
