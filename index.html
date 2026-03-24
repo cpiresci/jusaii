@@ -7,61 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #020617; 
-            color: #f8fafc; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh;
-            margin: 0;
-        }
-        .glass { 
-            background: rgba(15, 23, 42, 0.85); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-        }
-        .loader { 
-            border: 3px solid rgba(59, 130, 246, 0.1); 
-            border-top: 3px solid #3b82f6; 
-            border-radius: 50%; 
-            width: 40px; 
-            height: 40px; 
-            animation: spin 1s linear infinite; 
-        }
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .loader { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .fade-in-card {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .veredito-box {
-            background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(37,99,235,0.1) 100%);
-            border-left: 4px solid #3b82f6;
-        }
-        .error-message {
-            background: rgba(220, 38, 38, 0.2);
-            border-left: 4px solid #ef4444;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            color: #fecaca;
-        }
-        details {
-            transition: all 0.3s ease;
-        }
-        details summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: #60a5fa;
-        }
-        details[open] summary {
-            margin-bottom: 1rem;
-        }
-        .agent-error {
-            color: #f87171;
-            font-style: italic;
-        }
+        .fade-in-card { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .veredito-box { background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(37,99,235,0.1) 100%); border-left: 4px solid #3b82f6; }
+        .error-message { background: rgba(220, 38, 38, 0.2); border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; color: #fecaca; }
+        details { transition: all 0.3s ease; }
+        details summary { cursor: pointer; font-weight: 600; color: #60a5fa; }
+        details[open] summary { margin-bottom: 1rem; }
+        .agent-error { color: #f87171; font-style: italic; }
     </style>
 </head>
 <body class="flex flex-col items-center p-6 md:p-12">
@@ -82,7 +39,6 @@
             <textarea id="txt-input" 
                 class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" 
                 placeholder="Descreva aqui os factos do caso, legislação ou dúvida jurídica para análise profunda..."></textarea>
-            
             <div class="p-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
                 <div class="flex items-center gap-2">
                     <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -112,7 +68,6 @@
         const updateUI = () => { 
             document.getElementById('c-count').innerText = credits; 
             localStorage.setItem('justaii_credits_v31', credits); 
-            
             if(credits <= 0) {
                 document.getElementById('btn-main').disabled = true;
                 document.getElementById('st-msg').innerText = "Ciclos Esgotados";
@@ -123,18 +78,12 @@
                 document.getElementById('status-dot').classList.replace('bg-red-500', 'bg-green-500');
             }
         }
-        
         updateUI();
 
         async function analisarCaso() {
             const inputField = document.getElementById('txt-input');
             const prompt = inputField.value.trim();
-            
-            if(!prompt) {
-                alert("Por favor, introduza os detalhes do caso para análise.");
-                return;
-            }
-
+            if(!prompt) { alert("Por favor, introduza os detalhes do caso para análise."); return; }
             if(credits <= 0) return;
 
             const btn = document.getElementById('btn-main');
@@ -155,10 +104,7 @@
 
                 if (!response.ok) {
                     let errorMsg = `Erro do Servidor: ${response.status}`;
-                    try {
-                        const errorData = await response.json();
-                        errorMsg = errorData.error || errorMsg;
-                    } catch(e) {}
+                    try { const errorData = await response.json(); errorMsg = errorData.error || errorMsg; } catch(e) {}
                     throw new Error(errorMsg);
                 }
 
@@ -167,10 +113,8 @@
                 if(data.agents && data.agents.length > 0) {
                     credits--;
                     updateUI();
-                    
                     outputArea.innerHTML = "";
 
-                    // Exibe o veredito final
                     if(data.veredito) {
                         const vereditoCard = document.createElement('div');
                         vereditoCard.className = "veredito-box glass p-8 rounded-2xl mb-8 border border-blue-500/30 fade-in-card";
@@ -181,40 +125,29 @@
                                 </svg>
                                 <h2 class="text-2xl font-bold text-blue-300">Veredito do Juiz IA</h2>
                             </div>
-                            <div class="text-white leading-relaxed whitespace-pre-wrap">
-                                ${data.veredito.replace(/\n/g, '<br>')}
-                            </div>
+                            <div class="text-white leading-relaxed whitespace-pre-wrap">${data.veredito.replace(/\n/g, '<br>')}</div>
                         `;
                         outputArea.appendChild(vereditoCard);
                     }
 
-                    // Exibe os agentes
                     data.agents.forEach((agent, index) => {
                         const card = document.createElement('details');
-                        card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in-card";
-                        // Abre o primeiro por padrão, e também se contiver erro (para chamar atenção)
-                        const openAttr = (index === 0 || agent.analysis.toLowerCase().includes("falha") || agent.analysis.toLowerCase().includes("erro")) ? "open" : "";
-                        card.setAttribute("open", openAttr);
                         const isError = agent.analysis.toLowerCase().includes("falha") || agent.analysis.toLowerCase().includes("erro");
+                        const openAttr = (index === 0 || isError) ? "open" : "";
+                        card.setAttribute("open", openAttr);
                         const areaClass = isError ? "text-red-400" : "text-blue-300";
+                        card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in-card";
                         card.innerHTML = `
-                            <summary class="p-6 font-bold cursor-pointer hover:bg-white/5 transition-colors ${areaClass}">
-                                ${agent.area}
-                            </summary>
+                            <summary class="p-6 font-bold cursor-pointer hover:bg-white/5 transition-colors ${areaClass}">${agent.area}</summary>
                             <div class="p-6 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10 ${isError ? 'agent-error' : ''}">
                                 ${agent.analysis.replace(/\n/g, '<br>')}
                             </div>
                         `;
                         outputArea.appendChild(card);
                     });
-                    
                     inputField.value = "";
-                } else if (data.error) {
-                    throw new Error(data.error);
-                } else {
-                    throw new Error("Resposta inválida da API.");
-                }
-
+                } else if (data.error) throw new Error(data.error);
+                else throw new Error("Resposta inválida da API.");
             } catch (error) {
                 console.error("Erro na Requisição:", error);
                 const errorCard = document.createElement('div');
@@ -232,10 +165,7 @@
                     </div>
                 `;
                 outputArea.prepend(errorCard);
-                
-                setTimeout(() => {
-                    if (errorCard.parentNode) errorCard.remove();
-                }, 10000);
+                setTimeout(() => { if (errorCard.parentNode) errorCard.remove(); }, 10000);
             } finally {
                 btn.disabled = false;
                 loader.classList.add('hidden');
