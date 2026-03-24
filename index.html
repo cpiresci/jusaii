@@ -28,9 +28,7 @@
         </div>
         <div id="user-info" class="flex gap-4 items-center">
             <div id="credits" class="bg-blue-600/20 px-6 py-2 rounded-2xl border border-blue-500/30">
-                <span class="text-[10px] font-bold opacity-60 mr-2 uppercase">Créditos:</span>
-                <span id="c-count" class="font-black text-white italic text-lg">--</span>
-                <span class="text-[10px] font-bold opacity-60 mx-2">| Premium:</span>
+                <span class="text-[10px] font-bold opacity-60 mr-2 uppercase">Premium:</span>
                 <span id="p-count" class="font-black text-white italic text-lg">--</span>
             </div>
             <div id="auth-buttons">
@@ -44,7 +42,6 @@
     </header>
 
     <main class="w-full max-w-4xl space-y-10">
-        <!-- Área de Input -->
         <section class="glass rounded-[2.5rem] p-2 relative overflow-hidden shadow-2xl">
             <textarea id="txt-input" class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva aqui os factos do caso..."></textarea>
             <div class="p-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
@@ -92,25 +89,22 @@
     </div>
 
     <script>
-        const API_BASE = "https://jusaii-app.onrender.com"; // Altere se necessário
+        const API_BASE = "https://jusaii-app.onrender.com";
         let token = localStorage.getItem('token');
 
         function updateUI() {
             if (token) {
                 document.getElementById('auth-buttons').style.display = 'none';
                 document.getElementById('logout-button').style.display = 'block';
-                // Buscar dados do usuário
                 fetch(API_BASE + '/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
                     .then(res => res.json())
                     .then(data => {
-                        document.getElementById('c-count').innerText = data.credits;
                         document.getElementById('p-count').innerText = data.premium_credits;
                     })
                     .catch(() => {});
             } else {
                 document.getElementById('auth-buttons').style.display = 'block';
                 document.getElementById('logout-button').style.display = 'none';
-                document.getElementById('c-count').innerText = '0';
                 document.getElementById('p-count').innerText = '0';
             }
         }
@@ -163,13 +157,14 @@
         function closeModal() { document.querySelectorAll('.fixed').forEach(m => m.classList.add('hidden')); }
 
         async function analisarCaso(tipo) {
-            if (!token) {
-                alert('Você precisa estar logado para usar o sistema.');
+            const prompt = document.getElementById('txt-input').value.trim();
+            if (!prompt) { alert('Descreva o caso.'); return; }
+
+            if (tipo === 'premium' && !token) {
+                alert('Você precisa estar logado para usar o relatório premium.');
                 showLogin();
                 return;
             }
-            const prompt = document.getElementById('txt-input').value.trim();
-            if (!prompt) { alert('Descreva o caso.'); return; }
 
             const btnFree = document.getElementById('btn-free');
             const btnPremium = document.getElementById('btn-premium');
@@ -184,12 +179,18 @@
 
             try {
                 let endpoint = tipo === 'free' ? '/api/analyze' : '/api/analyze/premium';
+                const headers = { 'Content-Type': 'application/json' };
+                if (tipo === 'premium') headers['Authorization'] = `Bearer ${token}`;
+
                 const res = await fetch(API_BASE + endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    headers: headers,
                     body: JSON.stringify({ prompt })
                 });
-                if (!res.ok) throw new Error(await res.text());
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(errorText);
+                }
                 const data = await res.json();
 
                 if (tipo === 'free') {
@@ -201,7 +202,6 @@
                         <div class="glass p-6 rounded-2xl">
                             <h3 class="text-xl font-bold text-blue-300">Amostra Gratuita</h3>
                             <p class="text-slate-300 mt-2">${data.free_analysis.replace(/\n/g, '<br>')}</p>
-                            <p class="text-xs text-yellow-500 mt-4">Créditos restantes: ${data.credits_left}</p>
                         </div>
                         <p class="text-center text-sm text-slate-400 mt-4">🔓 Adquira o Relatório Premium para ver as análises completas dos 12 especialistas e baixar PDF.</p>
                     `;
@@ -223,8 +223,8 @@
                         card.innerHTML = `<summary class="p-6 font-bold cursor-pointer hover:bg-white/5 transition-colors text-blue-300">${agent.area}</summary><div class="p-6 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10">${agent.analysis.replace(/\n/g, '<br>')}</div>`;
                         output.appendChild(card);
                     });
+                    updateUI();
                 }
-                updateUI();
             } catch (err) {
                 alert('Erro: ' + err.message);
             } finally {
@@ -253,14 +253,6 @@
                 alert('Erro ao baixar PDF');
             }
         }
-
-        // Adicionar rota /api/auth/me no backend (opcional, pode ser substituída por chamada ao /api/user)
-        // Para simplificar, adicionamos um endpoint rápido no backend: /api/auth/me
-        // Inclua no backend:
-        // @app.route('/api/auth/me', methods=['GET'])
-        // @token_required
-        // def get_me(current_user):
-        //     return jsonify({'credits': current_user.credits, 'premium_credits': current_user.premium_credits})
 
         updateUI();
     </script>
