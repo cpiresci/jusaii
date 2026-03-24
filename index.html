@@ -3,65 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustAII | Law Engine 2026</title>
+    <title>JustAII | Law Engine Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+        /* CSS Forçado para garantir que nada fica branco ou vazio */
+        body { background: #020617 !important; color: #f8fafc !important; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
         .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .credit-badge { background: linear-gradient(90deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .credit-badge { background: linear-gradient(90deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
         @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 0.5; } 100% { top: 100%; opacity: 0; } }
         .scanning::after { content: ""; position: absolute; width: 100%; height: 2px; background: #3b82f6; left: 0; animation: scan 2s infinite linear; box-shadow: 0 0 15px #3b82f6; }
     </style>
 </head>
-<body class="flex flex-col items-center p-6 md:p-12">
+<body class="p-6 md:p-12">
 
+    <!-- Header -->
     <header class="w-full max-w-5xl flex justify-between items-center mb-16 border-b border-white/5 pb-6">
         <div>
-            <h1 class="text-3xl font-extrabold italic tracking-tighter text-blue-500 uppercase">JustAII</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Mechanical Authority</p>
+            <h1 class="text-3xl font-extrabold italic tracking-tighter text-blue-500 uppercase">JustAII <span class="text-[10px] text-white/20 font-normal ml-2">v2.1</span></h1>
+            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Mechanical Authority • Engine Active</p>
         </div>
-        <div class="credit-badge px-4 py-2 rounded-full flex items-center gap-2">
-            <span class="text-[10px] font-bold uppercase tracking-widest">Créditos:</span>
-            <span id="credit-count" class="font-black text-white text-sm">--</span>
+        <div class="credit-badge px-6 py-2 rounded-full flex items-center gap-3">
+            <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Créditos:</span>
+            <span id="credit-count" class="font-black text-white text-base">--</span>
         </div>
     </header>
 
     <main class="w-full max-w-4xl space-y-10">
+        <!-- Input -->
         <section class="glass-panel rounded-[2.5rem] p-2" id="main-panel">
             <div class="relative rounded-[2rem] overflow-hidden bg-slate-900/50" id="inputContainer">
-                <textarea id="prompt" class="w-full h-64 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-20 resize-none" placeholder="Descreva os factos jurídicos para que a orquestração SambaNova inicie a análise..."></textarea>
+                <textarea id="prompt" class="w-full h-64 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva os factos para análise jurídica..."></textarea>
             </div>
-            <div class="p-4 flex justify-end">
-                <button onclick="analisar()" id="btn" class="bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-lg shadow-blue-600/20">
+            <div class="p-6 flex justify-between items-center">
+                <p class="text-[10px] text-slate-500 font-mono">ESTADO: PRONTO PARA ORQUESTRAÇÃO</p>
+                <button onclick="analisar()" id="btn" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl shadow-blue-600/40">
                     Iniciar Orquestração
                 </button>
             </div>
         </section>
 
+        <!-- Resultados -->
         <section id="output" class="space-y-8 pb-32"></section>
     </main>
 
     <script>
-        // URL da sua API no Render (O motor que diz "Engine Online")
+        // ENDEREÇO DA SUA API (BACKEND)
         const API_URL = "https://jusaii-app.onrender.com/api/analyze";
         
-        // Inicialização de créditos (Salvo no navegador do cliente)
-        let credits = parseInt(localStorage.getItem('jusaii_credits') || "5");
+        // Sistema de Créditos Forçado
+        let credits = localStorage.getItem('jusaii_credits_v2');
+        if (credits === null) {
+            credits = 5;
+            localStorage.setItem('jusaii_credits_v2', 5);
+        } else {
+            credits = parseInt(credits);
+        }
+        
         document.getElementById('credit-count').innerText = credits;
 
         async function analisar() {
-            if (credits <= 0) return alert("Créditos esgotados! Recarregue a sua conta.");
+            if (credits <= 0) {
+                alert("Créditos Esgotados! Adquira mais no painel de controlo.");
+                return;
+            }
+
+            const prompt = document.getElementById('prompt').value.trim();
+            if(!prompt) return alert("Por favor, introduza os factos do caso.");
 
             const btn = document.getElementById('btn');
             const container = document.getElementById('inputContainer');
             const output = document.getElementById('output');
-            const prompt = document.getElementById('prompt').value.trim();
-
-            if(!prompt) return alert("Por favor, introduza os factos do caso.");
 
             btn.disabled = true;
-            btn.innerText = "A ORQUESTRAR...";
+            btn.innerText = "ORQUESTRANDO AGENTES...";
             container.classList.add('scanning');
 
             try {
@@ -71,25 +86,26 @@
                     body: JSON.stringify({ prompt: prompt })
                 });
 
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error("Cold Start");
 
                 const data = await response.json();
                 
                 if(data.agents) {
                     credits--;
-                    localStorage.setItem('jusaii_credits', credits);
+                    localStorage.setItem('jusaii_credits_v2', credits);
                     document.getElementById('credit-count').innerText = credits;
 
                     data.agents.forEach(a => {
                         const card = document.createElement('div');
-                        card.className = "glass-panel p-10 rounded-[3rem] border-l-4 border-blue-500 mb-6";
+                        card.className = "glass-panel p-10 rounded-[3rem] border-l-4 border-blue-500 mb-6 animate-pulse";
                         card.innerHTML = `<h3 class="text-blue-400 font-bold mb-4 text-xs uppercase tracking-widest">${a.area}</h3>
-                                          <div class="text-sm opacity-90 leading-relaxed text-slate-200">${a.analysis.replace(/\n/g, '<br>')}</div>`;
+                                          <div class="text-sm opacity-90 leading-loose text-slate-200">${a.analysis.replace(/\n/g, '<br>')}</div>`;
                         output.prepend(card);
+                        card.classList.remove('animate-pulse');
                     });
                 }
             } catch (error) {
-                alert("O motor está a acordar (Cold Start). Aguarde 20 segundos e tente novamente.");
+                alert("O motor está a acordar (Plano Gratuito do Render). Por favor, aguarde 20 segundos e tente novamente.");
             } finally {
                 btn.disabled = false;
                 btn.innerText = "INICIAR ORQUESTRAÇÃO";
