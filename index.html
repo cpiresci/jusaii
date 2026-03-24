@@ -3,81 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustAII | Law Engine Pro</title>
+    <title>JustAII | Law Engine v2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        /* CSS Forçado para garantir que nada fica branco ou vazio */
-        body { background: #020617 !important; color: #f8fafc !important; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
-        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .credit-badge { background: linear-gradient(90deg, #1e3a8a, #3b82f6); border: 1px solid #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-        @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 0.5; } 100% { top: 100%; opacity: 0; } }
-        .scanning::after { content: ""; position: absolute; width: 100%; height: 2px; background: #3b82f6; left: 0; animation: scan 2s infinite linear; box-shadow: 0 0 15px #3b82f6; }
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .credit-badge { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: 1px solid #60a5fa; box-shadow: 0 0 25px rgba(59, 130, 246, 0.3); }
+        
+        /* Efeito de Scanner */
+        @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .scanning-active::after { 
+            content: ""; position: absolute; width: 100%; height: 3px; 
+            background: #3b82f6; left: 0; animation: scan 2s infinite linear; 
+            box-shadow: 0 0 20px #3b82f6; z-index: 20;
+        }
+
+        /* Bloqueio de ecrã quando créditos = 0 */
+        .paywall-overlay { 
+            position: fixed; inset: 0; background: rgba(2, 6, 23, 0.9); 
+            backdrop-filter: blur(12px); z-index: 100; display: flex; 
+            align-items: center; justify-content: center; opacity: 0; 
+            pointer-events: none; transition: all 0.5s ease;
+        }
+        .paywall-active { opacity: 1; pointer-events: auto; }
+        
+        .buy-button {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            transition: all 0.3s ease;
+        }
+        .buy-button:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4); }
     </style>
 </head>
-<body class="p-6 md:p-12">
+<body class="flex flex-col items-center p-6 md:p-16">
 
     <!-- Header -->
-    <header class="w-full max-w-5xl flex justify-between items-center mb-16 border-b border-white/5 pb-6">
+    <header class="w-full max-w-6xl flex justify-between items-center mb-16 border-b border-white/5 pb-8">
         <div>
-            <h1 class="text-3xl font-extrabold italic tracking-tighter text-blue-500 uppercase">JustAII <span class="text-[10px] text-white/20 font-normal ml-2">v2.1</span></h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Mechanical Authority • Engine Active</p>
+            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase leading-none">JustAII</h1>
+            <p class="text-[9px] opacity-40 uppercase tracking-[0.5em] font-bold mt-2">Mechanical Authority • v2.5</p>
         </div>
-        <div class="credit-badge px-6 py-2 rounded-full flex items-center gap-3">
+        
+        <div class="credit-badge px-6 py-2.5 rounded-2xl flex items-center gap-3">
             <span class="text-[10px] font-bold uppercase tracking-widest opacity-70">Créditos:</span>
-            <span id="credit-count" class="font-black text-white text-base">--</span>
+            <span id="credit-display" class="font-black text-white text-xl">--</span>
         </div>
     </header>
 
-    <main class="w-full max-w-4xl space-y-10">
-        <!-- Input -->
-        <section class="glass-panel rounded-[2.5rem] p-2" id="main-panel">
-            <div class="relative rounded-[2rem] overflow-hidden bg-slate-900/50" id="inputContainer">
-                <textarea id="prompt" class="w-full h-64 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva os factos para análise jurídica..."></textarea>
+    <main class="w-full max-w-4xl space-y-12">
+        <!-- Input Area -->
+        <section class="glass-panel rounded-[3rem] p-3 transition-all duration-500" id="engine-panel">
+            <div class="relative rounded-[2.5rem] overflow-hidden bg-black/40" id="input-container">
+                <textarea id="prompt-input" 
+                    class="w-full h-72 p-10 bg-transparent border-none focus:ring-0 text-lg leading-relaxed placeholder:text-slate-700 resize-none text-slate-200" 
+                    placeholder="Descreva o caso jurídico para orquestração heurística..."></textarea>
             </div>
-            <div class="p-6 flex justify-between items-center">
-                <p class="text-[10px] text-slate-500 font-mono">ESTADO: PRONTO PARA ORQUESTRAÇÃO</p>
-                <button onclick="analisar()" id="btn" class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl shadow-blue-600/40">
+            
+            <div class="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">SambaNova Engine Online</span>
+                </div>
+                
+                <button onclick="executarAnalise()" id="main-btn" 
+                    class="bg-blue-600 hover:bg-blue-500 text-white px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl shadow-blue-900/20">
                     Iniciar Orquestração
                 </button>
             </div>
         </section>
 
         <!-- Resultados -->
-        <section id="output" class="space-y-8 pb-32"></section>
+        <section id="results-area" class="space-y-8 pb-40"></section>
     </main>
 
+    <!-- Paywall Modal -->
+    <div id="paywall-modal" class="paywall-overlay">
+        <div class="glass-panel p-12 rounded-[4rem] max-w-md w-full mx-4 text-center border-t-4 border-blue-500">
+            <div class="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <h2 class="text-3xl font-black mb-4">Energia Esgotada</h2>
+            <p class="text-slate-400 text-sm mb-10 leading-relaxed">A sua quota de análises gratuitas chegou ao fim. Recarregue os ciclos de energia para continuar.</p>
+            
+            <div class="space-y-4">
+                <button onclick="simularCompra(10)" class="buy-button w-full text-white py-5 rounded-3xl font-bold text-xs uppercase tracking-widest">
+                    Pack 10 Análises - €9,99
+                </button>
+                <button onclick="simularCompra(50)" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-5 rounded-3xl font-bold text-xs uppercase tracking-widest border border-white/5">
+                    Pack 50 Análises - €39,99
+                </button>
+                <p class="text-[9px] text-slate-600 mt-6 uppercase tracking-widest">Acesso imediato após confirmação</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ENDEREÇO DA SUA API (BACKEND)
         const API_URL = "https://jusaii-app.onrender.com/api/analyze";
         
-        // Sistema de Créditos Forçado
-        let credits = localStorage.getItem('jusaii_credits_v2');
-        if (credits === null) {
-            credits = 5;
-            localStorage.setItem('jusaii_credits_v2', 5);
-        } else {
-            credits = parseInt(credits);
-        }
+        // --- LÓGICA DE CRÉDITOS ---
+        let creditos = localStorage.getItem('justaii_credits_v25');
         
-        document.getElementById('credit-count').innerText = credits;
+        if (creditos === null) {
+            creditos = 2; // Créditos iniciais para novos utilizadores
+            localStorage.setItem('justaii_credits_v25', 2);
+        } else {
+            creditos = parseInt(creditos);
+        }
 
-        async function analisar() {
-            if (credits <= 0) {
-                alert("Créditos Esgotados! Adquira mais no painel de controlo.");
-                return;
+        atualizarInterface();
+
+        function atualizarInterface() {
+            document.getElementById('credit-display').innerText = creditos;
+            const modal = document.getElementById('paywall-modal');
+            const panel = document.getElementById('engine-panel');
+
+            if (creditos <= 0) {
+                modal.classList.add('paywall-active');
+                panel.style.filter = "blur(10px)";
+                panel.style.pointerEvents = "none";
+            } else {
+                modal.classList.remove('paywall-active');
+                panel.style.filter = "none";
+                panel.style.pointerEvents = "auto";
             }
+        }
 
-            const prompt = document.getElementById('prompt').value.trim();
-            if(!prompt) return alert("Por favor, introduza os factos do caso.");
+        async function executarAnalise() {
+            if (creditos <= 0) return;
 
-            const btn = document.getElementById('btn');
-            const container = document.getElementById('inputContainer');
-            const output = document.getElementById('output');
+            const prompt = document.getElementById('prompt-input').value.trim();
+            if (!prompt) return alert("Por favor, introduza os detalhes do caso.");
 
+            const btn = document.getElementById('main-btn');
+            const container = document.getElementById('input-container');
+            const results = document.getElementById('results-area');
+
+            // UI Feedback
             btn.disabled = true;
-            btn.innerText = "ORQUESTRANDO AGENTES...";
-            container.classList.add('scanning');
+            btn.innerText = "ORQUESTRANDO...";
+            container.classList.add('scanning-active');
 
             try {
                 const response = await fetch(API_URL, {
@@ -86,31 +150,44 @@
                     body: JSON.stringify({ prompt: prompt })
                 });
 
-                if (!response.ok) throw new Error("Cold Start");
+                if (!response.ok) throw new Error("Server asleep");
 
                 const data = await response.json();
-                
-                if(data.agents) {
-                    credits--;
-                    localStorage.setItem('jusaii_credits_v2', credits);
-                    document.getElementById('credit-count').innerText = credits;
 
-                    data.agents.forEach(a => {
+                if (data.agents) {
+                    // SUCESSO: Desconta crédito
+                    creditos--;
+                    localStorage.setItem('justaii_credits_v25', creditos);
+                    atualizarInterface();
+
+                    // Renderizar Agentes
+                    data.agents.forEach(agent => {
                         const card = document.createElement('div');
-                        card.className = "glass-panel p-10 rounded-[3rem] border-l-4 border-blue-500 mb-6 animate-pulse";
-                        card.innerHTML = `<h3 class="text-blue-400 font-bold mb-4 text-xs uppercase tracking-widest">${a.area}</h3>
-                                          <div class="text-sm opacity-90 leading-loose text-slate-200">${a.analysis.replace(/\n/g, '<br>')}</div>`;
-                        output.prepend(card);
-                        card.classList.remove('animate-pulse');
+                        card.className = "glass-panel p-12 rounded-[3.5rem] border-l-4 border-blue-500 mb-8";
+                        card.innerHTML = `
+                            <h3 class="text-blue-400 font-bold mb-6 text-[10px] uppercase tracking-[0.4em]">${agent.area}</h3>
+                            <div class="text-slate-200 text-base md:text-lg leading-relaxed opacity-90">
+                                ${agent.analysis.replace(/\n/g, '<br>')}
+                            </div>
+                        `;
+                        results.prepend(card);
                     });
+                    document.getElementById('prompt-input').value = "";
                 }
             } catch (error) {
-                alert("O motor está a acordar (Plano Gratuito do Render). Por favor, aguarde 20 segundos e tente novamente.");
+                alert("O motor está a carregar. Aguarde 15 segundos e tente novamente.");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "INICIAR ORQUESTRAÇÃO";
-                container.classList.remove('scanning');
+                btn.innerText = "Iniciar Orquestração";
+                container.classList.remove('scanning-active');
             }
+        }
+
+        function simularCompra(qtd) {
+            alert(`Processando pagamento para ${qtd} créditos...`);
+            creditos += qtd;
+            localStorage.setItem('justaii_credits_v25', creditos);
+            atualizarInterface();
         }
     </script>
 </body>
