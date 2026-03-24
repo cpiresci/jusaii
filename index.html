@@ -86,11 +86,10 @@
     <script>
         /**
          * CONFIGURAÇÃO DA API
-         * Importante: Não uses a porta :5000 nem :10000 aqui.
-         * O Render faz o redireccionamento automático para o teu serviço.
+         * URL do backend já configurada para o deploy atual.
          */
         const API_URL = "https://jusaii-app.onrender.com/api/analyze";
-        
+
         // Gestão de Créditos Local (Simulação de Sessão)
         let credits = parseInt(localStorage.getItem('justaii_credits_v29') || "5");
         
@@ -102,6 +101,10 @@
                 document.getElementById('btn-main').disabled = true;
                 document.getElementById('st-msg').innerText = "Ciclos Esgotados";
                 document.getElementById('status-dot').classList.replace('bg-green-500', 'bg-red-500');
+            } else {
+                document.getElementById('btn-main').disabled = false;
+                document.getElementById('st-msg').innerText = "Motor v2.9 Online";
+                document.getElementById('status-dot').classList.replace('bg-red-500', 'bg-green-500');
             }
         }
         
@@ -139,7 +142,12 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erro do Servidor: ${response.status}`);
+                    let errorMsg = `Erro do Servidor: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch(e) {}
+                    throw new Error(errorMsg);
                 }
 
                 const data = await response.json();
@@ -148,6 +156,7 @@
                     credits--;
                     updateUI();
                     
+                    // Adiciona cada análise no topo da área de resultados
                     data.agents.forEach(agent => {
                         const card = document.createElement('div');
                         card.className = "glass p-10 rounded-[3rem] border-l-4 border-blue-600 fade-in-card mb-6 shadow-xl";
@@ -168,11 +177,13 @@
                     inputField.value = "";
                 } else if (data.error) {
                     throw new Error(data.error);
+                } else {
+                    throw new Error("Resposta inválida da API.");
                 }
 
             } catch (error) {
                 console.error("Erro na Requisição:", error);
-                alert("O sistema está a ser reiniciado no servidor (Cold Start). Por favor, aguarde 20 segundos e tente novamente.");
+                alert(`Falha na análise: ${error.message}\n\nO servidor pode estar a iniciar (cold start). Aguarde alguns segundos e tente novamente.`);
             } finally {
                 btn.disabled = false;
                 loader.classList.add('hidden');
@@ -183,4 +194,3 @@
     </script>
 </body>
 </html>
-
