@@ -17,6 +17,7 @@
         .error-message { background: rgba(220, 38, 38, 0.2); border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; color: #fecaca; }
         details summary { cursor: pointer; font-weight: 600; color: #60a5fa; }
         .btn-premium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn-buy { background: linear-gradient(135deg, #10b981, #059669); }
     </style>
 </head>
 <body class="flex flex-col items-center p-6 md:p-12">
@@ -54,7 +55,10 @@
                         Análise Gratuita
                     </button>
                     <button onclick="analisarCaso('premium')" id="btn-premium" class="btn-premium hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
-                        Relatório Premium (R$ 19,90)
+                        Relatório Premium
+                    </button>
+                    <button onclick="buyCredits()" id="btn-buy" class="btn-buy hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
+                        Comprar (R$ 19,90)
                     </button>
                 </div>
             </div>
@@ -156,6 +160,29 @@
                     closeModal();
                 } else {
                     alert(data.error || 'Erro ao criar conta');
+                }
+            } catch (err) {
+                alert('Erro de conexão: ' + err.message);
+            }
+        }
+
+        async function buyCredits() {
+            if (!token) {
+                alert('Você precisa estar logado para comprar.');
+                showLogin();
+                return;
+            }
+            try {
+                const res = await fetch(API_BASE + '/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    // Redireciona para o Stripe Checkout
+                    window.location.href = data.url;
+                } else {
+                    alert(data.error || 'Erro ao iniciar pagamento');
                 }
             } catch (err) {
                 alert('Erro de conexão: ' + err.message);
