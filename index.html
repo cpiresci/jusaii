@@ -36,11 +36,17 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .error-message {
+            background: rgba(220, 38, 38, 0.2);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            color: #fecaca;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center p-6 md:p-12">
 
-    <!-- Cabeçalho -->
     <header class="w-full max-w-5xl flex justify-between items-center mb-12 border-b border-white/5 pb-8">
         <div>
             <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase">JustAII</h1>
@@ -53,7 +59,6 @@
     </header>
 
     <main class="w-full max-w-4xl space-y-10">
-        <!-- Área de Input -->
         <section class="glass rounded-[2.5rem] p-2 relative overflow-hidden shadow-2xl">
             <textarea id="txt-input" 
                 class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" 
@@ -71,7 +76,6 @@
             </div>
         </section>
 
-        <!-- Loader -->
         <div id="loading-box" class="hidden flex flex-col items-center py-10 space-y-4">
             <div class="loader"></div>
             <p class="text-[10px] uppercase tracking-widest text-blue-400 animate-pulse font-bold text-center">
@@ -79,18 +83,13 @@
             </p>
         </div>
 
-        <!-- Área de Resultados -->
         <div id="output-area" class="space-y-6 pb-40"></div>
     </main>
 
     <script>
-        /**
-         * CONFIGURAÇÃO DA API
-         * URL do backend já configurada para o deploy atual.
-         */
+        // URL do backend (ajuste se necessário)
         const API_URL = "https://jusaii-app.onrender.com/api/analyze";
 
-        // Gestão de Créditos Local (Simulação de Sessão)
         let credits = parseInt(localStorage.getItem('justaii_credits_v29') || "5");
         
         const updateUI = () => { 
@@ -108,7 +107,6 @@
             }
         }
         
-        // Inicializar UI
         updateUI();
 
         async function analisarCaso() {
@@ -127,7 +125,6 @@
             const statusMsg = document.getElementById('st-msg');
             const outputArea = document.getElementById('output-area');
 
-            // Bloquear UI
             btn.disabled = true;
             loader.classList.remove('hidden');
             statusMsg.innerText = "A consultar agentes...";
@@ -135,9 +132,7 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: prompt })
                 });
 
@@ -156,7 +151,6 @@
                     credits--;
                     updateUI();
                     
-                    // Adiciona cada análise no topo da área de resultados
                     data.agents.forEach(agent => {
                         const card = document.createElement('div');
                         card.className = "glass p-10 rounded-[3rem] border-l-4 border-blue-600 fade-in-card mb-6 shadow-xl";
@@ -183,7 +177,27 @@
 
             } catch (error) {
                 console.error("Erro na Requisição:", error);
-                alert(`Falha na análise: ${error.message}\n\nO servidor pode estar a iniciar (cold start). Aguarde alguns segundos e tente novamente.`);
+                // Exibe o erro de forma mais clara dentro da área de resultados
+                const errorCard = document.createElement('div');
+                errorCard.className = "error-message glass p-6 rounded-2xl mb-4";
+                errorCard.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-bold text-red-300">Falha na análise</p>
+                            <p class="text-sm text-red-200/80">${error.message}</p>
+                            <p class="text-xs text-red-300/60 mt-2">O servidor pode estar a iniciar (cold start). Aguarde alguns segundos e tente novamente.</p>
+                        </div>
+                    </div>
+                `;
+                outputArea.prepend(errorCard);
+                
+                // Remove a mensagem de erro após 10 segundos
+                setTimeout(() => {
+                    if (errorCard.parentNode) errorCard.remove();
+                }, 10000);
             } finally {
                 btn.disabled = false;
                 loader.classList.add('hidden');
