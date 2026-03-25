@@ -263,7 +263,7 @@
                 if (tipo === 'premium') headers['Authorization'] = `Bearer ${token}`;
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 120000);
+                const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minutos
 
                 const res = await fetch(API_BASE + endpoint, {
                     method: 'POST',
@@ -316,7 +316,7 @@
                 }
             } catch (err) {
                 if (err.name === 'AbortError') {
-                    alert('A análise premium demorou muito e foi cancelada. Tente novamente.');
+                    alert('A análise demorou muito e foi cancelada. Tente novamente.');
                 } else {
                     alert('Erro: ' + err.message);
                 }
