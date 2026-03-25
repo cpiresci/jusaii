@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,346 +8,495 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
         body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
-        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .loader { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .fade-in-card { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .veredito-box { background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(37,99,235,0.1) 100%); border-left: 4px solid #3b82f6; }
-        .error-message { background: rgba(220, 38, 38, 0.2); border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; color: #fecaca; }
-        details summary { cursor: pointer; font-weight: 600; color: #60a5fa; }
-        .btn-premium { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-buy { background: linear-gradient(135deg, #10b981, #059669); }
+        .glass { background: rgba(15,23,42,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .loader { border: 3px solid rgba(59,130,246,0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .veredito-box { background: linear-gradient(135deg,rgba(59,130,246,0.2) 0%,rgba(37,99,235,0.1) 100%); border-left: 4px solid #3b82f6; }
+        .btn-premium { background: linear-gradient(135deg,#f59e0b,#d97706); }
+        .btn-buy { background: linear-gradient(135deg,#10b981,#059669); }
+        details summary { cursor: pointer; }
+        input::placeholder { color: rgba(148,163,184,0.5); }
     </style>
 </head>
-<body class="flex flex-col items-center p-6 md:p-12">
+<body class="flex flex-col items-center p-4 md:p-12">
 
-    <header class="w-full max-w-5xl flex justify-between items-center mb-12 border-b border-white/5 pb-8">
+    <!-- HEADER -->
+    <header class="w-full max-w-5xl flex justify-between items-center mb-10 border-b border-white/5 pb-8">
         <div>
             <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase">Jusaii</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold italic">Orquestração Ultra Avançada</p>
+            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold italic">Motor Jurídico IA</p>
         </div>
-        <div id="user-info" class="flex gap-4 items-center">
-            <div id="credits" class="bg-blue-600/20 px-6 py-2 rounded-2xl border border-blue-500/30">
-                <span class="text-[10px] font-bold opacity-60 mr-2 uppercase">Premium:</span>
+        <div class="flex gap-3 items-center flex-wrap justify-end">
+            <!-- Créditos premium -->
+            <div class="bg-blue-600/20 px-4 py-2 rounded-2xl border border-blue-500/30 flex items-center gap-2">
+                <span class="text-[10px] font-bold opacity-60 uppercase">Premium:</span>
                 <span id="p-count" class="font-black text-white italic text-lg">--</span>
             </div>
-            <div id="auth-buttons">
-                <button onclick="showLogin()" class="text-sm bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20">Login</button>
-                <button onclick="showRegister()" class="text-sm bg-blue-600 px-4 py-2 rounded-xl ml-2">Registrar</button>
+            <!-- Email do usuário -->
+            <span id="user-email" class="text-xs text-slate-400 hidden"></span>
+            <!-- Botões auth -->
+            <div id="auth-buttons" class="flex gap-2">
+                <button onclick="showLogin()" class="text-sm bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20 transition">Login</button>
+                <button onclick="showRegister()" class="text-sm bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-500 transition">Registrar</button>
             </div>
-            <div id="logout-button" style="display:none;">
-                <button onclick="logout()" class="text-sm bg-red-600/20 px-4 py-2 rounded-xl">Sair</button>
+            <div id="logout-button" class="hidden">
+                <button onclick="logout()" class="text-sm bg-red-600/20 px-4 py-2 rounded-xl hover:bg-red-600/40 transition">Sair</button>
             </div>
         </div>
     </header>
 
-    <main class="w-full max-w-4xl space-y-10">
-        <section class="glass rounded-[2.5rem] p-2 relative overflow-hidden shadow-2xl">
-            <textarea id="txt-input" class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva aqui os factos do caso..."></textarea>
-            <div class="p-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
+    <!-- MAIN -->
+    <main class="w-full max-w-4xl space-y-8">
+
+        <!-- INPUT -->
+        <section class="glass rounded-[2.5rem] p-2 shadow-2xl">
+            <textarea id="txt-input"
+                class="w-full h-64 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-30 resize-none text-white"
+                placeholder="Descreva os fatos do caso jurídico com o máximo de detalhes possível...&#10;&#10;Ex: Fui demitido sem justa causa após 3 anos na empresa e não recebi FGTS nem aviso prévio..."></textarea>
+            <div class="p-5 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
                 <div class="flex items-center gap-2">
                     <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span id="st-msg" class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Motor Online</span>
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="analisarCaso('free')" id="btn-free" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
-                        Análise Gratuita
+                <div class="flex gap-3 flex-wrap justify-center">
+                    <button onclick="analisar('free')" id="btn-free"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
+                        ⚡ Análise Gratuita
                     </button>
-                    <button onclick="analisarCaso('premium')" id="btn-premium" class="btn-premium hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
-                        Relatório Premium
+                    <button onclick="analisar('premium')" id="btn-premium"
+                        class="btn-premium hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
+                        ⭐ Relatório Premium (12 Esp.)
                     </button>
-                    <button onclick="buyCredits()" id="btn-buy" class="btn-buy hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
-                        Comprar (R$ 19,90)
+                    <button onclick="comprar()" id="btn-buy"
+                        class="btn-buy hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition">
+                        🛒 Comprar (R$ 19,90)
                     </button>
                 </div>
             </div>
         </section>
 
+        <!-- LOADING -->
         <div id="loading-box" class="hidden flex flex-col items-center py-10 space-y-4">
             <div class="loader"></div>
-            <p class="text-[10px] uppercase tracking-widest text-blue-400 animate-pulse font-bold text-center">Orquestrando 16 agentes especializados...</p>
+            <p id="loading-msg" class="text-[10px] uppercase tracking-widest text-blue-400 animate-pulse font-bold text-center">
+                Consultando especialistas jurídicos...
+            </p>
         </div>
 
-        <div id="output-area" class="space-y-6 pb-40"></div>
+        <!-- OUTPUT -->
+        <div id="output-area" class="space-y-5 pb-40"></div>
+
     </main>
 
-    <div id="login-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
-        <div class="glass p-8 rounded-2xl w-96">
-            <h2 class="text-2xl font-bold mb-4">Login</h2>
-            <input type="email" id="login-email" placeholder="Email" class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white">
-            <input type="password" id="login-password" placeholder="Senha" class="w-full p-3 rounded-xl bg-white/10 mb-4 text-white">
-            <button onclick="login()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Entrar</button>
-            <button onclick="closeModal()" class="w-full mt-3 text-sm opacity-70">Cancelar</button>
+    <!-- MODAL LOGIN -->
+    <div id="login-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="glass p-8 rounded-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-6">Entrar</h2>
+            <input type="email" id="login-email" placeholder="Email"
+                class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white outline-none border border-white/10 focus:border-blue-500">
+            <input type="password" id="login-password" placeholder="Senha"
+                class="w-full p-3 rounded-xl bg-white/10 mb-5 text-white outline-none border border-white/10 focus:border-blue-500">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Entrar</button>
+            <button onclick="closeModals()" class="w-full mt-3 text-sm opacity-50 hover:opacity-100 transition">Cancelar</button>
+            <p id="login-error" class="text-red-400 text-sm mt-3 hidden"></p>
         </div>
     </div>
 
-    <div id="register-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
-        <div class="glass p-8 rounded-2xl w-96">
-            <h2 class="text-2xl font-bold mb-4">Registrar</h2>
-            <input type="email" id="reg-email" placeholder="Email" class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white">
-            <input type="password" id="reg-password" placeholder="Senha" class="w-full p-3 rounded-xl bg-white/10 mb-4 text-white">
-            <button onclick="register()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Criar conta</button>
-            <button onclick="closeModal()" class="w-full mt-3 text-sm opacity-70">Cancelar</button>
+    <!-- MODAL REGISTER -->
+    <div id="register-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
+        <div class="glass p-8 rounded-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-6">Criar Conta</h2>
+            <input type="email" id="reg-email" placeholder="Email"
+                class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white outline-none border border-white/10 focus:border-blue-500">
+            <input type="password" id="reg-password" placeholder="Senha (mínimo 4 caracteres)"
+                class="w-full p-3 rounded-xl bg-white/10 mb-5 text-white outline-none border border-white/10 focus:border-blue-500">
+            <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Criar conta</button>
+            <button onclick="closeModals()" class="w-full mt-3 text-sm opacity-50 hover:opacity-100 transition">Cancelar</button>
+            <p id="reg-error" class="text-red-400 text-sm mt-3 hidden"></p>
         </div>
     </div>
 
-    <div id="admin-panel" style="display:none;" class="fixed bottom-4 right-4 z-50">
-        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm">Admin +1 crédito</button>
+    <!-- ADMIN PANEL -->
+    <div id="admin-panel" class="hidden fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">
+            👑 Admin +1 crédito
+        </button>
+        <button onclick="verHistorico()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">
+            📋 Histórico
+        </button>
     </div>
 
     <script>
-        const API_BASE = "https://jusaii-app-docker.onrender.com";
-        let token = localStorage.getItem('token');
-        let currentUserId = null;
+        const API = "https://jusaii-app-docker.onrender.com";
+        let token = localStorage.getItem("token");
+        let userId = null;
 
+        // ── UI ──────────────────────────────────────────────────────────
         function updateUI() {
             if (token) {
-                document.getElementById('auth-buttons').style.display = 'none';
-                document.getElementById('logout-button').style.display = 'block';
-                fetch(API_BASE + '/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                    .then(res => res.json())
+                document.getElementById("auth-buttons").classList.add("hidden");
+                document.getElementById("logout-button").classList.remove("hidden");
+                fetch(API + "/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+                    .then(r => r.json())
                     .then(data => {
-                        document.getElementById('p-count').innerText = data.premium_credits;
+                        document.getElementById("p-count").innerText = data.premium_credits ?? 0;
+                        document.getElementById("user-email").innerText = data.email || "";
+                        document.getElementById("user-email").classList.remove("hidden");
+                        userId = data.id;
                         if (data.is_admin) {
-                            document.getElementById('admin-panel').style.display = 'block';
-                            currentUserId = data.id;
-                        } else {
-                            document.getElementById('admin-panel').style.display = 'none';
+                            document.getElementById("admin-panel").classList.remove("hidden");
                         }
                     })
-                    .catch(() => {});
+                    .catch(() => {
+                        // token inválido — limpa
+                        localStorage.removeItem("token");
+                        token = null;
+                        updateUI();
+                    });
             } else {
-                document.getElementById('auth-buttons').style.display = 'block';
-                document.getElementById('logout-button').style.display = 'none';
-                document.getElementById('p-count').innerText = '0';
-                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById("auth-buttons").classList.remove("hidden");
+                document.getElementById("logout-button").classList.add("hidden");
+                document.getElementById("user-email").classList.add("hidden");
+                document.getElementById("p-count").innerText = "--";
+                document.getElementById("admin-panel").classList.add("hidden");
             }
         }
 
+        function setStatus(msg, color = "text-slate-500") {
+            const el = document.getElementById("st-msg");
+            el.innerText = msg;
+            el.className = `text-[10px] uppercase font-bold tracking-widest ${color}`;
+        }
+
+        function setLoading(on, msg = "Consultando especialistas jurídicos...") {
+            document.getElementById("loading-box").classList.toggle("hidden", !on);
+            document.getElementById("loading-msg").innerText = msg;
+            document.getElementById("btn-free").disabled = on;
+            document.getElementById("btn-premium").disabled = on;
+            if (on) setStatus("A processar...", "text-blue-400");
+            else setStatus("Motor Online", "text-slate-500");
+        }
+
+        // ── AUTH ────────────────────────────────────────────────────────
         async function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            if (!email || !password) {
-                alert('Preencha email e senha.');
-                return;
-            }
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-password").value;
+            const errEl = document.getElementById("login-error");
+            errEl.classList.add("hidden");
+            if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
             try {
-                const res = await fetch(API_BASE + '/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const res = await fetch(API + "/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
                 if (res.ok) {
                     token = data.token;
-                    localStorage.setItem('token', token);
-                    closeModal();
+                    localStorage.setItem("token", token);
+                    closeModals();
                     updateUI();
-                    alert('Login realizado!');
                 } else {
-                    alert(data.error || 'Erro no login');
+                    showErr(errEl, data.error || "Erro no login");
                 }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
+            } catch { showErr(errEl, "Erro de conexão com o servidor."); }
         }
 
         async function register() {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            if (!email || !password) {
-                alert('Preencha email e senha.');
-                return;
-            }
+            const email = document.getElementById("reg-email").value.trim();
+            const password = document.getElementById("reg-password").value;
+            const errEl = document.getElementById("reg-error");
+            errEl.classList.add("hidden");
+            if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
             try {
-                const res = await fetch(API_BASE + '/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const res = await fetch(API + "/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    alert('Conta criada! Faça login.');
-                    closeModal();
+                    closeModals();
+                    showLogin();
+                    document.getElementById("login-email").value = email;
+                    alert("Conta criada! Você tem 5 análises gratuitas. Faça login.");
                 } else {
-                    alert(data.error || 'Erro ao criar conta');
+                    showErr(errEl, data.error || "Erro ao criar conta");
                 }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
-
-        async function buyCredits() {
-            if (!token) {
-                alert('Você precisa estar logado para comprar.');
-                showLogin();
-                return;
-            }
-            try {
-                const res = await fetch(API_BASE + '/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (res.ok && data.url) {
-                    window.location.href = data.url;
-                } else {
-                    alert(data.error || 'Erro ao iniciar pagamento');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
-
-        async function adminAddCredits() {
-            if (!currentUserId) return;
-            const adminSecret = prompt("Senha administrativa:");
-            if (!adminSecret) return;
-            try {
-                const res = await fetch(API_BASE + '/api/admin/add-credits', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminSecret}`
-                    },
-                    body: JSON.stringify({ user_id: currentUserId, amount: 1 })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(`Crédito adicionado! Novo saldo: ${data.new_balance}`);
-                    updateUI();
-                } else {
-                    alert(data.error || 'Erro');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
+            } catch { showErr(errEl, "Erro de conexão com o servidor."); }
         }
 
         function logout() {
-            localStorage.removeItem('token');
+            localStorage.removeItem("token");
             token = null;
+            userId = null;
+            document.getElementById("output-area").innerHTML = "";
             updateUI();
-            alert('Desconectado');
         }
 
-        function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
-        function showRegister() { document.getElementById('register-modal').classList.remove('hidden'); }
-        function closeModal() { document.querySelectorAll('.fixed').forEach(m => m.classList.add('hidden')); }
-
-        async function analisarCaso(tipo) {
-            const prompt = document.getElementById('txt-input').value.trim();
-            if (!prompt) { alert('Descreva o caso.'); return; }
-
-            if (tipo === 'premium' && !token) {
-                alert('Você precisa estar logado para usar o relatório premium.');
+        // ── ANÁLISE ─────────────────────────────────────────────────────
+        async function analisar(tipo) {
+            const prompt = document.getElementById("txt-input").value.trim();
+            if (!prompt || prompt.length < 20) {
+                alert("Descreva o caso com pelo menos 20 caracteres.");
+                return;
+            }
+            if (tipo === "premium" && !token) {
+                alert("Você precisa estar logado para usar o relatório premium.");
                 showLogin();
                 return;
             }
 
-            const btnFree = document.getElementById('btn-free');
-            const btnPremium = document.getElementById('btn-premium');
-            const loader = document.getElementById('loading-box');
-            const output = document.getElementById('output-area');
-            const statusMsg = document.getElementById('st-msg');
+            const output = document.getElementById("output-area");
+            output.innerHTML = "";
 
-            btnFree.disabled = true;
-            btnPremium.disabled = true;
-            loader.classList.remove('hidden');
-            statusMsg.innerText = "A processar...";
+            const loadingMsg = tipo === "free"
+                ? "Consultando especialista jurídico..."
+                : "Orquestrando 12 especialistas jurídicos... (pode levar até 2 minutos)";
+            setLoading(true, loadingMsg);
 
             try {
-                let endpoint = tipo === 'free' ? '/api/analyze' : '/api/analyze/premium';
-                const headers = { 'Content-Type': 'application/json' };
-                if (tipo === 'premium') headers['Authorization'] = `Bearer ${token}`;
+                const endpoint = tipo === "free" ? "/api/analyze" : "/api/analyze/premium";
+                const headers = { "Content-Type": "application/json" };
+                if (tipo === "premium") headers["Authorization"] = `Bearer ${token}`;
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 180000);
+                // Free: 60s timeout | Premium: 3 min timeout
+                const timeoutMs = tipo === "free" ? 60000 : 180000;
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-                const res = await fetch(API_BASE + endpoint, {
-                    method: 'POST',
-                    headers: headers,
+                const res = await fetch(API + endpoint, {
+                    method: "POST",
+                    headers,
                     body: JSON.stringify({ prompt }),
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
 
                 if (!res.ok) {
-                    let errorMsg = `Erro: ${res.status}`;
-                    try {
-                        const errData = await res.json();
-                        errorMsg = errData.error || errorMsg;
-                    } catch(e) {}
-                    throw new Error(errorMsg);
+                    const err = await res.json().catch(() => ({}));
+                    if (res.status === 402) {
+                        output.innerHTML = `
+                            <div class="glass p-8 rounded-2xl text-center fade-in">
+                                <p class="text-yellow-400 text-lg font-bold mb-2">⚠ Sem créditos premium</p>
+                                <p class="text-slate-400 mb-4">Adquira um relatório para continuar.</p>
+                                <button onclick="comprar()" class="btn-buy px-8 py-3 rounded-xl font-bold text-white">
+                                    🛒 Comprar Relatório — R$ 19,90
+                                </button>
+                            </div>`;
+                        return;
+                    }
+                    throw new Error(err.error || `Erro ${res.status}`);
                 }
+
                 const data = await res.json();
 
-                if (tipo === 'free') {
-                    output.innerHTML = `
-                        <div class="veredito-box glass p-8 rounded-2xl mb-8 fade-in-card">
-                            <h2 class="text-2xl font-bold text-blue-300 mb-4">Veredito do Juiz IA</h2>
-                            <div class="whitespace-pre-wrap">${data.veredito.replace(/\n/g, '<br>')}</div>
-                        </div>
-                        <div class="glass p-6 rounded-2xl">
-                            <h3 class="text-xl font-bold text-blue-300">Amostra Gratuita</h3>
-                            <p class="text-slate-300 mt-2">${data.free_analysis.replace(/\n/g, '<br>')}</p>
-                        </div>
-                        <p class="text-center text-sm text-slate-400 mt-4">🔓 Adquira o Relatório Premium para ver as análises completas dos 16 especialistas e baixar PDF.</p>
-                    `;
+                if (tipo === "free") {
+                    renderFree(data, output);
                 } else {
-                    output.innerHTML = `
-                        <div class="veredito-box glass p-8 rounded-2xl mb-8 fade-in-card">
-                            <div class="flex justify-between items-center">
-                                <h2 class="text-2xl font-bold text-blue-300">Veredito do Juiz IA</h2>
-                                <button onclick="downloadPDF(${data.analysis_id})" class="bg-green-600 px-4 py-2 rounded-xl text-sm">📄 Baixar PDF</button>
-                            </div>
-                            <div class="whitespace-pre-wrap mt-4">${data.veredito.replace(/\n/g, '<br>')}</div>
-                        </div>
-                    `;
-                    data.agents.forEach((agent, idx) => {
-                        const card = document.createElement('details');
-                        card.setAttribute('open', idx === 0 ? 'true' : 'false');
-                        card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in-card";
-                        card.innerHTML = `<summary class="p-6 font-bold cursor-pointer hover:bg-white/5 transition-colors text-blue-300">${agent.area} – ${agent.specialty || ''}</summary><div class="p-6 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10">${agent.analysis.replace(/\n/g, '<br>')}</div>`;
-                        output.appendChild(card);
-                    });
-                    updateUI();
+                    renderPremium(data, output);
+                    updateUI(); // atualiza contagem de créditos
                 }
+
             } catch (err) {
-                if (err.name === 'AbortError') {
-                    alert('A análise demorou muito e foi cancelada. Tente novamente.');
+                if (err.name === "AbortError") {
+                    output.innerHTML = `<div class="glass p-8 rounded-2xl text-center fade-in">
+                        <p class="text-red-400 font-bold text-lg">⏱ Tempo esgotado</p>
+                        <p class="text-slate-400 mt-2">A análise demorou mais que o esperado. Tente novamente.</p>
+                    </div>`;
                 } else {
-                    alert('Erro: ' + err.message);
+                    output.innerHTML = `<div class="glass p-8 rounded-2xl text-center fade-in">
+                        <p class="text-red-400 font-bold text-lg">❌ Erro</p>
+                        <p class="text-slate-400 mt-2">${err.message}</p>
+                    </div>`;
                 }
             } finally {
-                btnFree.disabled = false;
-                btnPremium.disabled = false;
-                loader.classList.add('hidden');
-                statusMsg.innerText = "Motor Online";
+                setLoading(false);
             }
         }
 
-        async function downloadPDF(analysisId) {
-            if (!token) return;
-            const res = await fetch(API_BASE + `/api/report/pdf/${analysisId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+        function renderFree(data, output) {
+            output.innerHTML = `
+                <div class="veredito-box glass p-8 rounded-2xl fade-in">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">⚖</span>
+                        <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
+                    </div>
+                    <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(data.veredito)}</div>
+                </div>
+                <div class="glass p-6 rounded-2xl fade-in">
+                    <h3 class="text-lg font-bold text-blue-300 mb-3">📋 Análise — Direito do Consumidor</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">${escHtml(data.free_analysis)}</p>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center fade-in border border-yellow-500/20">
+                    <p class="text-yellow-400 font-bold mb-1">🔓 Desbloqueie o relatório completo</p>
+                    <p class="text-slate-400 text-sm mb-4">Veja a análise dos 12 especialistas + PDF profissional</p>
+                    <div class="flex gap-3 justify-center flex-wrap">
+                        <button onclick="analisar('premium')" class="btn-premium px-6 py-3 rounded-xl font-bold text-white text-sm">
+                            ⭐ Usar Crédito Premium
+                        </button>
+                        <button onclick="comprar()" class="btn-buy px-6 py-3 rounded-xl font-bold text-white text-sm">
+                            🛒 Comprar — R$ 19,90
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function renderPremium(data, output) {
+            output.innerHTML = `
+                <div class="veredito-box glass p-8 rounded-2xl fade-in">
+                    <div class="flex justify-between items-start flex-wrap gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">⚖</span>
+                            <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
+                        </div>
+                        <button onclick="downloadPDF(${data.analysis_id})"
+                            class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                            📄 Baixar PDF
+                        </button>
+                    </div>
+                    <div class="whitespace-pre-wrap text-sm leading-relaxed mt-4">${escHtml(data.veredito)}</div>
+                    <p class="text-xs text-slate-500 mt-4">Gerado em: ${data.created_at || ""} · Créditos restantes: ${data.credits_remaining ?? "--"}</p>
+                </div>`;
+
+            data.agents.forEach((agent, idx) => {
+                const card = document.createElement("details");
+                if (idx === 0) card.setAttribute("open", "");
+                card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in";
+                card.innerHTML = `
+                    <summary class="p-5 font-bold hover:bg-white/5 transition text-blue-300 flex items-center gap-2">
+                        <span class="text-xs bg-blue-600/30 px-2 py-1 rounded-lg">${idx + 1}</span>
+                        ${escHtml(agent.area)}
+                        <span class="text-slate-500 font-normal text-xs ml-1">— ${escHtml(agent.specialty || "")}</span>
+                    </summary>
+                    <div class="p-5 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10 whitespace-pre-wrap">
+                        ${escHtml(agent.analysis)}
+                    </div>`;
+                output.appendChild(card);
             });
-            if (res.ok) {
+        }
+
+        // ── PDF ─────────────────────────────────────────────────────────
+        async function downloadPDF(analysisId) {
+            if (!token) { alert("Faça login para baixar o PDF."); return; }
+            try {
+                const res = await fetch(API + `/api/report/pdf/${analysisId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) { alert("Erro ao baixar PDF."); return; }
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
                 a.href = url;
                 a.download = `jusaii_relatorio_${analysisId}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } else {
-                alert('Erro ao baixar PDF');
-            }
+                URL.revokeObjectURL(url);
+            } catch { alert("Erro ao baixar PDF."); }
         }
 
+        // ── HISTÓRICO ───────────────────────────────────────────────────
+        async function verHistorico() {
+            if (!token) return;
+            try {
+                const res = await fetch(API + "/api/analyses", { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                if (!data.length) { alert("Nenhum relatório encontrado."); return; }
+                const output = document.getElementById("output-area");
+                output.innerHTML = `<h3 class="text-lg font-bold text-blue-300 mb-4">📋 Seus Relatórios</h3>`;
+                data.forEach(r => {
+                    const card = document.createElement("div");
+                    card.className = "glass p-5 rounded-2xl fade-in cursor-pointer hover:border-blue-500/30 border border-white/5 transition";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start gap-3">
+                            <div>
+                                <p class="text-sm text-slate-300">${escHtml(r.prompt)}</p>
+                                <p class="text-xs text-slate-500 mt-1">${r.created_at}</p>
+                            </div>
+                            <button onclick="downloadPDF(${r.id})" class="bg-green-600/20 hover:bg-green-600/40 text-green-400 px-3 py-1 rounded-lg text-xs transition shrink-0">
+                                📄 PDF
+                            </button>
+                        </div>`;
+                    output.appendChild(card);
+                });
+            } catch { alert("Erro ao carregar histórico."); }
+        }
+
+        // ── PAGAMENTO ───────────────────────────────────────────────────
+        async function comprar() {
+            if (!token) { alert("Faça login primeiro."); showLogin(); return; }
+            try {
+                const res = await fetch(API + "/api/create-checkout-session", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert(data.error || "Erro ao iniciar pagamento.");
+                }
+            } catch { alert("Erro de conexão."); }
+        }
+
+        // ── ADMIN ───────────────────────────────────────────────────────
+        async function adminAddCredits() {
+            if (!userId) return;
+            const secret = prompt("Senha administrativa:");
+            if (!secret) return;
+            const targetId = prompt("ID do usuário (deixe em branco para você mesmo):");
+            const uid = targetId ? parseInt(targetId) : userId;
+            try {
+                const res = await fetch(API + "/api/admin/add-credits", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
+                    body: JSON.stringify({ user_id: uid, amount: 1 })
+                });
+                const data = await res.json();
+                if (res.ok) { alert(`✓ ${data.message}\nNovo saldo: ${data.new_balance}`); updateUI(); }
+                else alert(data.error || "Erro");
+            } catch { alert("Erro de conexão."); }
+        }
+
+        // ── MODAIS ──────────────────────────────────────────────────────
+        function showLogin() {
+            closeModals();
+            document.getElementById("login-modal").classList.remove("hidden");
+            setTimeout(() => document.getElementById("login-email").focus(), 100);
+        }
+        function showRegister() {
+            closeModals();
+            document.getElementById("register-modal").classList.remove("hidden");
+            setTimeout(() => document.getElementById("reg-email").focus(), 100);
+        }
+        function closeModals() {
+            document.getElementById("login-modal").classList.add("hidden");
+            document.getElementById("register-modal").classList.add("hidden");
+        }
+
+        // Fecha modal ao clicar fora
+        document.getElementById("login-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
+        document.getElementById("register-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
+
+        // Enter nos inputs de login/register
+        document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+        document.getElementById("reg-password").addEventListener("keydown", e => { if (e.key === "Enter") register(); });
+
+        // ── UTILS ───────────────────────────────────────────────────────
+        function escHtml(str) {
+            if (!str) return "";
+            return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                      .replace(/\n/g,"<br>");
+        }
+        function showErr(el, msg) {
+            el.innerText = msg;
+            el.classList.remove("hidden");
+        }
+
+        // Init
         updateUI();
     </script>
 </body>
