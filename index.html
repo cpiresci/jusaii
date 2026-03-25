@@ -67,7 +67,7 @@
                     </button>
                     <button onclick="analisar('premium')" id="btn-premium"
                         class="btn-premium hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
-                        ⭐ Relatório Premium (12 Esp.)
+                        ⭐ Relatório Premium (6 Esp.)
                     </button>
                     <button onclick="comprar()" id="btn-buy"
                         class="btn-buy hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition">
@@ -254,30 +254,39 @@
 
             const loadingMsg = tipo === "free"
                 ? "Consultando especialista jurídico..."
-                : "Orquestrando 12 especialistas jurídicos... (pode levar até 2 minutos)";
+                : "Iniciando análise premium...";
             setLoading(true, loadingMsg);
 
             try {
-                const endpoint = tipo === "free" ? "/api/analyze" : "/api/analyze/premium";
-                const headers = { "Content-Type": "application/json" };
-                if (tipo === "premium") headers["Authorization"] = `Bearer ${token}`;
-
+                if (tipo === "free") {
+                // ── ANÁLISE GRATUITA — resposta direta ──────────────────
                 const controller = new AbortController();
-                // Free: 60s timeout | Premium: 3 min timeout
-                const timeoutMs = tipo === "free" ? 60000 : 180000;
-                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-                const res = await fetch(API + endpoint, {
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+                const res = await fetch(API + "/api/analyze", {
                     method: "POST",
-                    headers,
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ prompt }),
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
-
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    if (res.status === 402) {
+                    throw new Error(err.error || `Erro ${res.status}`);
+                }
+                const data = await res.json();
+                renderFree(data, output);
+
+            } else {
+                // ── ANÁLISE PREMIUM — background + polling ───────────────
+                // Passo 1: inicia job (retorna imediatamente com job_id)
+                const resJob = await fetch(API + "/api/analyze/premium", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                    body: JSON.stringify({ prompt })
+                });
+                if (!resJob.ok) {
+                    const err = await resJob.json().catch(() => ({}));
+                    if (resJob.status === 402) {
                         output.innerHTML = `
                             <div class="glass p-8 rounded-2xl text-center fade-in">
                                 <p class="text-yellow-400 text-lg font-bold mb-2">⚠ Sem créditos premium</p>
@@ -288,17 +297,18 @@
                             </div>`;
                         return;
                     }
-                    throw new Error(err.error || `Erro ${res.status}`);
+                    throw new Error(err.error || `Erro ${resJob.status}`);
                 }
+                const jobData = await resJob.json();
+                const jobId = jobData.job_id;
 
-                const data = await res.json();
-
-                if (tipo === "free") {
-                    renderFree(data, output);
-                } else {
+                // Passo 2: polling a cada 4s até status=done
+                const data = await pollJob(jobId, output);
+                if (data) {
                     renderPremium(data, output);
-                    updateUI(); // atualiza contagem de créditos
+                    updateUI();
                 }
+            }
 
             } catch (err) {
                 if (err.name === "AbortError") {
@@ -317,6 +327,35 @@
             }
         }
 
+        // ── POLLING ─────────────────────────────────────────────────────
+        async function pollJob(jobId, output) {
+            const maxAttempts = 60; // 60 × 4s = 4 minutos máximo
+            let dots = 0;
+            for (let i = 0; i < maxAttempts; i++) {
+                await new Promise(r => setTimeout(r, 4000));
+                dots = (dots % 3) + 1;
+                document.getElementById("loading-msg").innerText =
+                    "Consultando especialistas" + ".".repeat(dots) + " (" + (i * 4) + "s)";
+                try {
+                    const res = await fetch(API + `/api/job/${jobId}`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.status === "done") return data;
+                    if (data.status === "error") {
+                        throw new Error(data.verdict || "Erro na análise. Crédito reembolsado.");
+                    }
+                    // pending/running → continua polling
+                } catch (err) {
+                    if (err.message.includes("reembolsado") || err.message.includes("Erro")) {
+                        throw err;
+                    }
+                    // erro de rede → tenta novamente
+                }
+            }
+            throw new Error("Tempo esgotado. Tente novamente.");
+        }
+
         function renderFree(data, output) {
             output.innerHTML = `
                 <div class="veredito-box glass p-8 rounded-2xl fade-in">
@@ -332,7 +371,7 @@
                 </div>
                 <div class="glass p-6 rounded-2xl text-center fade-in border border-yellow-500/20">
                     <p class="text-yellow-400 font-bold mb-1">🔓 Desbloqueie o relatório completo</p>
-                    <p class="text-slate-400 text-sm mb-4">Veja a análise dos 12 especialistas + PDF profissional</p>
+                    <p class="text-slate-400 text-sm mb-4">Veja a análise dos 6 especialistas + PDF profissional</p>
                     <div class="flex gap-3 justify-center flex-wrap">
                         <button onclick="analisar('premium')" class="btn-premium px-6 py-3 rounded-xl font-bold text-white text-sm">
                             ⭐ Usar Crédito Premium
