@@ -384,6 +384,15 @@
         }
 
         function renderPremium(data, output) {
+            const analysisId = data.analysis_id;
+            const veredito = data.veredito || data.verdict || "";
+            const pdfBtn = analysisId
+                ? `<button onclick="downloadPDF(${analysisId})"
+                        class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        📄 Baixar PDF
+                   </button>`
+                : `<span class="text-xs text-slate-500">PDF indisponível</span>`;
+
             output.innerHTML = `
                 <div class="veredito-box glass p-8 rounded-2xl fade-in">
                     <div class="flex justify-between items-start flex-wrap gap-3">
@@ -391,12 +400,9 @@
                             <span class="text-2xl">⚖</span>
                             <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
                         </div>
-                        <button onclick="downloadPDF(${data.analysis_id})"
-                            class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                            📄 Baixar PDF
-                        </button>
+                        ${pdfBtn}
                     </div>
-                    <div class="whitespace-pre-wrap text-sm leading-relaxed mt-4">${escHtml(data.veredito)}</div>
+                    <div class="whitespace-pre-wrap text-sm leading-relaxed mt-4">${escHtml(veredito)}</div>
                     <p class="text-xs text-slate-500 mt-4">Gerado em: ${data.created_at || ""} · Créditos restantes: ${data.credits_remaining ?? "--"}</p>
                 </div>`;
 
