@@ -262,11 +262,18 @@
                 const headers = { 'Content-Type': 'application/json' };
                 if (tipo === 'premium') headers['Authorization'] = `Bearer ${token}`;
 
+                // Timeout de 2 minutos para evitar espera infinita
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000);
+
                 const res = await fetch(API_BASE + endpoint, {
                     method: 'POST',
                     headers: headers,
-                    body: JSON.stringify({ prompt })
+                    body: JSON.stringify({ prompt }),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+
                 if (!res.ok) {
                     let errorMsg = `Erro: ${res.status}`;
                     try {
@@ -310,7 +317,11 @@
                     updateUI();
                 }
             } catch (err) {
-                alert('Erro: ' + err.message);
+                if (err.name === 'AbortError') {
+                    alert('A análise premium demorou muito e foi cancelada. Tente novamente.');
+                } else {
+                    alert('Erro: ' + err.message);
+                }
             } finally {
                 btnFree.disabled = false;
                 btnPremium.disabled = false;
