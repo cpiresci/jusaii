@@ -92,9 +92,14 @@
         </div>
     </div>
 
+    <div id="admin-panel" style="display:none;" class="fixed bottom-4 right-4 z-50">
+        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm">Admin +1 crédito</button>
+    </div>
+
     <script>
-        const API_BASE = "https://jusaii-app-docker.onrender.com";
+        const API_BASE = "https://jusaii-app-docker.onrender.com"; // substitua pela URL do seu backend
         let token = localStorage.getItem('token');
+        let currentUserId = null;
 
         function updateUI() {
             if (token) {
@@ -104,12 +109,19 @@
                     .then(res => res.json())
                     .then(data => {
                         document.getElementById('p-count').innerText = data.premium_credits;
+                        if (data.is_admin) {
+                            document.getElementById('admin-panel').style.display = 'block';
+                            currentUserId = data.id;
+                        } else {
+                            document.getElementById('admin-panel').style.display = 'none';
+                        }
                     })
                     .catch(() => {});
             } else {
                 document.getElementById('auth-buttons').style.display = 'block';
                 document.getElementById('logout-button').style.display = 'none';
                 document.getElementById('p-count').innerText = '0';
+                document.getElementById('admin-panel').style.display = 'none';
             }
         }
 
@@ -179,10 +191,34 @@
                 });
                 const data = await res.json();
                 if (res.ok && data.url) {
-                    // Redireciona para o Stripe Checkout
                     window.location.href = data.url;
                 } else {
                     alert(data.error || 'Erro ao iniciar pagamento');
+                }
+            } catch (err) {
+                alert('Erro de conexão: ' + err.message);
+            }
+        }
+
+        async function adminAddCredits() {
+            if (!currentUserId) return;
+            const adminSecret = prompt("Senha administrativa:");
+            if (!adminSecret) return;
+            try {
+                const res = await fetch(API_BASE + '/api/admin/add-credits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminSecret}`
+                    },
+                    body: JSON.stringify({ user_id: currentUserId, amount: 1 })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Crédito adicionado! Novo saldo: ${data.new_balance}`);
+                    updateUI();
+                } else {
+                    alert(data.error || 'Erro');
                 }
             } catch (err) {
                 alert('Erro de conexão: ' + err.message);
