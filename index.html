@@ -1,356 +1,406 @@
-<!DOCTYPE html>
-<html lang="pt-pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JustAII | Orquestração Jurídica Ultra</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
-        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .loader { border: 3px solid rgba(59, 130, 246, 0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .fade-in-card { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .veredito-box { background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(37,99,235,0.1) 100%); border-left: 4px solid #3b82f6; }
-        .error-message { background: rgba(220, 38, 38, 0.2); border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; color: #fecaca; }
-        details summary { cursor: pointer; font-weight: 600; color: #60a5fa; }
-        .btn-premium { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-buy { background: linear-gradient(135deg, #10b981, #059669); }
-    </style>
-</head>
-<body class="flex flex-col items-center p-6 md:p-12">
+import os
+import json
+import asyncio
+import logging
+import aiohttp
+import stripe
+from datetime import datetime, timedelta
+from io import BytesIO
+from functools import wraps
 
-    <header class="w-full max-w-5xl flex justify-between items-center mb-12 border-b border-white/5 pb-8">
-        <div>
-            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase">JustAII</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold italic">Orquestração Ultra Avançada</p>
-        </div>
-        <div id="user-info" class="flex gap-4 items-center">
-            <div id="credits" class="bg-blue-600/20 px-6 py-2 rounded-2xl border border-blue-500/30">
-                <span class="text-[10px] font-bold opacity-60 mr-2 uppercase">Premium:</span>
-                <span id="p-count" class="font-black text-white italic text-lg">--</span>
-            </div>
-            <div id="auth-buttons">
-                <button onclick="showLogin()" class="text-sm bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20">Login</button>
-                <button onclick="showRegister()" class="text-sm bg-blue-600 px-4 py-2 rounded-xl ml-2">Registrar</button>
-            </div>
-            <div id="logout-button" style="display:none;">
-                <button onclick="logout()" class="text-sm bg-red-600/20 px-4 py-2 rounded-xl">Sair</button>
-            </div>
-        </div>
-    </header>
+import jwt
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from aiohttp import ClientTimeout
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
-    <main class="w-full max-w-4xl space-y-10">
-        <section class="glass rounded-[2.5rem] p-2 relative overflow-hidden shadow-2xl">
-            <textarea id="txt-input" class="w-full h-72 p-10 bg-transparent border-none outline-none text-lg leading-relaxed placeholder:opacity-20 resize-none text-white" placeholder="Descreva aqui os factos do caso..."></textarea>
-            <div class="p-6 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
-                <div class="flex items-center gap-2">
-                    <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span id="st-msg" class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Motor Online</span>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="analisarCaso('free')" id="btn-free" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
-                        Análise Gratuita
-                    </button>
-                    <button onclick="analisarCaso('premium')" id="btn-premium" class="btn-premium hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
-                        Relatório Premium
-                    </button>
-                    <button onclick="buyCredits()" id="btn-buy" class="btn-buy hover:opacity-90 text-white px-8 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
-                        Comprar (R$ 19,90)
-                    </button>
-                </div>
-            </div>
-        </section>
+# Configuração
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-        <div id="loading-box" class="hidden flex flex-col items-center py-10 space-y-4">
-            <div class="loader"></div>
-            <p class="text-[10px] uppercase tracking-widest text-blue-400 animate-pulse font-bold text-center">Orquestrando 12 agentes especializados...</p>
-        </div>
+app = Flask(__name__)
+CORS(app)
 
-        <div id="output-area" class="space-y-6 pb-40"></div>
-    </main>
+# Configurações do banco
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'chave-super-secreta')
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
-    <div id="login-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
-        <div class="glass p-8 rounded-2xl w-96">
-            <h2 class="text-2xl font-bold mb-4">Login</h2>
-            <input type="email" id="login-email" placeholder="Email" class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white">
-            <input type="password" id="login-password" placeholder="Senha" class="w-full p-3 rounded-xl bg-white/10 mb-4 text-white">
-            <button onclick="login()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Entrar</button>
-            <button onclick="closeModal()" class="w-full mt-3 text-sm opacity-70">Cancelar</button>
-        </div>
-    </div>
+# Configurações da API SambaNova
+SAMBANOVA_API_KEY = os.environ.get("SAMBANOVA_API_KEY", "")
+SAMBANOVA_URL = "https://api.sambanova.ai/v1/chat/completions"
+MODEL_NAME = os.environ.get("MODEL_NAME", "DeepSeek-V3-0324")
 
-    <div id="register-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
-        <div class="glass p-8 rounded-2xl w-96">
-            <h2 class="text-2xl font-bold mb-4">Registrar</h2>
-            <input type="email" id="reg-email" placeholder="Email" class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white">
-            <input type="password" id="reg-password" placeholder="Senha" class="w-full p-3 rounded-xl bg-white/10 mb-4 text-white">
-            <button onclick="register()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Criar conta</button>
-            <button onclick="closeModal()" class="w-full mt-3 text-sm opacity-70">Cancelar</button>
-        </div>
-    </div>
+# Configurações do Stripe
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
 
-    <div id="admin-panel" style="display:none;" class="fixed bottom-4 right-4 z-50">
-        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm">Admin +1 crédito</button>
-    </div>
+# Configurações de admin
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_SECRET = os.environ.get('ADMIN_SECRET', '')
 
-    <script>
-        const API_BASE = "https://jusaii-app-docker.onrender.com"; // substitua pela URL do seu backend
-        let token = localStorage.getItem('token');
-        let currentUserId = null;
+if not SAMBANOVA_API_KEY:
+    logger.error("SAMBANOVA_API_KEY não configurada.")
+if not stripe.api_key:
+    logger.warning("Stripe não configurado. Os pagamentos não funcionarão.")
 
-        function updateUI() {
-            if (token) {
-                document.getElementById('auth-buttons').style.display = 'none';
-                document.getElementById('logout-button').style.display = 'block';
-                fetch(API_BASE + '/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById('p-count').innerText = data.premium_credits;
-                        if (data.is_admin) {
-                            document.getElementById('admin-panel').style.display = 'block';
-                            currentUserId = data.id;
-                        } else {
-                            document.getElementById('admin-panel').style.display = 'none';
-                        }
-                    })
-                    .catch(() => {});
-            } else {
-                document.getElementById('auth-buttons').style.display = 'block';
-                document.getElementById('logout-button').style.display = 'none';
-                document.getElementById('p-count').innerText = '0';
-                document.getElementById('admin-panel').style.display = 'none';
-            }
-        }
+# ------------------- Modelos de Banco -------------------
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    credits = db.Column(db.Integer, default=5)
+    premium_credits = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-        async function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            if (!email || !password) {
-                alert('Preencha email e senha.');
-                return;
-            }
-            try {
-                const res = await fetch(API_BASE + '/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.token;
-                    localStorage.setItem('token', token);
-                    closeModal();
-                    updateUI();
-                    alert('Login realizado!');
-                } else {
-                    alert(data.error || 'Erro no login');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
+class Analysis(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    prompt = db.Column(db.Text, nullable=False)
+    veredict = db.Column(db.Text)
+    full_report = db.Column(db.Text)
+    is_premium = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-        async function register() {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            if (!email || !password) {
-                alert('Preencha email e senha.');
-                return;
-            }
-            try {
-                const res = await fetch(API_BASE + '/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert('Conta criada! Faça login.');
-                    closeModal();
-                } else {
-                    alert(data.error || 'Erro ao criar conta');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
+with app.app_context():
+    db.create_all()
 
-        async function buyCredits() {
-            if (!token) {
-                alert('Você precisa estar logado para comprar.');
-                showLogin();
-                return;
-            }
-            try {
-                const res = await fetch(API_BASE + '/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (res.ok && data.url) {
-                    window.location.href = data.url;
-                } else {
-                    alert(data.error || 'Erro ao iniciar pagamento');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
+# ------------------- Agentes e funções de IA -------------------
+AGENTS = [
+    {"id": "civil", "area": "Direito Civil", "specialty": "Contratos, danos, obrigações",
+     "system_prompt": "Você é um Advogado Especialista em Direito Civil. Analise o caso com foco em contratos, responsabilidade civil e obrigações. Cite artigos do Código Civil."},
+    {"id": "penal", "area": "Direito Penal", "specialty": "Crimes, defesa, acusação, penas",
+     "system_prompt": "Você é um Advogado Especialista em Direito Penal. Analise se os fatos configuram crime, tipicidade, provas."},
+    {"id": "trabalhista", "area": "Direito Trabalhista", "specialty": "Demissão, FGTS, horas extras, assédio",
+     "system_prompt": "Você é um Advogado Especialista em Direito Trabalhista. Analise verbas rescisórias, horas extras, assédio."},
+    {"id": "familia", "area": "Direito de Família", "specialty": "Divórcio, guarda, pensão, união estável",
+     "system_prompt": "Você é um Advogado Especialista em Direito de Família. Analise divórcio, guarda, pensão, união estável."},
+    {"id": "consumidor", "area": "Direito do Consumidor", "specialty": "Procon, compras online, bancos, golpes",
+     "system_prompt": "Você é um Advogado Especialista em Direito do Consumidor. Avalie vícios de produto, cobranças indevidas, compras online."},
+    {"id": "tributario", "area": "Direito Tributário", "specialty": "IR, IPTU, multas fiscais, planejamento",
+     "system_prompt": "Você é um Advogado Especialista em Direito Tributário. Analise tributos, obrigações acessórias, multas."},
+    {"id": "empresarial", "area": "Direito Empresarial", "specialty": "Empresa, MEI, sócios, contratos comerciais",
+     "system_prompt": "Você é um Advogado Especialista em Direito Empresarial. Analise MEI, responsabilidade de sócios, contratos comerciais."},
+    {"id": "imobiliario", "area": "Direito Imobiliário", "specialty": "Compra/venda, locação, condomínio, inventário",
+     "system_prompt": "Você é um Advogado Especialista em Direito Imobiliário. Avalie compra/venda, locação, condomínio."},
+    {"id": "digital", "area": "Direito Digital", "specialty": "LGPD, internet, redes sociais, golpes virtuais",
+     "system_prompt": "Você é um Advogado Especialista em Direito Digital. Analise LGPD, golpes virtuais, responsabilidade de plataformas."},
+    {"id": "previdenciario", "area": "Direito Previdenciário", "specialty": "Aposentadoria, INSS, BPC, auxílio-doença",
+     "system_prompt": "Você é um Advogado Especialista em Direito Previdenciário. Avalie aposentadoria, auxílio-doença, BPC."},
+    {"id": "ambiental", "area": "Direito Ambiental", "specialty": "Vizinhança, poluição, licenças, danos ambientais",
+     "system_prompt": "Você é um Advogado Especialista em Direito Ambiental. Analise danos ambientais, licenciamento, vizinhança."},
+    {"id": "constitucional", "area": "Direito Constitucional", "specialty": "Direitos fundamentais, desigualdade, discriminação",
+     "system_prompt": "Você é um Advogado Especialista em Direito Constitucional. Analise violações a direitos fundamentais, acesso à justiça."}
+]
 
-        async function adminAddCredits() {
-            if (!currentUserId) return;
-            const adminSecret = prompt("Senha administrativa:");
-            if (!adminSecret) return;
-            try {
-                const res = await fetch(API_BASE + '/api/admin/add-credits', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${adminSecret}`
-                    },
-                    body: JSON.stringify({ user_id: currentUserId, amount: 1 })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(`Crédito adicionado! Novo saldo: ${data.new_balance}`);
-                    updateUI();
-                } else {
-                    alert(data.error || 'Erro');
-                }
-            } catch (err) {
-                alert('Erro de conexão: ' + err.message);
-            }
-        }
+async def call_agent(session, agent, user_prompt):
+    headers = {"Authorization": f"Bearer {SAMBANOVA_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": agent["system_prompt"]},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.1,
+        "max_tokens": 1500
+    }
+    try:
+        async with session.post(SAMBANOVA_URL, headers=headers, json=payload, timeout=ClientTimeout(total=60)) as resp:
+            if resp.status == 200:
+                result = await resp.json()
+                return {"area": agent["area"], "specialty": agent["specialty"], "analysis": result['choices'][0]['message']['content']}
+            else:
+                error_text = await resp.text()
+                return {"area": agent["area"], "specialty": agent["specialty"], "analysis": f"Erro: {resp.status} - {error_text[:200]}"}
+    except Exception as e:
+        return {"area": agent["area"], "specialty": agent["specialty"], "analysis": f"Falha: {str(e)}"}
 
-        function logout() {
-            localStorage.removeItem('token');
-            token = null;
-            updateUI();
-            alert('Desconectado');
-        }
+async def call_juiz(session, user_prompt, agents_analyses):
+    resumo = "\n\n".join([f"=== {a['area']} ({a['specialty']}) ===\n{a['analysis'][:600]}" for a in agents_analyses])
+    system_juiz = (
+        "Você é o Juiz IA. Analise as opiniões dos 12 especialistas e entregue UM ÚNICO VEREDITO FINAL no formato:\n"
+        "VEREDITO: Favorável / Desfavorável / Parcial\n"
+        "PROBABILIDADE DE VITÓRIA: XX%\n"
+        "JUSTIFICATIVA RESUMIDA: (máx. 150 palavras)\n"
+        "PRÓXIMOS PASSOS RECOMENDADOS:"
+    )
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_juiz},
+            {"role": "user", "content": f"CASO ORIGINAL:\n{user_prompt}\n\nANÁLISES DOS AGENTES:\n{resumo}"}
+        ],
+        "temperature": 0.2,
+        "max_tokens": 1000
+    }
+    headers = {"Authorization": f"Bearer {SAMBANOVA_API_KEY}", "Content-Type": "application/json"}
+    try:
+        async with session.post(SAMBANOVA_URL, headers=headers, json=payload, timeout=ClientTimeout(total=90)) as resp:
+            if resp.status == 200:
+                result = await resp.json()
+                return result['choices'][0]['message']['content']
+            else:
+                return "Falha na consolidação do veredito."
+    except Exception as e:
+        return f"Erro ao gerar veredito: {str(e)}"
 
-        function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
-        function showRegister() { document.getElementById('register-modal').classList.remove('hidden'); }
-        function closeModal() { document.querySelectorAll('.fixed').forEach(m => m.classList.add('hidden')); }
+def run_full_analysis(prompt):
+    """Executa a orquestração completa (12 agentes + juiz) e retorna dict com agents e veredito."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        async def run():
+            connector = aiohttp.TCPConnector(limit=20)
+            async with aiohttp.ClientSession(connector=connector) as session:
+                agent_tasks = [call_agent(session, agent, prompt) for agent in AGENTS]
+                agents_analyses = await asyncio.gather(*agent_tasks)
+                veredito = await call_juiz(session, prompt, agents_analyses)
+                return {"agents": agents_analyses, "veredito": veredito}
+        return loop.run_until_complete(run())
+    finally:
+        loop.close()
 
-        async function analisarCaso(tipo) {
-            const prompt = document.getElementById('txt-input').value.trim();
-            if (!prompt) { alert('Descreva o caso.'); return; }
+# ------------------- Autenticação -------------------
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'error': 'Token ausente'}), 401
+        try:
+            token = token.split(' ')[1]
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = User.query.get(data['user_id'])
+            if not current_user:
+                raise Exception()
+        except:
+            return jsonify({'error': 'Token inválido'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
 
-            if (tipo === 'premium' && !token) {
-                alert('Você precisa estar logado para usar o relatório premium.');
-                showLogin();
-                return;
-            }
+# ------------------- Rotas de Autenticação -------------------
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    if not email or not password:
+        return jsonify({'error': 'Email e senha obrigatórios'}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Usuário já existe'}), 409
+    hashed = bcrypt.generate_password_hash(password).decode('utf-8')
+    user = User(email=email, password_hash=hashed, credits=5, premium_credits=0)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({'message': 'Usuário criado'}), 201
 
-            const btnFree = document.getElementById('btn-free');
-            const btnPremium = document.getElementById('btn-premium');
-            const loader = document.getElementById('loading-box');
-            const output = document.getElementById('output-area');
-            const statusMsg = document.getElementById('st-msg');
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    user = User.query.filter_by(email=email).first()
+    if not user or not bcrypt.check_password_hash(user.password_hash, password):
+        return jsonify({'error': 'Credenciais inválidas'}), 401
+    token = jwt.encode({
+        'user_id': user.id,
+        'exp': datetime.utcnow() + timedelta(hours=24)
+    }, app.config['SECRET_KEY'], algorithm='HS256')
+    return jsonify({'token': token, 'credits': user.credits, 'premium_credits': user.premium_credits})
 
-            btnFree.disabled = true;
-            btnPremium.disabled = true;
-            loader.classList.remove('hidden');
-            statusMsg.innerText = "A processar...";
+@app.route('/api/auth/me', methods=['GET'])
+@token_required
+def get_me(current_user):
+    is_admin = (current_user.email == ADMIN_EMAIL) if ADMIN_EMAIL else False
+    return jsonify({
+        'id': current_user.id,
+        'email': current_user.email,
+        'credits': current_user.credits,
+        'premium_credits': current_user.premium_credits,
+        'is_admin': is_admin
+    })
 
-            try {
-                let endpoint = tipo === 'free' ? '/api/analyze' : '/api/analyze/premium';
-                const headers = { 'Content-Type': 'application/json' };
-                if (tipo === 'premium') headers['Authorization'] = `Bearer ${token}`;
+# ------------------- Rotas de Análise -------------------
+@app.route('/api/analyze', methods=['POST'])  # FREE
+def analyze_free():
+    data = request.get_json()
+    prompt = data.get('prompt', '').strip()
+    if not prompt:
+        return jsonify({'error': 'Prompt vazio'}), 400
 
-                // Timeout de 2 minutos para evitar espera infinita
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 120000);
+    result = run_full_analysis(prompt)
+    free_agent = next((a for a in result['agents'] if a['area'] == 'Direito do Consumidor'), result['agents'][0])
 
-                const res = await fetch(API_BASE + endpoint, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({ prompt }),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
+    return jsonify({
+        'veredito': result['veredito'],
+        'free_analysis': free_agent['analysis'][:500]
+    })
 
-                if (!res.ok) {
-                    let errorMsg = `Erro: ${res.status}`;
-                    try {
-                        const errData = await res.json();
-                        errorMsg = errData.error || errorMsg;
-                    } catch(e) {}
-                    throw new Error(errorMsg);
-                }
-                const data = await res.json();
+@app.route('/api/analyze/premium', methods=['POST'])
+@token_required
+def analyze_premium(current_user):
+    data = request.get_json()
+    prompt = data.get('prompt', '').strip()
+    if not prompt:
+        return jsonify({'error': 'Prompt vazio'}), 400
 
-                if (tipo === 'free') {
-                    output.innerHTML = `
-                        <div class="veredito-box glass p-8 rounded-2xl mb-8 fade-in-card">
-                            <h2 class="text-2xl font-bold text-blue-300 mb-4">Veredito do Juiz IA</h2>
-                            <div class="whitespace-pre-wrap">${data.veredito.replace(/\n/g, '<br>')}</div>
-                        </div>
-                        <div class="glass p-6 rounded-2xl">
-                            <h3 class="text-xl font-bold text-blue-300">Amostra Gratuita</h3>
-                            <p class="text-slate-300 mt-2">${data.free_analysis.replace(/\n/g, '<br>')}</p>
-                        </div>
-                        <p class="text-center text-sm text-slate-400 mt-4">🔓 Adquira o Relatório Premium para ver as análises completas dos 12 especialistas e baixar PDF.</p>
-                    `;
-                } else {
-                    // Premium
-                    output.innerHTML = `
-                        <div class="veredito-box glass p-8 rounded-2xl mb-8 fade-in-card">
-                            <div class="flex justify-between items-center">
-                                <h2 class="text-2xl font-bold text-blue-300">Veredito do Juiz IA</h2>
-                                <button onclick="downloadPDF(${data.analysis_id})" class="bg-green-600 px-4 py-2 rounded-xl text-sm">📄 Baixar PDF</button>
-                            </div>
-                            <div class="whitespace-pre-wrap mt-4">${data.veredito.replace(/\n/g, '<br>')}</div>
-                        </div>
-                    `;
-                    data.agents.forEach((agent, idx) => {
-                        const card = document.createElement('details');
-                        card.setAttribute('open', idx === 0 ? 'true' : 'false');
-                        card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in-card";
-                        card.innerHTML = `<summary class="p-6 font-bold cursor-pointer hover:bg-white/5 transition-colors text-blue-300">${agent.area}</summary><div class="p-6 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10">${agent.analysis.replace(/\n/g, '<br>')}</div>`;
-                        output.appendChild(card);
-                    });
-                    updateUI();
-                }
-            } catch (err) {
-                if (err.name === 'AbortError') {
-                    alert('A análise premium demorou muito e foi cancelada. Tente novamente.');
-                } else {
-                    alert('Erro: ' + err.message);
-                }
-            } finally {
-                btnFree.disabled = false;
-                btnPremium.disabled = false;
-                loader.classList.add('hidden');
-                statusMsg.innerText = "Motor Online";
-            }
-        }
+    if current_user.premium_credits <= 0:
+        return jsonify({'error': 'Sem relatórios premium. Adquira um.'}), 402
 
-        async function downloadPDF(analysisId) {
-            if (!token) return;
-            const res = await fetch(API_BASE + `/api/report/pdf/${analysisId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `relatorio_${analysisId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            } else {
-                alert('Erro ao baixar PDF');
-            }
-        }
+    result = run_full_analysis(prompt)
 
-        updateUI();
-    </script>
-</body>
-</html>
+    analysis = Analysis(
+        user_id=current_user.id,
+        prompt=prompt,
+        veredict=result['veredito'],
+        full_report=json.dumps(result),
+        is_premium=True
+    )
+    db.session.add(analysis)
+    current_user.premium_credits -= 1
+    db.session.commit()
+
+    return jsonify({
+        'analysis_id': analysis.id,
+        'agents': result['agents'],
+        'veredito': result['veredito']
+    })
+
+# ------------------- PDF -------------------
+@app.route('/api/report/pdf/<int:analysis_id>', methods=['GET'])
+@token_required
+def get_pdf(current_user, analysis_id):
+    analysis = Analysis.query.filter_by(id=analysis_id, user_id=current_user.id).first()
+    if not analysis:
+        return jsonify({'error': 'Relatório não encontrado'}), 404
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=72, rightMargin=72, topMargin=72, bottomMargin=72)
+    styles = getSampleStyleSheet()
+    # Criar estilo customizado para título principal
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Title'],
+        alignment=TA_CENTER,
+        fontSize=18,
+        spaceAfter=20,
+        textColor='#1E3A8A'  # azul escuro
+    )
+    heading_style = ParagraphStyle(
+        'HeadingStyle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        spaceAfter=10,
+        textColor='#1E3A8A'
+    )
+
+    story = []
+
+    # Título
+    story.append(Paragraph("Jusaii Relatório Jurídico", title_style))
+    story.append(Spacer(1, 12))
+    story.append(Paragraph(f"<b>Data:</b> {analysis.created_at.strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
+    story.append(Paragraph(f"<b>Prompt do caso:</b> {analysis.prompt}", styles['Normal']))
+    story.append(Spacer(1, 20))
+
+    # Veredito
+    story.append(Paragraph("Veredito do Juiz IA", heading_style))
+    story.append(Paragraph(analysis.veredict.replace('\n', '<br/>'), styles['Normal']))
+    story.append(Spacer(1, 20))
+
+    # Análises dos agentes
+    full = json.loads(analysis.full_report)
+    for agent in full['agents']:
+        story.append(Paragraph(f"<b>{agent['area']}</b> – {agent.get('specialty', '')}", heading_style))
+        story.append(Paragraph(agent['analysis'][:2000].replace('\n', '<br/>'), styles['Normal']))
+        story.append(Spacer(1, 12))
+
+    doc.build(story)
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name=f"jusaii_relatorio_{analysis_id}.pdf", mimetype='application/pdf')
+
+# ------------------- Stripe -------------------
+@app.route('/api/create-checkout-session', methods=['POST'])
+@token_required
+def create_checkout_session(current_user):
+    if not STRIPE_PRICE_ID:
+        return jsonify({'error': 'Stripe não configurado'}), 500
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items=[{
+                'price': STRIPE_PRICE_ID,
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=os.environ.get('FRONTEND_URL', 'https://jusaii-frontend.onrender.com') + '/success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=os.environ.get('FRONTEND_URL', 'https://jusaii-frontend.onrender.com') + '/cancel',
+            metadata={'user_id': current_user.id}
+        )
+        return jsonify({'url': checkout_session.url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+    if not STRIPE_WEBHOOK_SECRET:
+        return jsonify({'error': 'Webhook secret não configurado'}), 500
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata']['user_id']
+        user = User.query.get(user_id)
+        if user:
+            user.premium_credits += 1
+            db.session.commit()
+    return jsonify({'status': 'success'}), 200
+
+# ------------------- Admin: adicionar créditos -------------------
+@app.route('/api/admin/add-credits', methods=['POST'])
+def admin_add_credits():
+    auth = request.headers.get('Authorization')
+    if auth != f"Bearer {ADMIN_SECRET}":
+        return jsonify({'error': 'Não autorizado'}), 403
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+    amount = data.get('amount', 1)
+
+    if not user_id:
+        return jsonify({'error': 'user_id é obrigatório'}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+
+    user.premium_credits += amount
+    db.session.commit()
+    return jsonify({'message': f'{amount} crédito(s) adicionado(s)', 'new_balance': user.premium_credits})
+
+# ------------------- Health Check -------------------
+@app.route('/', methods=['GET'])
+def health():
+    return {
+        "status": "online",
+        "message": "JustAII Ultra Avançado",
+        "model": MODEL_NAME,
+        "api_key_configured": bool(SAMBANOVA_API_KEY),
+        "stripe_configured": bool(stripe.api_key)
+    }, 200
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
