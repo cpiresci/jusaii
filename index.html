@@ -3,40 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jusaii | Orquestração Jurídica Ultra</title>
+    <title>Jusaii | Orquestração Jurídica Swarm IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,700;0,800;1,800&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
+        :root {
+            --blue: #3b82f6; --blue-dark: #1e3a8a; --gold: #d97706;
+            --green: #10b981; --red: #dc2626; --bg: #020617;
+        }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
         .glass { background: rgba(15,23,42,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-        .loader { border: 3px solid rgba(59,130,246,0.1); border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        .veredito-box { background: linear-gradient(135deg,rgba(59,130,246,0.2) 0%,rgba(37,99,235,0.1) 100%); border-left: 4px solid #3b82f6; }
-        .btn-premium { background: linear-gradient(135deg,#f59e0b,#d97706); }
-        .btn-buy { background: linear-gradient(135deg,#10b981,#059669); }
-        details summary { cursor: pointer; }
-        input::placeholder { color: rgba(148,163,184,0.5); }
+        .glass-blue { background: rgba(30,58,138,0.2); backdrop-filter: blur(20px); border: 1px solid rgba(59,130,246,0.2); }
+
+        /* ── Loader ─────────────────────────────── */
+        .spinner { border: 3px solid rgba(59,130,246,0.15); border-top: 3px solid var(--blue); border-radius: 50%; width: 36px; height: 36px; animation: spin 0.9s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Animações ──────────────────────────── */
+        .fade-up { animation: fadeUp 0.45s ease-out forwards; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .pulse-dot { animation: pulseDot 1.4s ease-in-out infinite; }
+        @keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* ── Singularity Log ─────────────────────── */
+        #log-feed { font-family: 'Courier New', monospace; font-size: 11px; }
+        .log-thinking { color: #60a5fa; }
+        .log-done     { color: #34d399; }
+        .log-skip     { color: #64748b; }
+        .log-veto     { color: #f87171; font-weight: bold; }
+        .log-judge    { color: #fbbf24; }
+        .log-verdict  { color: #a78bfa; }
+
+        /* ── Risk badges ─────────────────────────── */
+        .risk-CRÍTICO  { background: rgba(220,38,38,0.2);  color: #fca5a5; border: 1px solid rgba(220,38,38,0.4); }
+        .risk-ALTO     { background: rgba(234,88,12,0.2);  color: #fdba74; border: 1px solid rgba(234,88,12,0.4); }
+        .risk-MÉDIO    { background: rgba(217,119,6,0.2);  color: #fcd34d; border: 1px solid rgba(217,119,6,0.4); }
+        .risk-BAIXO    { background: rgba(22,163,74,0.2);  color: #86efac; border: 1px solid rgba(22,163,74,0.4); }
+        .risk-badge    { padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+
+        /* ── Veredito ─────────────────────────────── */
+        .veredito-box { background: linear-gradient(135deg,rgba(59,130,246,0.18),rgba(37,99,235,0.08)); border-left: 4px solid var(--blue); }
+        .veto-box     { background: linear-gradient(135deg,rgba(220,38,38,0.18),rgba(185,28,28,0.08)); border-left: 4px solid var(--red); }
+
+        /* ── Botões ───────────────────────────────── */
+        .btn-premium { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn-buy     { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-veto    { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        input::placeholder { color: rgba(148,163,184,0.4); }
+        details summary { cursor: pointer; list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body class="flex flex-col items-center p-4 md:p-12">
+<body class="flex flex-col items-center p-4 md:p-10">
 
     <!-- HEADER -->
-    <header class="w-full max-w-5xl flex justify-between items-center mb-10 border-b border-white/5 pb-8">
+    <header class="w-full max-w-5xl flex justify-between items-center mb-10 border-b border-white/5 pb-7">
         <div>
-            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase">Jusaii</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold italic">Motor Jurídico IA</p>
+            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase select-none">Jusaii</h1>
+            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Swarm Intelligence Jurídica</p>
         </div>
         <div class="flex gap-3 items-center flex-wrap justify-end">
-            <!-- Créditos premium -->
-            <div class="bg-blue-600/20 px-4 py-2 rounded-2xl border border-blue-500/30 flex items-center gap-2">
+            <div class="glass-blue px-4 py-2 rounded-2xl flex items-center gap-2">
                 <span class="text-[10px] font-bold opacity-60 uppercase">Premium:</span>
-                <span id="p-count" class="font-black text-white italic text-lg">--</span>
+                <span id="p-count" class="font-black text-white italic text-xl">--</span>
             </div>
-            <!-- Email do usuário -->
             <span id="user-email" class="text-xs text-slate-400 hidden"></span>
-            <!-- Botões auth -->
             <div id="auth-buttons" class="flex gap-2">
                 <button onclick="showLogin()" class="text-sm bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20 transition">Login</button>
                 <button onclick="showRegister()" class="text-sm bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-500 transition">Registrar</button>
@@ -48,45 +79,47 @@
     </header>
 
     <!-- MAIN -->
-    <main class="w-full max-w-4xl space-y-8">
+    <main class="w-full max-w-4xl space-y-6">
 
         <!-- INPUT -->
         <section class="glass rounded-[2.5rem] p-2 shadow-2xl">
             <textarea id="txt-input"
-                class="w-full h-64 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-30 resize-none text-white"
-                placeholder="Descreva os fatos do caso jurídico com o máximo de detalhes possível...&#10;&#10;Ex: Fui demitido sem justa causa após 3 anos na empresa e não recebi FGTS nem aviso prévio..."></textarea>
+                class="w-full h-56 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-30 resize-none text-white"
+                placeholder="Descreva os fatos do caso jurídico com o máximo de detalhes...&#10;&#10;Ex: Fui demitido sem justa causa após 3 anos e não recebi FGTS nem aviso prévio..."></textarea>
             <div class="p-5 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
                 <div class="flex items-center gap-2">
-                    <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span id="st-msg" class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Motor Online</span>
+                    <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                    <span id="st-msg" class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Swarm Online</span>
                 </div>
                 <div class="flex gap-3 flex-wrap justify-center">
                     <button onclick="analisar('free')" id="btn-free"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
                         ⚡ Análise Gratuita
                     </button>
                     <button onclick="analisar('premium')" id="btn-premium"
-                        class="btn-premium hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
-                        ⭐ Relatório Premium (16 Esp.)
+                        class="btn-premium hover:opacity-90 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
+                        ⭐ Swarm Premium (16 Esp.)
                     </button>
                     <button onclick="comprar()" id="btn-buy"
-                        class="btn-buy hover:opacity-90 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition">
+                        class="btn-buy hover:opacity-90 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition">
                         🛒 Comprar (R$ 19,90)
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- LOADING -->
-        <div id="loading-box" class="hidden flex flex-col items-center py-10 space-y-4">
-            <div class="loader"></div>
-            <p id="loading-msg" class="text-[10px] uppercase tracking-widest text-blue-400 animate-pulse font-bold text-center">
-                Consultando especialistas jurídicos...
-            </p>
+        <!-- SINGULARITY LOG (SSE Stream) -->
+        <div id="singularity-panel" class="hidden glass rounded-3xl overflow-hidden">
+            <div class="flex items-center gap-3 px-6 py-4 border-b border-white/5">
+                <div class="w-2 h-2 bg-blue-400 rounded-full pulse-dot"></div>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Singularity Log — Rede de Agentes</span>
+                <span id="agent-counter" class="ml-auto text-xs text-slate-500"></span>
+            </div>
+            <div id="log-feed" class="p-5 max-h-72 overflow-y-auto space-y-1 leading-relaxed"></div>
         </div>
 
-        <!-- OUTPUT -->
-        <div id="output-area" class="space-y-5 pb-40"></div>
+        <!-- OUTPUT PRINCIPAL -->
+        <div id="output-area" class="space-y-4 pb-32"></div>
 
     </main>
 
@@ -110,7 +143,7 @@
             <h2 class="text-2xl font-bold mb-6">Criar Conta</h2>
             <input type="email" id="reg-email" placeholder="Email"
                 class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white outline-none border border-white/10 focus:border-blue-500">
-            <input type="password" id="reg-password" placeholder="Senha (mínimo 4 caracteres)"
+            <input type="password" id="reg-password" placeholder="Senha"
                 class="w-full p-3 rounded-xl bg-white/10 mb-5 text-white outline-none border border-white/10 focus:border-blue-500">
             <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Criar conta</button>
             <button onclick="closeModals()" class="w-full mt-3 text-sm opacity-50 hover:opacity-100 transition">Cancelar</button>
@@ -120,429 +153,444 @@
 
     <!-- ADMIN PANEL -->
     <div id="admin-panel" class="hidden fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">
-            👑 Admin +1 crédito
-        </button>
-        <button onclick="verHistorico()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">
-            📋 Histórico
-        </button>
+        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">👑 Admin +Crédito</button>
+        <button onclick="verHistorico()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">📋 Histórico</button>
     </div>
 
-    <script>
-        const API = "https://jusaii-app-docker.onrender.com";
-        let token = localStorage.getItem("token");
-        let userId = null;
+<script>
+const API = "https://jusaii-app-docker.onrender.com";
+let token = localStorage.getItem("token");
+let userId = null;
+let _abortController = null;
 
-        // ── UI ──────────────────────────────────────────────────────────
-        function updateUI() {
-            if (token) {
-                document.getElementById("auth-buttons").classList.add("hidden");
-                document.getElementById("logout-button").classList.remove("hidden");
-                fetch(API + "/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-                    .then(r => r.json())
-                    .then(data => {
-                        document.getElementById("p-count").innerText = data.premium_credits ?? 0;
-                        document.getElementById("user-email").innerText = data.email || "";
-                        document.getElementById("user-email").classList.remove("hidden");
-                        userId = data.id;
-                        if (data.is_admin) {
-                            document.getElementById("admin-panel").classList.remove("hidden");
-                        }
-                    })
-                    .catch(() => {
-                        // token inválido — limpa
-                        localStorage.removeItem("token");
-                        token = null;
-                        updateUI();
-                    });
-            } else {
-                document.getElementById("auth-buttons").classList.remove("hidden");
-                document.getElementById("logout-button").classList.add("hidden");
-                document.getElementById("user-email").classList.add("hidden");
-                document.getElementById("p-count").innerText = "--";
-                document.getElementById("admin-panel").classList.add("hidden");
-            }
+// ── UI ─────────────────────────────────────────────────────────────
+function updateUI() {
+    if (token) {
+        document.getElementById("auth-buttons").classList.add("hidden");
+        document.getElementById("logout-button").classList.remove("hidden");
+        fetch(API + "/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById("p-count").innerText = data.premium_credits ?? 0;
+                document.getElementById("user-email").innerText = data.email || "";
+                document.getElementById("user-email").classList.remove("hidden");
+                userId = data.id;
+                if (data.is_admin) document.getElementById("admin-panel").classList.remove("hidden");
+            })
+            .catch(() => { localStorage.removeItem("token"); token = null; updateUI(); });
+    } else {
+        document.getElementById("auth-buttons").classList.remove("hidden");
+        document.getElementById("logout-button").classList.add("hidden");
+        document.getElementById("user-email").classList.add("hidden");
+        document.getElementById("p-count").innerText = "--";
+        document.getElementById("admin-panel").classList.add("hidden");
+    }
+}
+
+function setStatus(msg, cls = "text-slate-500") {
+    const el = document.getElementById("st-msg");
+    el.innerText = msg;
+    el.className = `text-[10px] uppercase font-bold tracking-widest ${cls}`;
+}
+
+function setLoading(on) {
+    document.getElementById("btn-free").disabled = on;
+    document.getElementById("btn-premium").disabled = on;
+    setStatus(on ? "Processando..." : "Swarm Online", on ? "text-blue-400" : "text-slate-500");
+}
+
+// ── SINGULARITY LOG ────────────────────────────────────────────────
+let _agentDone = 0;
+let _agentTotal = 0;
+
+function resetLog() {
+    document.getElementById("log-feed").innerHTML = "";
+    document.getElementById("singularity-panel").classList.add("hidden");
+    document.getElementById("agent-counter").innerText = "";
+    _agentDone = 0; _agentTotal = 0;
+}
+
+function pushLog(msg, cls = "log-thinking") {
+    const panel = document.getElementById("singularity-panel");
+    panel.classList.remove("hidden");
+    const feed = document.getElementById("log-feed");
+    const line = document.createElement("div");
+    const ts = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    line.className = cls;
+    line.innerHTML = `<span class="opacity-40">[${ts}]</span> ${escHtml(msg)}`;
+    feed.appendChild(line);
+    feed.scrollTop = feed.scrollHeight;
+}
+
+function updateCounter() {
+    const el = document.getElementById("agent-counter");
+    if (_agentTotal > 0) el.innerText = `${_agentDone}/${_agentTotal} concluídos`;
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────
+async function login() {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+    const errEl = document.getElementById("login-error");
+    errEl.classList.add("hidden");
+    if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
+    try {
+        const res = await fetch(API + "/api/auth/login", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) { token = data.token; localStorage.setItem("token", token); closeModals(); updateUI(); }
+        else showErr(errEl, data.detail || data.error || "Erro no login");
+    } catch { showErr(errEl, "Erro de conexão com o servidor."); }
+}
+
+async function register() {
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+    const errEl = document.getElementById("reg-error");
+    errEl.classList.add("hidden");
+    if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
+    try {
+        const res = await fetch(API + "/api/auth/register", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            closeModals(); showLogin();
+            document.getElementById("login-email").value = email;
+            alert("Conta criada! Você tem 5 análises gratuitas.");
+        } else showErr(errEl, data.detail || "Erro ao criar conta");
+    } catch { showErr(errEl, "Erro de conexão."); }
+}
+
+function logout() {
+    localStorage.removeItem("token"); token = null; userId = null;
+    document.getElementById("output-area").innerHTML = "";
+    resetLog(); updateUI();
+}
+
+// ── ANÁLISE PRINCIPAL ──────────────────────────────────────────────
+async function analisar(tipo) {
+    const prompt = document.getElementById("txt-input").value.trim();
+    if (!prompt || prompt.length < 20) { alert("Descreva o caso com pelo menos 20 caracteres."); return; }
+    if (tipo === "premium" && !token) { alert("Faça login para usar o relatório premium."); showLogin(); return; }
+
+    const output = document.getElementById("output-area");
+    output.innerHTML = "";
+    resetLog();
+    setLoading(true);
+
+    try {
+        if (tipo === "free") {
+            await analisarFree(prompt, output);
+        } else {
+            await analisarPremiumSSE(prompt, output);
         }
+    } catch (err) {
+        output.innerHTML = `
+            <div class="glass p-8 rounded-2xl text-center fade-up">
+                <p class="text-red-400 font-bold text-lg">❌ ${escHtml(err.message || "Erro desconhecido")}</p>
+            </div>`;
+    } finally {
+        setLoading(false);
+    }
+}
 
-        function setStatus(msg, color = "text-slate-500") {
-            const el = document.getElementById("st-msg");
-            el.innerText = msg;
-            el.className = `text-[10px] uppercase font-bold tracking-widest ${color}`;
-        }
+// ── GRATUITA ───────────────────────────────────────────────────────
+async function analisarFree(prompt, output) {
+    setStatus("Consultando especialista...", "text-blue-400");
+    const res = await fetch(API + "/api/analyze", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+        signal: AbortSignal.timeout(65000)
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Erro ${res.status}`);
+    }
+    const data = await res.json();
+    renderFree(data, output);
+}
 
-        function setLoading(on, msg = "Consultando especialistas jurídicos...") {
-            document.getElementById("loading-box").classList.toggle("hidden", !on);
-            document.getElementById("loading-msg").innerText = msg;
-            document.getElementById("btn-free").disabled = on;
-            document.getElementById("btn-premium").disabled = on;
-            if (on) setStatus("A processar...", "text-blue-400");
-            else setStatus("Motor Online", "text-slate-500");
-        }
+// ── PREMIUM SSE STREAM ─────────────────────────────────────────────
+async function analisarPremiumSSE(prompt, output) {
+    _abortController = new AbortController();
+    const results = [];
+    let verdictText = "";
+    let analysisId = null;
+    let vetoTriggered = false;
 
-        // ── AUTH ────────────────────────────────────────────────────────
-        async function login() {
-            const email = document.getElementById("login-email").value.trim();
-            const password = document.getElementById("login-password").value;
-            const errEl = document.getElementById("login-error");
-            errEl.classList.add("hidden");
-            if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
-            try {
-                const res = await fetch(API + "/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    token = data.token;
-                    localStorage.setItem("token", token);
-                    closeModals();
-                    updateUI();
-                } else {
-                    showErr(errEl, data.error || "Erro no login");
-                }
-            } catch { showErr(errEl, "Erro de conexão com o servidor."); }
-        }
+    setStatus("Conectando ao Swarm...", "text-blue-400");
 
-        async function register() {
-            const email = document.getElementById("reg-email").value.trim();
-            const password = document.getElementById("reg-password").value;
-            const errEl = document.getElementById("reg-error");
-            errEl.classList.add("hidden");
-            if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
-            try {
-                const res = await fetch(API + "/api/auth/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    closeModals();
-                    showLogin();
-                    document.getElementById("login-email").value = email;
-                    alert("Conta criada! Você tem 5 análises gratuitas. Faça login.");
-                } else {
-                    showErr(errEl, data.error || "Erro ao criar conta");
-                }
-            } catch { showErr(errEl, "Erro de conexão com o servidor."); }
-        }
+    const res = await fetch(API + "/api/analyze/premium/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ prompt }),
+        signal: _abortController.signal
+    });
 
-        function logout() {
-            localStorage.removeItem("token");
-            token = null;
-            userId = null;
-            document.getElementById("output-area").innerHTML = "";
-            updateUI();
-        }
-
-        // ── ANÁLISE ─────────────────────────────────────────────────────
-        async function analisar(tipo) {
-            const prompt = document.getElementById("txt-input").value.trim();
-            if (!prompt || prompt.length < 20) {
-                alert("Descreva o caso com pelo menos 20 caracteres.");
-                return;
-            }
-            if (tipo === "premium" && !token) {
-                alert("Você precisa estar logado para usar o relatório premium.");
-                showLogin();
-                return;
-            }
-
-            const output = document.getElementById("output-area");
-            output.innerHTML = "";
-
-            const loadingMsg = tipo === "free"
-                ? "Consultando especialista jurídico..."
-                : "Iniciando análise premium...";
-            setLoading(true, loadingMsg);
-
-            try {
-                if (tipo === "free") {
-                // ── ANÁLISE GRATUITA — resposta direta ──────────────────
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 60000);
-                const res = await fetch(API + "/api/analyze", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt }),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.error || `Erro ${res.status}`);
-                }
-                const data = await res.json();
-                renderFree(data, output);
-
-            } else {
-                // ── ANÁLISE PREMIUM — background + polling ───────────────
-                // Passo 1: inicia job (retorna imediatamente com job_id)
-                const resJob = await fetch(API + "/api/analyze/premium", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                    body: JSON.stringify({ prompt })
-                });
-                if (!resJob.ok) {
-                    const err = await resJob.json().catch(() => ({}));
-                    if (resJob.status === 402) {
-                        output.innerHTML = `
-                            <div class="glass p-8 rounded-2xl text-center fade-in">
-                                <p class="text-yellow-400 text-lg font-bold mb-2">⚠ Sem créditos premium</p>
-                                <p class="text-slate-400 mb-4">Adquira um relatório para continuar.</p>
-                                <button onclick="comprar()" class="btn-buy px-8 py-3 rounded-xl font-bold text-white">
-                                    🛒 Comprar Relatório — R$ 19,90
-                                </button>
-                            </div>`;
-                        return;
-                    }
-                    throw new Error(err.error || `Erro ${resJob.status}`);
-                }
-                const jobData = await resJob.json();
-                const jobId = jobData.job_id;
-
-                // Passo 2: polling a cada 4s até status=done
-                const data = await pollJob(jobId, output);
-                if (data) {
-                    renderPremium(data, output);
-                    updateUI();
-                }
-            }
-
-            } catch (err) {
-                if (err.name === "AbortError") {
-                    output.innerHTML = `<div class="glass p-8 rounded-2xl text-center fade-in">
-                        <p class="text-red-400 font-bold text-lg">⏱ Tempo esgotado</p>
-                        <p class="text-slate-400 mt-2">A análise demorou mais que o esperado. Tente novamente.</p>
-                    </div>`;
-                } else {
-                    output.innerHTML = `<div class="glass p-8 rounded-2xl text-center fade-in">
-                        <p class="text-red-400 font-bold text-lg">❌ Erro</p>
-                        <p class="text-slate-400 mt-2">${err.message}</p>
-                    </div>`;
-                }
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        // ── POLLING ─────────────────────────────────────────────────────
-        async function pollJob(jobId, output) {
-            const maxAttempts = 60; // 60 × 4s = 4 minutos máximo
-            let dots = 0;
-            for (let i = 0; i < maxAttempts; i++) {
-                await new Promise(r => setTimeout(r, 4000));
-                dots = (dots % 3) + 1;
-                document.getElementById("loading-msg").innerText =
-                    "Consultando especialistas" + ".".repeat(dots) + " (" + (i * 4) + "s)";
-                try {
-                    const res = await fetch(API + `/api/job/${jobId}`, {
-                        headers: { "Authorization": `Bearer ${token}` }
-                    });
-                    const data = await res.json();
-                    if (data.status === "done") return data;
-                    if (data.status === "error") {
-                        throw new Error(data.verdict || "Erro na análise. Crédito reembolsado.");
-                    }
-                    // pending/running → continua polling
-                } catch (err) {
-                    if (err.message.includes("reembolsado") || err.message.includes("Erro")) {
-                        throw err;
-                    }
-                    // erro de rede → tenta novamente
-                }
-            }
-            throw new Error("Tempo esgotado. Tente novamente.");
-        }
-
-        function renderFree(data, output) {
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 402) {
             output.innerHTML = `
-                <div class="veredito-box glass p-8 rounded-2xl fade-in">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-2xl">⚖</span>
-                        <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
-                    </div>
-                    <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(data.veredito)}</div>
-                </div>
-                <div class="glass p-6 rounded-2xl fade-in">
-                    <h3 class="text-lg font-bold text-blue-300 mb-3">📋 Análise — Direito do Consumidor</h3>
-                    <p class="text-slate-300 text-sm leading-relaxed">${escHtml(data.free_analysis)}</p>
-                </div>
-                <div class="glass p-6 rounded-2xl text-center fade-in border border-yellow-500/20">
-                    <p class="text-yellow-400 font-bold mb-1">🔓 Desbloqueie o relatório completo</p>
-                    <p class="text-slate-400 text-sm mb-4">Veja a análise dos 16 especialistas + PDF profissional</p>
-                    <div class="flex gap-3 justify-center flex-wrap">
-                        <button onclick="analisar('premium')" class="btn-premium px-6 py-3 rounded-xl font-bold text-white text-sm">
-                            ⭐ Usar Crédito Premium
-                        </button>
-                        <button onclick="comprar()" class="btn-buy px-6 py-3 rounded-xl font-bold text-white text-sm">
-                            🛒 Comprar — R$ 19,90
-                        </button>
-                    </div>
+                <div class="glass p-8 rounded-2xl text-center fade-up">
+                    <p class="text-yellow-400 text-lg font-bold mb-2">⚠ Sem créditos premium</p>
+                    <p class="text-slate-400 mb-4">Adquira um relatório para continuar.</p>
+                    <button onclick="comprar()" class="btn-buy px-8 py-3 rounded-xl font-bold text-white">🛒 Comprar — R$ 19,90</button>
                 </div>`;
+            return;
         }
+        throw new Error(err.detail || `Erro ${res.status}`);
+    }
 
-        function renderPremium(data, output) {
-            const analysisId = data.analysis_id;
-            const veredito = data.veredito || data.verdict || "";
-            const pdfBtn = analysisId
-                ? `<button onclick="downloadPDF(${analysisId})"
-                        class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                        📄 Baixar PDF
-                   </button>`
-                : `<span class="text-xs text-slate-500">PDF indisponível</span>`;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
 
-            output.innerHTML = `
-                <div class="veredito-box glass p-8 rounded-2xl fade-in">
-                    <div class="flex justify-between items-start flex-wrap gap-3">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">⚖</span>
-                            <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
-                        </div>
-                        ${pdfBtn}
-                    </div>
-                    <div class="whitespace-pre-wrap text-sm leading-relaxed mt-4">${escHtml(veredito)}</div>
-                    <p class="text-xs text-slate-500 mt-4">Gerado em: ${data.created_at || ""} · Créditos restantes: ${data.credits_remaining ?? "--"}</p>
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // guarda linha incompleta
+
+        for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const raw = line.slice(6).trim();
+            if (raw === "[DONE]") break;
+
+            let ev;
+            try { ev = JSON.parse(raw); } catch { continue; }
+
+            handleSSEEvent(ev, results, output);
+            if (ev.type === "verdict") { verdictText = ev.verdict; vetoTriggered = ev.veto_triggered; }
+            if (ev.type === "saved")   { analysisId = ev.analysis_id; updateUI(); }
+            if (ev.type === "error")   throw new Error(ev.message);
+        }
+    }
+
+    // Render final
+    if (verdictText) renderPremiumFinal(verdictText, results, analysisId, vetoTriggered, output);
+}
+
+// ── SSE EVENT HANDLER ──────────────────────────────────────────────
+function handleSSEEvent(ev, results, output) {
+    switch (ev.type) {
+        case "start":
+            _agentTotal = ev.total || 16;
+            pushLog(ev.message, "log-thinking");
+            updateCounter();
+            break;
+
+        case "agent_thinking":
+            pushLog(ev.message, "log-thinking");
+            break;
+
+        case "agent_done":
+            _agentDone++;
+            updateCounter();
+            pushLog(ev.message, "log-done");
+            results.push(ev);
+            break;
+
+        case "agent_skip":
+            pushLog(ev.message, "log-skip");
+            break;
+
+        case "veto":
+            pushLog(ev.message, "log-veto");
+            results.push(ev);
+            // Banner de veto imediato
+            const vetoAlert = document.createElement("div");
+            vetoAlert.className = "veto-box glass p-6 rounded-2xl fade-up";
+            vetoAlert.innerHTML = `
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-2xl">🚨</span>
+                    <h3 class="font-black text-red-400 text-lg">VETO EMITIDO — Análise Interrompida</h3>
+                </div>
+                <p class="text-red-300 text-sm"><b>${escHtml(ev.area)}</b>: ${escHtml(ev.veto_reason || "")}</p>`;
+            output.prepend(vetoAlert);
+            break;
+
+        case "judge_thinking":
+            pushLog(ev.message, "log-judge");
+            break;
+
+        case "verdict":
+            pushLog(ev.message, "log-verdict");
+            break;
+    }
+}
+
+// ── RENDER FINAL (premium) ─────────────────────────────────────────
+function renderPremiumFinal(verdict, results, analysisId, isVeto, output) {
+    const pdfBtn = analysisId
+        ? `<button onclick="downloadPDF(${analysisId})" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">📄 PDF</button>`
+        : "";
+    const boxClass = isVeto ? "veto-box" : "veredito-box";
+    const icon = isVeto ? "🚨" : "⚖";
+    const title = isVeto ? "Veredito de VETO" : "Veredito do Juiz IA";
+
+    const verdictCard = document.createElement("div");
+    verdictCard.className = `${boxClass} glass p-8 rounded-2xl fade-up`;
+    verdictCard.innerHTML = `
+        <div class="flex justify-between items-start flex-wrap gap-3 mb-4">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">${icon}</span>
+                <h2 class="text-xl font-bold ${isVeto ? "text-red-300" : "text-blue-300"}">${title}</h2>
+            </div>
+            ${pdfBtn}
+        </div>
+        <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(verdict)}</div>`;
+    output.appendChild(verdictCard);
+
+    // Pareceres dos especialistas em cards collapsíveis
+    const agentsDone = results.filter(r => r.type === "agent_done");
+    if (agentsDone.length) {
+        const section = document.createElement("div");
+        section.className = "space-y-3 fade-up";
+        section.innerHTML = `<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">Pareceres dos Especialistas (${agentsDone.length})</h3>`;
+
+        agentsDone.forEach((r, i) => {
+            const risk = r.risk_level || "MÉDIO";
+            const card = document.createElement("details");
+            if (i === 0) card.open = true;
+            card.className = "glass rounded-2xl overflow-hidden";
+            card.innerHTML = `
+                <summary class="p-4 hover:bg-white/5 transition flex items-center gap-3 select-none">
+                    <span class="text-xs bg-blue-600/30 px-2 py-1 rounded-lg font-bold text-blue-300">${String(i+1).padStart(2,"0")}</span>
+                    <span class="font-bold text-blue-300 text-sm">${escHtml(r.area)}</span>
+                    <span class="risk-badge risk-${risk} ml-auto shrink-0">${risk}</span>
+                    <span class="text-slate-500 text-xs">${r.duration_ms || 0}ms ▸</span>
+                </summary>
+                <div class="px-5 pb-5 pt-2 border-t border-white/5 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+                    <p class="text-xs text-slate-500 mb-3 italic">${escHtml(r.specialty || "")}</p>
+                    ${escHtml(r.analysis || "")}
                 </div>`;
+            section.appendChild(card);
+        });
+        output.appendChild(section);
+    }
+}
 
-            data.agents.forEach((agent, idx) => {
-                const card = document.createElement("details");
-                if (idx === 0) card.setAttribute("open", "");
-                card.className = "glass rounded-2xl border border-white/10 overflow-hidden fade-in";
-                card.innerHTML = `
-                    <summary class="p-5 font-bold hover:bg-white/5 transition text-blue-300 flex items-center gap-2">
-                        <span class="text-xs bg-blue-600/30 px-2 py-1 rounded-lg">${idx + 1}</span>
-                        ${escHtml(agent.area)}
-                        <span class="text-slate-500 font-normal text-xs ml-1">— ${escHtml(agent.specialty || "")}</span>
-                    </summary>
-                    <div class="p-5 pt-0 text-slate-300 text-sm leading-relaxed border-t border-white/10 whitespace-pre-wrap">
-                        ${escHtml(agent.analysis)}
-                    </div>`;
-                output.appendChild(card);
-            });
-        }
+// ── RENDER FREE ────────────────────────────────────────────────────
+function renderFree(data, output) {
+    output.innerHTML = `
+        <div class="veredito-box glass p-8 rounded-2xl fade-up">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl">⚖</span>
+                <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
+            </div>
+            <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(data.veredito)}</div>
+        </div>
+        <div class="glass p-6 rounded-2xl fade-up">
+            <h3 class="text-sm font-bold text-blue-300 mb-3">📋 Análise — Direito do Consumidor</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">${escHtml(data.free_analysis)}</p>
+        </div>
+        <div class="glass p-6 rounded-2xl text-center fade-up border border-yellow-500/20">
+            <p class="text-yellow-400 font-bold mb-1">🔓 Desbloqueie o Relatório Swarm Completo</p>
+            <p class="text-slate-400 text-sm mb-4">16 especialistas jurídicos em paralelo + logs em tempo real + PDF profissional</p>
+            <div class="flex gap-3 justify-center flex-wrap">
+                <button onclick="analisar('premium')" class="btn-premium px-6 py-3 rounded-xl font-bold text-white text-sm">⭐ Usar Crédito Premium</button>
+                <button onclick="comprar()" class="btn-buy px-6 py-3 rounded-xl font-bold text-white text-sm">🛒 Comprar — R$ 19,90</button>
+            </div>
+        </div>`;
+}
 
-        // ── PDF ─────────────────────────────────────────────────────────
-        async function downloadPDF(analysisId) {
-            if (!token) { alert("Faça login para baixar o PDF."); return; }
-            try {
-                const res = await fetch(API + `/api/report/pdf/${analysisId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (!res.ok) { alert("Erro ao baixar PDF."); return; }
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `jusaii_relatorio_${analysisId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch { alert("Erro ao baixar PDF."); }
-        }
+// ── PDF ────────────────────────────────────────────────────────────
+async function downloadPDF(id) {
+    if (!token) { alert("Faça login para baixar o PDF."); return; }
+    try {
+        const res = await fetch(API + `/api/report/pdf/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) { alert("Erro ao baixar PDF."); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `jusaii_relatorio_${id}.pdf`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch { alert("Erro ao baixar PDF."); }
+}
 
-        // ── HISTÓRICO ───────────────────────────────────────────────────
-        async function verHistorico() {
-            if (!token) return;
-            try {
-                const res = await fetch(API + "/api/analyses", { headers: { Authorization: `Bearer ${token}` } });
-                const data = await res.json();
-                if (!data.length) { alert("Nenhum relatório encontrado."); return; }
-                const output = document.getElementById("output-area");
-                output.innerHTML = `<h3 class="text-lg font-bold text-blue-300 mb-4">📋 Seus Relatórios</h3>`;
-                data.forEach(r => {
-                    const card = document.createElement("div");
-                    card.className = "glass p-5 rounded-2xl fade-in cursor-pointer hover:border-blue-500/30 border border-white/5 transition";
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start gap-3">
-                            <div>
-                                <p class="text-sm text-slate-300">${escHtml(r.prompt)}</p>
-                                <p class="text-xs text-slate-500 mt-1">${r.created_at}</p>
-                            </div>
-                            <button onclick="downloadPDF(${r.id})" class="bg-green-600/20 hover:bg-green-600/40 text-green-400 px-3 py-1 rounded-lg text-xs transition shrink-0">
-                                📄 PDF
-                            </button>
-                        </div>`;
-                    output.appendChild(card);
-                });
-            } catch { alert("Erro ao carregar histórico."); }
-        }
+// ── HISTÓRICO ──────────────────────────────────────────────────────
+async function verHistorico() {
+    if (!token) return;
+    try {
+        const res = await fetch(API + "/api/analyses", { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.length) { alert("Nenhum relatório encontrado."); return; }
+        const output = document.getElementById("output-area");
+        output.innerHTML = `<h3 class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-4">📋 Seus Relatórios</h3>`;
+        data.forEach(r => {
+            const card = document.createElement("div");
+            card.className = "glass p-5 rounded-2xl fade-up border border-white/5 hover:border-blue-500/30 transition";
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3">
+                    <div>
+                        <p class="text-sm text-slate-300">${escHtml(r.prompt)}</p>
+                        <p class="text-xs text-slate-500 mt-1">${r.created_at}</p>
+                    </div>
+                    <button onclick="downloadPDF(${r.id})" class="bg-green-600/20 hover:bg-green-600/40 text-green-400 px-3 py-1 rounded-lg text-xs transition shrink-0">📄 PDF</button>
+                </div>`;
+            output.appendChild(card);
+        });
+    } catch { alert("Erro ao carregar histórico."); }
+}
 
-        // ── PAGAMENTO ───────────────────────────────────────────────────
-        async function comprar() {
-            if (!token) { alert("Faça login primeiro."); showLogin(); return; }
-            try {
-                const res = await fetch(API + "/api/create-checkout-session", {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (res.ok && data.url) {
-                    window.location.href = data.url;
-                } else {
-                    alert(data.error || "Erro ao iniciar pagamento.");
-                }
-            } catch { alert("Erro de conexão."); }
-        }
+// ── PAGAMENTO ──────────────────────────────────────────────────────
+async function comprar() {
+    if (!token) { alert("Faça login primeiro."); showLogin(); return; }
+    try {
+        const res = await fetch(API + "/api/create-checkout-session", {
+            method: "POST", headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.url) window.location.href = data.url;
+        else alert(data.detail || "Erro ao iniciar pagamento.");
+    } catch { alert("Erro de conexão."); }
+}
 
-        // ── ADMIN ───────────────────────────────────────────────────────
-        async function adminAddCredits() {
-            if (!userId) return;
-            const secret = prompt("Senha administrativa:");
-            if (!secret) return;
-            const targetId = prompt("ID do usuário (deixe em branco para você mesmo):");
-            const uid = targetId ? parseInt(targetId) : userId;
-            try {
-                const res = await fetch(API + "/api/admin/add-credits", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
-                    body: JSON.stringify({ user_id: uid, amount: 1 })
-                });
-                const data = await res.json();
-                if (res.ok) { alert(`✓ ${data.message}\nNovo saldo: ${data.new_balance}`); updateUI(); }
-                else alert(data.error || "Erro");
-            } catch { alert("Erro de conexão."); }
-        }
+// ── ADMIN ──────────────────────────────────────────────────────────
+async function adminAddCredits() {
+    if (!userId) return;
+    const secret = prompt("Senha administrativa:");
+    if (!secret) return;
+    const targetId = prompt("ID do usuário (vazio = você):");
+    const uid = targetId ? parseInt(targetId) : userId;
+    try {
+        const res = await fetch(API + "/api/admin/add-credits", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
+            body: JSON.stringify({ user_id: uid, amount: 1 })
+        });
+        const data = await res.json();
+        if (res.ok) { alert(`✓ ${data.message}\nNovo saldo: ${data.new_balance}`); updateUI(); }
+        else alert(data.detail || "Erro");
+    } catch { alert("Erro de conexão."); }
+}
 
-        // ── MODAIS ──────────────────────────────────────────────────────
-        function showLogin() {
-            closeModals();
-            document.getElementById("login-modal").classList.remove("hidden");
-            setTimeout(() => document.getElementById("login-email").focus(), 100);
-        }
-        function showRegister() {
-            closeModals();
-            document.getElementById("register-modal").classList.remove("hidden");
-            setTimeout(() => document.getElementById("reg-email").focus(), 100);
-        }
-        function closeModals() {
-            document.getElementById("login-modal").classList.add("hidden");
-            document.getElementById("register-modal").classList.add("hidden");
-        }
+// ── MODAIS ─────────────────────────────────────────────────────────
+function showLogin()    { closeModals(); document.getElementById("login-modal").classList.remove("hidden"); setTimeout(() => document.getElementById("login-email").focus(), 100); }
+function showRegister() { closeModals(); document.getElementById("register-modal").classList.remove("hidden"); setTimeout(() => document.getElementById("reg-email").focus(), 100); }
+function closeModals()  { ["login-modal","register-modal"].forEach(id => document.getElementById(id).classList.add("hidden")); }
 
-        // Fecha modal ao clicar fora
-        document.getElementById("login-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
-        document.getElementById("register-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
+document.getElementById("login-modal").addEventListener("click",    e => { if (e.target === e.currentTarget) closeModals(); });
+document.getElementById("register-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
+document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+document.getElementById("reg-password").addEventListener("keydown",   e => { if (e.key === "Enter") register(); });
 
-        // Enter nos inputs de login/register
-        document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-        document.getElementById("reg-password").addEventListener("keydown", e => { if (e.key === "Enter") register(); });
+// ── UTILS ──────────────────────────────────────────────────────────
+function escHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+}
+function showErr(el, msg) { el.innerText = msg; el.classList.remove("hidden"); }
 
-        // ── UTILS ───────────────────────────────────────────────────────
-        function escHtml(str) {
-            if (!str) return "";
-            return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-                      .replace(/\n/g,"<br>");
-        }
-        function showErr(el, msg) {
-            el.innerText = msg;
-            el.classList.remove("hidden");
-        }
-
-        // Init
-        updateUI();
-    </script>
+// Init
+updateUI();
+</script>
 </body>
 </html>
