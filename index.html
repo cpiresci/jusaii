@@ -33,6 +33,7 @@
         .log-veto     { color: #f87171; font-weight: bold; }
         .log-judge    { color: #fbbf24; }
         .log-verdict  { color: #a78bfa; }
+        .log-warmup   { color: #94a3b8; font-style: italic; }
 
         /* ── Risk badges ─────────────────────────── */
         .risk-CRÍTICO  { background: rgba(220,38,38,0.2);  color: #fca5a5; border: 1px solid rgba(220,38,38,0.4); }
@@ -158,7 +159,9 @@
     </div>
 
 <script>
-const API = "https://jusaii-app-docker.onrender.com";
+// ── CORREÇÃO 1: URL correta do backend ────────────────────────────
+const API = "https://jusaii-app.onrender.com";
+
 let token = localStorage.getItem("token");
 let userId = null;
 let _abortController = null;
@@ -227,6 +230,18 @@ function updateCounter() {
     if (_agentTotal > 0) el.innerText = `${_agentDone}/${_agentTotal} concluídos`;
 }
 
+// ── CORREÇÃO 2: Warm-up do servidor antes da análise ──────────────
+async function warmUpServer() {
+    try {
+        setStatus("Acordando servidor...", "text-slate-400");
+        pushLog("🔄 Verificando servidor — aguarde...", "log-warmup");
+        await fetch(API + "/", { signal: AbortSignal.timeout(15000) });
+        pushLog("✅ Servidor ativo.", "log-warmup");
+    } catch {
+        pushLog("⚠ Servidor demorou a responder, continuando...", "log-warmup");
+    }
+}
+
 // ── AUTH ───────────────────────────────────────────────────────────
 async function login() {
     const email = document.getElementById("login-email").value.trim();
@@ -237,7 +252,8 @@ async function login() {
     try {
         const res = await fetch(API + "/api/auth/login", {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
+            signal: AbortSignal.timeout(20000)
         });
         const data = await res.json();
         if (res.ok) { token = data.token; localStorage.setItem("token", token); closeModals(); updateUI(); }
@@ -254,7 +270,8 @@ async function register() {
     try {
         const res = await fetch(API + "/api/auth/register", {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
+            signal: AbortSignal.timeout(20000)
         });
         const data = await res.json();
         if (res.ok) {
@@ -283,15 +300,22 @@ async function analisar(tipo) {
     setLoading(true);
 
     try {
+        // CORREÇÃO 3: Warm-up antes de qualquer análise
+        await warmUpServer();
+
         if (tipo === "free") {
             await analisarFree(prompt, output);
         } else {
             await analisarPremiumSSE(prompt, output);
         }
     } catch (err) {
+        const msg = err.name === "TimeoutError"
+            ? "O servidor demorou muito para responder. Tente novamente em instantes."
+            : (err.message || "Erro desconhecido");
         output.innerHTML = `
             <div class="glass p-8 rounded-2xl text-center fade-up">
-                <p class="text-red-400 font-bold text-lg">❌ ${escHtml(err.message || "Erro desconhecido")}</p>
+                <p class="text-red-400 font-bold text-lg">❌ ${escHtml(msg)}</p>
+                <p class="text-slate-500 text-sm mt-2">O servidor gratuito pode estar acordando. Aguarde 30 segundos e tente novamente.</p>
             </div>`;
     } finally {
         setLoading(false);
@@ -301,10 +325,11 @@ async function analisar(tipo) {
 // ── GRATUITA ───────────────────────────────────────────────────────
 async function analisarFree(prompt, output) {
     setStatus("Consultando especialista...", "text-blue-400");
+    // CORREÇÃO 4: Timeout aumentado para 120 segundos
     const res = await fetch(API + "/api/analyze", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(65000)
+        signal: AbortSignal.timeout(120000)
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -317,6 +342,10 @@ async function analisarFree(prompt, output) {
 // ── PREMIUM SSE STREAM ─────────────────────────────────────────────
 async function analisarPremiumSSE(prompt, output) {
     _abortController = new AbortController();
+
+    // CORREÇÃO 5: Timeout de 5 minutos para SSE (análise com 16 agentes é longa)
+    const timeoutId = setTimeout(() => _abortController.abort(), 300000);
+
     const results = [];
     let verdictText = "";
     let analysisId = null;
@@ -324,14 +353,21 @@ async function analisarPremiumSSE(prompt, output) {
 
     setStatus("Conectando ao Swarm...", "text-blue-400");
 
-    const res = await fetch(API + "/api/analyze/premium/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify({ prompt }),
-        signal: _abortController.signal
-    });
+    let res;
+    try {
+        res = await fetch(API + "/api/analyze/premium/stream", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ prompt }),
+            signal: _abortController.signal
+        });
+    } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+    }
 
     if (!res.ok) {
+        clearTimeout(timeoutId);
         const err = await res.json().catch(() => ({}));
         if (res.status === 402) {
             output.innerHTML = `
@@ -349,30 +385,33 @@ async function analisarPremiumSSE(prompt, output) {
     const decoder = new TextDecoder();
     let buffer = "";
 
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop(); // guarda linha incompleta
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop();
 
-        for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const raw = line.slice(6).trim();
-            if (raw === "[DONE]") break;
+            for (const line of lines) {
+                if (!line.startsWith("data: ")) continue;
+                const raw = line.slice(6).trim();
+                if (raw === "[DONE]") break;
 
-            let ev;
-            try { ev = JSON.parse(raw); } catch { continue; }
+                let ev;
+                try { ev = JSON.parse(raw); } catch { continue; }
 
-            handleSSEEvent(ev, results, output);
-            if (ev.type === "verdict") { verdictText = ev.verdict; vetoTriggered = ev.veto_triggered; }
-            if (ev.type === "saved")   { analysisId = ev.analysis_id; updateUI(); }
-            if (ev.type === "error")   throw new Error(ev.message);
+                handleSSEEvent(ev, results, output);
+                if (ev.type === "verdict") { verdictText = ev.verdict; vetoTriggered = ev.veto_triggered; }
+                if (ev.type === "saved")   { analysisId = ev.analysis_id; updateUI(); }
+                if (ev.type === "error")   throw new Error(ev.message);
+            }
         }
+    } finally {
+        clearTimeout(timeoutId);
     }
 
-    // Render final
     if (verdictText) renderPremiumFinal(verdictText, results, analysisId, vetoTriggered, output);
 }
 
@@ -403,7 +442,6 @@ function handleSSEEvent(ev, results, output) {
         case "veto":
             pushLog(ev.message, "log-veto");
             results.push(ev);
-            // Banner de veto imediato
             const vetoAlert = document.createElement("div");
             vetoAlert.className = "veto-box glass p-6 rounded-2xl fade-up";
             vetoAlert.innerHTML = `
@@ -415,12 +453,20 @@ function handleSSEEvent(ev, results, output) {
             output.prepend(vetoAlert);
             break;
 
+        case "devil_thinking":
+            pushLog(ev.message, "log-judge");
+            break;
+
+        case "devil_done":
+            pushLog(ev.message, "log-done");
+            break;
+
         case "judge_thinking":
             pushLog(ev.message, "log-judge");
             break;
 
         case "verdict":
-            pushLog(ev.message, "log-verdict");
+            pushLog("⚖ Veredito gerado.", "log-verdict");
             break;
     }
 }
@@ -447,7 +493,6 @@ function renderPremiumFinal(verdict, results, analysisId, isVeto, output) {
         <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(verdict)}</div>`;
     output.appendChild(verdictCard);
 
-    // Pareceres dos especialistas em cards collapsíveis
     const agentsDone = results.filter(r => r.type === "agent_done");
     if (agentsDone.length) {
         const section = document.createElement("div");
@@ -504,7 +549,10 @@ function renderFree(data, output) {
 async function downloadPDF(id) {
     if (!token) { alert("Faça login para baixar o PDF."); return; }
     try {
-        const res = await fetch(API + `/api/report/pdf/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(API + `/api/report/pdf/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: AbortSignal.timeout(30000)
+        });
         if (!res.ok) { alert("Erro ao baixar PDF."); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
@@ -519,7 +567,10 @@ async function downloadPDF(id) {
 async function verHistorico() {
     if (!token) return;
     try {
-        const res = await fetch(API + "/api/analyses", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(API + "/api/analyses", {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: AbortSignal.timeout(20000)
+        });
         const data = await res.json();
         if (!data.length) { alert("Nenhum relatório encontrado."); return; }
         const output = document.getElementById("output-area");
@@ -545,7 +596,9 @@ async function comprar() {
     if (!token) { alert("Faça login primeiro."); showLogin(); return; }
     try {
         const res = await fetch(API + "/api/create-checkout-session", {
-            method: "POST", headers: { Authorization: `Bearer ${token}` }
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            signal: AbortSignal.timeout(20000)
         });
         const data = await res.json();
         if (res.ok && data.url) window.location.href = data.url;
@@ -564,7 +617,8 @@ async function adminAddCredits() {
         const res = await fetch(API + "/api/admin/add-credits", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
-            body: JSON.stringify({ user_id: uid, amount: 1 })
+            body: JSON.stringify({ user_id: uid, amount: 1 }),
+            signal: AbortSignal.timeout(20000)
         });
         const data = await res.json();
         if (res.ok) { alert(`✓ ${data.message}\nNovo saldo: ${data.new_balance}`); updateUI(); }
