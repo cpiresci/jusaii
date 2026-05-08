@@ -1121,6 +1121,7 @@ textarea#txt::placeholder{color:rgba(226,232,240,0.18);font-style:italic;}
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 /* ──────────────────────────────────────────────
    CANVAS STARS
@@ -1570,21 +1571,27 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
     });
   }
 
-  // ── Analysis action buttons (PDF + Share) ──
+  // ── Analysis action buttons (PDF + Share) — safe closure approach ──
   const actions = document.createElement("div");
   actions.className = "analysis-actions fade-up";
-  const hasPdf = !!analysisId;
-  actions.innerHTML = `
-    ${hasPdf ? `
-    <button class="btn-dl-pdf" onclick="downloadPDF(${analysisId})">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-      Baixar PDF
-    </button>` : ""}
-    ${!isVeto && score>0 ? `
-    <button class="btn-share-card" onclick="openShareCard(${score}, \`${(verdict||'').replace(/`/g,"'").replace(/\n/g," ").slice(0,300)}\`, \`${(tribunal||'').replace(/`/g,"'")}\`)">
-      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-      Compartilhar Card
-    </button>` : ""}`;
+
+  if(analysisId){
+    const pdfBtn = document.createElement("button");
+    pdfBtn.className = "btn-dl-pdf";
+    pdfBtn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Baixar PDF`;
+    pdfBtn.onclick = () => downloadPDF(analysisId);
+    actions.appendChild(pdfBtn);
+  }
+
+  if(!isVeto && score > 0){
+    const shareBtn = document.createElement("button");
+    shareBtn.className = "btn-share-card";
+    shareBtn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg> Compartilhar Card`;
+    const _v = verdict || "", _s = score, _t = tribunal || "";
+    shareBtn.onclick = () => openShareCard(_s, _v, _t);
+    actions.appendChild(shareBtn);
+  }
+
   out.appendChild(actions);
 }
 
@@ -1734,10 +1741,70 @@ let _adminSecret = null;
 function openAdmin(){
   document.getElementById("admin-overlay").classList.add("open");
   document.body.style.overflow="hidden";
+  const secret = _adminSecret || localStorage.getItem("admin_secret") || "";
+  if(!secret){
+    // Show inline auth form instead of prompt()
+    showAdminAuthBanner();
+    return;
+  }
   loadAdminStats();
   if(document.getElementById("tab-users").classList.contains("visible")){
     loadUsers();
   }
+}
+
+function showAdminAuthBanner(){
+  // Inject a one-time auth form into the stats section
+  const statsEl = document.getElementById("tab-stats");
+  statsEl.innerHTML = `
+    <div style="padding:32px 0;text-align:center;">
+      <div style="font-size:28px;margin-bottom:12px;">🔐</div>
+      <div style="font-size:14px;color:var(--ice);margin-bottom:6px;font-weight:600;">Autenticação Necessária</div>
+      <div style="font-size:12px;color:var(--mist);margin-bottom:20px;">Digite o ADMIN_SECRET configurado no servidor</div>
+      <input class="admin-input" id="secret-input" type="password" placeholder="ADMIN_SECRET…"
+        style="max-width:300px;margin:0 auto 12px;display:block;"
+        onkeydown="if(event.key==='Enter') submitAdminSecret()">
+      <button class="admin-btn admin-btn-purple" onclick="submitAdminSecret()" style="margin:0 auto;display:block;padding:10px 28px;">
+        Entrar
+      </button>
+      <div class="admin-msg" id="secret-err" style="max-width:300px;margin:12px auto 0;"></div>
+    </div>`;
+  // Also blank other sections stats
+  document.getElementById("tab-users").innerHTML = `<div class="users-loader" style="color:var(--mist);">Faça login no painel para ver os usuários.</div>`;
+}
+
+async function submitAdminSecret(){
+  const s = (document.getElementById("secret-input")||{}).value || "";
+  if(!s) return;
+  // Test it
+  const testRes = await fetch(API+"/api/admin/stats",{
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${s}`},
+    signal:AbortSignal.timeout(10000)
+  }).catch(()=>null);
+  if(!testRes || testRes.status === 403){
+    const errEl = document.getElementById("secret-err");
+    if(errEl){ errEl.textContent="❌ Senha incorreta."; errEl.className="admin-msg error"; errEl.style.display="block"; }
+    return;
+  }
+  _adminSecret = s;
+  localStorage.setItem("admin_secret", s);
+  // Restore stats section and load data
+  document.getElementById("tab-stats").innerHTML = `
+    <div class="stats-grid" id="admin-stats-grid">
+      <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-lbl">Usuários</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-analyses">—</div><div class="stat-lbl">Análises Hoje</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">Total Análises</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-jobs">—</div><div class="stat-lbl">Jobs Ativos</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-agents">—</div><div class="stat-lbl">Max Jobs</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-providers">—</div><div class="stat-lbl">Providers</div></div>
+    </div>`;
+  document.getElementById("tab-users").innerHTML = `
+    <div class="admin-search">
+      <input class="admin-input" id="user-search" placeholder="Buscar por e-mail ou ID..." oninput="filterUsers()">
+      <button class="admin-btn admin-btn-purple" onclick="loadUsers()">↻ Atualizar</button>
+    </div>
+    <div id="users-list"><div class="users-loader">Carregando usuários…</div></div>`;
+  loadAdminStats();
 }
 function closeAdmin(){
   document.getElementById("admin-overlay").classList.remove("open");
@@ -1764,7 +1831,8 @@ async function loadAdminStats(){
   try{
     const res=await fetch(API+"/api/admin/stats",{headers:_adminHeaders(),signal:AbortSignal.timeout(15000)});
     if(res.status===403){
-      promptAdminSecret(); return;
+      _adminSecret=null; localStorage.removeItem("admin_secret");
+      showAdminAuthBanner(); return;
     }
     const d=await res.json();
     document.getElementById("s-users").textContent=d.total_users??0;
@@ -1772,7 +1840,7 @@ async function loadAdminStats(){
     document.getElementById("s-total").textContent=d.total_analyses??0;
     document.getElementById("s-jobs").textContent=d.active_jobs??0;
     document.getElementById("s-agents").textContent=d.max_concurrent_jobs??0;
-    document.getElementById("s-providers").textContent=(d.providers||[]).join(", ").slice(0,12)||"—";
+    document.getElementById("s-providers").textContent=(d.providers||[]).length || "—";
     // Features
     const fg = document.getElementById("features-grid");
     fg.innerHTML="";
@@ -1799,7 +1867,7 @@ async function loadUsers(){
   list.innerHTML=`<div class="users-loader">⏳ Carregando...</div>`;
   try{
     const res=await fetch(API+"/api/admin/users",{headers:_adminHeaders(),signal:AbortSignal.timeout(20000)});
-    if(res.status===403){ promptAdminSecret(); return; }
+    if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
     _allUsers=await res.json();
     renderUsers(_allUsers);
   }catch(e){
@@ -1864,10 +1932,10 @@ async function adminSetCredits(op, uid){
   const url=op==="add"?"/api/admin/add-credits":"/api/admin/remove-credits";
   try{
     const res=await fetch(API+url,{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid,amount}),signal:AbortSignal.timeout(15000)});
+    if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
     const d=await res.json();
     if(res.ok){
       showUserMsg(uid,`✓ ${d.message} · Saldo: ${d.new_balance}`);
-      // Update inline
       const u=_allUsers.find(x=>x.id===uid);
       if(u){ u.premium_credits=d.new_balance; }
     }else showUserMsg(uid,d.detail||"Erro",true);
@@ -1877,6 +1945,7 @@ async function adminSetCredits(op, uid){
 async function adminResetFree(uid){
   try{
     const res=await fetch(API+"/api/admin/reset-free-credits",{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid}),signal:AbortSignal.timeout(15000)});
+    if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
     const d=await res.json();
     if(res.ok) showUserMsg(uid,"✓ "+d.message);
     else showUserMsg(uid,d.detail||"Erro",true);
@@ -1887,20 +1956,13 @@ async function adminDeleteUser(uid, email){
   if(!confirm(`Deletar permanentemente ${email} e todas as suas análises?\n\nEssa ação é irreversível.`)) return;
   try{
     const res=await fetch(API+"/api/admin/delete-user",{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid}),signal:AbortSignal.timeout(15000)});
+    if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
     const d=await res.json();
     if(res.ok){
       _allUsers=_allUsers.filter(u=>u.id!==uid);
       renderUsers(_allUsers);
     }else alert(d.detail||"Erro ao deletar");
   }catch{ alert("Erro de conexão"); }
-}
-
-function promptAdminSecret(){
-  const s=prompt("Senha admin (ADMIN_SECRET):");
-  if(!s) return;
-  _adminSecret=s;
-  localStorage.setItem("admin_secret",s);
-  loadAdminStats();
 }
 
 /* ──────────────────────────────────────────────
@@ -1954,19 +2016,28 @@ function copyShareText(){
 }
 
 async function downloadShareImg(){
-  // If html2canvas isn't available, fallback to copy
-  if(typeof html2canvas==="undefined"){
-    alert("Para salvar como imagem, tente a extensão de screenshot do navegador ou use 'Copiar Texto'.");
+  const el = document.getElementById("share-card-el");
+  if(typeof html2canvas === "undefined"){
+    alert("Erro: html2canvas não carregou. Verifique sua conexão e recarregue a página.");
     return;
   }
   try{
-    const el=document.getElementById("share-card-el");
-    const canvas=await html2canvas(el,{backgroundColor:null,scale:2});
-    const a=document.createElement("a");
-    a.href=canvas.toDataURL("image/png");
-    a.download="jusaii_score.png";
+    const canvas = await html2canvas(el, {
+      backgroundColor: "#040918",
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `jusaii_score_${Math.round(_shareData.score||0)}.png`;
+    document.body.appendChild(a);
     a.click();
-  }catch{ alert("Erro ao gerar imagem."); }
+    document.body.removeChild(a);
+  }catch(e){
+    console.error(e);
+    alert("Erro ao gerar imagem. Tente usar 'Copiar Texto'.");
+  }
 }
 
 /* ──────────────────────────────────────────────
@@ -2012,3 +2083,4 @@ updateUI();
 </script>
 </body>
 </html>
+
