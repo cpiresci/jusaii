@@ -1,649 +1,1494 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jusaii | Orquestração Jurídica Swarm IA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,700;0,800;1,800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue: #3b82f6; --blue-dark: #1e3a8a; --gold: #d97706;
-            --green: #10b981; --red: #dc2626; --bg: #020617;
-        }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; margin: 0; }
-        .glass { background: rgba(15,23,42,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-        .glass-blue { background: rgba(30,58,138,0.2); backdrop-filter: blur(20px); border: 1px solid rgba(59,130,246,0.2); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JUSAII — Quantum Legal Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   RESET & TOKENS
+══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --void:#020510;
+  --abyss:#040918;
+  --deep:#070d1f;
+  --surface:#0a1228;
+  --glass:rgba(10,18,40,0.7);
+  --blue:#2563eb;
+  --blue-bright:#3b82f6;
+  --blue-glow:rgba(37,99,235,0.35);
+  --gold:#d97706;
+  --gold-bright:#f59e0b;
+  --gold-glow:rgba(245,158,11,0.2);
+  --ice:#e2e8f0;
+  --mist:rgba(226,232,240,0.5);
+  --ghost:rgba(226,232,240,0.08);
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --border:rgba(59,130,246,0.12);
+  --border-gold:rgba(245,158,11,0.2);
+  --font-serif:'Cormorant Garamond',serif;
+  --font-sans:'Syne',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--ice);
+  font-family:var(--font-sans);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:default;
+}
+::selection{background:var(--blue);color:#fff;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px;}
 
-        /* ── Loader ─────────────────────────────── */
-        .spinner { border: 3px solid rgba(59,130,246,0.15); border-top: 3px solid var(--blue); border-radius: 50%; width: 36px; height: 36px; animation: spin 0.9s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+/* ══════════════════════════════════════════════
+   CANVAS BACKGROUND
+══════════════════════════════════════════════ */
+#bg-canvas{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
+.noise-overlay{
+  position:fixed;inset:0;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;opacity:.5;
+}
+.gradient-orb{
+  position:fixed;border-radius:50%;filter:blur(120px);
+  pointer-events:none;z-index:0;
+}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,0.15),transparent 70%);top:-200px;left:-100px;}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(217,119,6,0.08),transparent 70%);bottom:-100px;right:-100px;}
+.orb-3{width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,0.1),transparent 70%);top:40%;left:60%;}
 
-        /* ── Animações ──────────────────────────── */
-        .fade-up { animation: fadeUp 0.45s ease-out forwards; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        .pulse-dot { animation: pulseDot 1.4s ease-in-out infinite; }
-        @keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+/* ══════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════ */
+#app{
+  position:relative;z-index:10;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 20px 80px;
+}
 
-        /* ── Singularity Log ─────────────────────── */
-        #log-feed { font-family: 'Courier New', monospace; font-size: 11px; }
-        .log-thinking { color: #60a5fa; }
-        .log-done     { color: #34d399; }
-        .log-skip     { color: #64748b; }
-        .log-veto     { color: #f87171; font-weight: bold; }
-        .log-judge    { color: #fbbf24; }
-        .log-verdict  { color: #a78bfa; }
-        .log-warmup   { color: #94a3b8; font-style: italic; }
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+header{
+  width:100%;max-width:1100px;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:36px 0 32px;
+  border-bottom:1px solid var(--border);
+  position:relative;
+}
+header::after{
+  content:'';position:absolute;bottom:-1px;left:0;
+  width:120px;height:1px;
+  background:linear-gradient(90deg,var(--blue),transparent);
+}
+.logo-block{display:flex;flex-direction:column;gap:4px;}
+.logo{
+  font-family:var(--font-serif);
+  font-size:52px;font-weight:700;font-style:italic;
+  letter-spacing:-2px;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,#93c5fd 50%,var(--blue) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;
+}
+.logo-sub{
+  font-size:9px;font-weight:700;
+  letter-spacing:.55em;
+  color:rgba(226,232,240,0.25);
+  text-transform:uppercase;
+  padding-left:3px;
+}
+.header-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end;}
+.credit-badge{
+  display:flex;align-items:baseline;gap:6px;
+  padding:8px 18px;
+  background:rgba(245,158,11,0.06);
+  border:1px solid var(--border-gold);
+  border-radius:100px;
+  backdrop-filter:blur(10px);
+}
+.credit-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:rgba(245,158,11,0.5);text-transform:uppercase;}
+.credit-count{font-family:var(--font-serif);font-size:28px;font-weight:700;font-style:italic;color:var(--gold-bright);line-height:1;}
+.user-email{font-size:11px;color:rgba(226,232,240,0.3);letter-spacing:.02em;}
+.btn-auth{
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 20px;border-radius:100px;border:none;cursor:pointer;
+  transition:all .2s ease;
+}
+.btn-auth-login{background:var(--ghost);color:var(--ice);}
+.btn-auth-login:hover{background:rgba(226,232,240,0.14);}
+.btn-auth-register{background:var(--blue);color:#fff;}
+.btn-auth-register:hover{background:var(--blue-bright);box-shadow:0 0 24px var(--blue-glow);}
+.btn-auth-logout{background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
+.btn-auth-logout:hover{background:rgba(239,68,68,0.2);}
 
-        /* ── Risk badges ─────────────────────────── */
-        .risk-CRÍTICO  { background: rgba(220,38,38,0.2);  color: #fca5a5; border: 1px solid rgba(220,38,38,0.4); }
-        .risk-ALTO     { background: rgba(234,88,12,0.2);  color: #fdba74; border: 1px solid rgba(234,88,12,0.4); }
-        .risk-MÉDIO    { background: rgba(217,119,6,0.2);  color: #fcd34d; border: 1px solid rgba(217,119,6,0.4); }
-        .risk-BAIXO    { background: rgba(22,163,74,0.2);  color: #86efac; border: 1px solid rgba(22,163,74,0.4); }
-        .risk-badge    { padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+/* ══════════════════════════════════════════════
+   MAIN AREA
+══════════════════════════════════════════════ */
+main{width:100%;max-width:1100px;margin-top:56px;display:flex;flex-direction:column;gap:28px;}
 
-        /* ── Veredito ─────────────────────────────── */
-        .veredito-box { background: linear-gradient(135deg,rgba(59,130,246,0.18),rgba(37,99,235,0.08)); border-left: 4px solid var(--blue); }
-        .veto-box     { background: linear-gradient(135deg,rgba(220,38,38,0.18),rgba(185,28,28,0.08)); border-left: 4px solid var(--red); }
+/* ══════════════════════════════════════════════
+   INPUT PANEL
+══════════════════════════════════════════════ */
+.input-panel{
+  position:relative;
+  background:var(--glass);
+  backdrop-filter:blur(32px);
+  border-radius:28px;
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:border-color .3s;
+}
+.input-panel.focused{border-color:rgba(59,130,246,0.35);}
+.input-panel-glow{
+  position:absolute;inset:0;border-radius:28px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(37,99,235,0.08),transparent);
+  pointer-events:none;
+}
+.corner-mark{
+  position:absolute;width:20px;height:20px;
+  border-color:rgba(59,130,246,0.3);border-style:solid;
+  border-width:0;
+}
+.corner-mark.tl{top:12px;left:12px;border-top-width:1px;border-left-width:1px;border-top-left-radius:4px;}
+.corner-mark.tr{top:12px;right:12px;border-top-width:1px;border-right-width:1px;border-top-right-radius:4px;}
+.corner-mark.bl{bottom:12px;left:12px;border-bottom-width:1px;border-left-width:1px;border-bottom-left-radius:4px;}
+.corner-mark.br{bottom:12px;right:12px;border-bottom-width:1px;border-right-width:1px;border-bottom-right-radius:4px;}
+textarea#txt{
+  width:100%;min-height:220px;max-height:400px;
+  padding:40px 44px 32px;
+  background:transparent;border:none;outline:none;
+  font-family:var(--font-serif);
+  font-size:18px;line-height:1.75;
+  color:var(--ice);
+  resize:vertical;
+}
+textarea#txt::placeholder{color:rgba(226,232,240,0.18);font-style:italic;}
+.input-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 28px 24px;
+  border-top:1px solid var(--border);
+  flex-wrap:wrap;gap:16px;
+}
+.status-cluster{display:flex;align-items:center;gap:10px;}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulseDot 2s ease-in-out infinite;
+}
+.status-dot.loading{background:var(--blue-bright);box-shadow:0 0 8px var(--blue-bright);}
+.status-dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none;}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.85);}}
+.status-text{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(226,232,240,0.3);}
+.btn-cluster{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-action{
+  position:relative;overflow:hidden;
+  font-family:var(--font-sans);
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:12px 22px;border-radius:100px;border:none;cursor:pointer;
+  transition:all .25s ease;
+  display:flex;align-items:center;gap:7px;
+}
+.btn-action::before{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,0);
+  transition:background .2s;
+}
+.btn-action:hover::before{background:rgba(255,255,255,0.06);}
+.btn-action:disabled{opacity:.35;cursor:not-allowed;}
+.btn-free{background:rgba(59,130,246,0.12);color:var(--blue-bright);border:1px solid rgba(59,130,246,0.25);}
+.btn-free:hover:not(:disabled){border-color:rgba(59,130,246,0.5);box-shadow:0 0 20px rgba(59,130,246,0.12);}
+.btn-premium{background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.12));color:var(--gold-bright);border:1px solid var(--border-gold);}
+.btn-premium:hover:not(:disabled){border-color:rgba(245,158,11,0.45);box-shadow:0 0 24px var(--gold-glow);}
+.btn-buy{background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.08));color:#34d399;border:1px solid rgba(16,185,129,0.2);}
+.btn-buy:hover{border-color:rgba(16,185,129,0.4);box-shadow:0 0 20px rgba(16,185,129,0.1);}
 
-        /* ── Botões ───────────────────────────────── */
-        .btn-premium { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-buy     { background: linear-gradient(135deg, #10b981, #059669); }
-        .btn-veto    { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-        input::placeholder { color: rgba(148,163,184,0.4); }
-        details summary { cursor: pointer; list-style: none; }
-        details summary::-webkit-details-marker { display: none; }
-    </style>
+/* ══════════════════════════════════════════════
+   TRIBUNAL BADGE
+══════════════════════════════════════════════ */
+.tribunal-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 24px;
+  background:rgba(245,158,11,0.05);
+  border:1px solid var(--border-gold);
+  border-radius:14px;
+  font-size:11px;font-weight:600;
+  color:rgba(245,158,11,0.7);
+  letter-spacing:.08em;
+  animation:fadeUp .4s ease-out;
+}
+.tribunal-icon{font-size:16px;}
+.tribunal-name{color:var(--gold-bright);font-weight:800;}
+
+/* ══════════════════════════════════════════════
+   SINGULARITY LOG
+══════════════════════════════════════════════ */
+.log-panel{
+  background:rgba(4,9,24,0.9);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  display:none;
+}
+.log-panel.active{display:block;animation:fadeUp .35s ease-out;}
+.log-header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  background:rgba(37,99,235,0.04);
+}
+.log-title-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--blue-bright);
+  box-shadow:0 0 8px var(--blue-bright);
+  animation:pulseDot 1.5s ease-in-out infinite;
+}
+.log-title{font-size:9px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:rgba(59,130,246,0.6);}
+.log-progress-text{margin-left:auto;font-size:10px;font-family:var(--font-mono);color:rgba(226,232,240,0.3);}
+.progress-track{height:2px;background:rgba(59,130,246,0.1);position:relative;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-bright));width:0%;transition:width .5s ease;position:relative;}
+.progress-fill::after{content:'';position:absolute;right:0;top:-1px;width:4px;height:4px;background:var(--blue-bright);border-radius:50%;box-shadow:0 0 6px var(--blue-bright);}
+#log-feed{
+  padding:16px 20px;
+  max-height:280px;
+  overflow-y:auto;
+  display:flex;flex-direction:column;gap:3px;
+}
+.log-line{
+  font-family:var(--font-mono);
+  font-size:11px;line-height:1.6;
+  display:flex;gap:10px;align-items:flex-start;
+  padding:2px 0;
+  border-bottom:1px solid rgba(255,255,255,0.02);
+  animation:logIn .2s ease-out;
+}
+@keyframes logIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+.log-ts{color:rgba(226,232,240,0.18);flex-shrink:0;font-size:10px;}
+.log-msg{flex:1;}
+.log-thinking .log-msg{color:#60a5fa;}
+.log-done .log-msg{color:#34d399;}
+.log-skip .log-msg{color:#334155;}
+.log-veto .log-msg{color:#fca5a5;font-weight:500;}
+.log-judge .log-msg{color:#fbbf24;}
+.log-score .log-msg{color:#a78bfa;}
+.log-warmup .log-msg{color:#64748b;font-style:italic;}
+.log-verdict .log-msg{color:#c4b5fd;}
+
+/* ══════════════════════════════════════════════
+   SCORE RING
+══════════════════════════════════════════════ */
+.score-panel{
+  display:flex;align-items:center;gap:36px;
+  padding:32px 40px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:24px;
+  backdrop-filter:blur(20px);
+  animation:fadeUp .45s ease-out;
+}
+.score-ring-wrap{position:relative;width:120px;height:120px;flex-shrink:0;}
+.score-svg{width:120px;height:120px;transform:rotate(-90deg);}
+.score-track{fill:none;stroke:rgba(37,99,235,0.1);stroke-width:6;}
+.score-arc{
+  fill:none;stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:314;stroke-dashoffset:314;
+  transition:stroke-dashoffset 1.8s cubic-bezier(.25,.46,.45,.94);
+}
+.score-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.score-num{
+  font-family:var(--font-serif);
+  font-size:36px;font-weight:700;font-style:italic;
+  line-height:1;
+  background:linear-gradient(135deg,#fff,var(--gold-bright));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.score-label-ring{font-size:8px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(226,232,240,0.3);margin-top:2px;}
+.score-meta{flex:1;}
+.score-meta-title{
+  font-family:var(--font-serif);
+  font-size:22px;font-weight:600;
+  color:var(--ice);margin-bottom:8px;
+}
+.score-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{
+  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 12px;border-radius:100px;
+}
+.chip-green{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.2);}
+.chip-amber{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);}
+.chip-red{background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
+.chip-blue{background:rgba(59,130,246,0.12);color:#93c5fd;border:1px solid rgba(59,130,246,0.2);}
+.chip-muted{background:rgba(226,232,240,0.05);color:rgba(226,232,240,0.4);border:1px solid rgba(226,232,240,0.08);}
+.score-desc{font-size:13px;line-height:1.65;color:rgba(226,232,240,0.55);}
+
+/* ══════════════════════════════════════════════
+   VERDICT CARD
+══════════════════════════════════════════════ */
+.verdict-card{
+  position:relative;overflow:hidden;
+  border-radius:24px;
+  padding:40px 44px;
+  backdrop-filter:blur(20px);
+  animation:verdictReveal .6s cubic-bezier(.16,1,.3,1);
+}
+@keyframes verdictReveal{
+  from{opacity:0;transform:translateY(20px) scale(.98);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.verdict-card.favorable{
+  background:linear-gradient(145deg,rgba(37,99,235,0.14),rgba(7,13,31,0.9));
+  border:1px solid rgba(59,130,246,0.25);
+}
+.verdict-card.favorable::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);
+}
+.verdict-card.veto{
+  background:linear-gradient(145deg,rgba(239,68,68,0.14),rgba(7,13,31,0.9));
+  border:1px solid rgba(239,68,68,0.25);
+}
+.verdict-card.veto::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--red),transparent);
+}
+.verdict-header{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;margin-bottom:28px;
+}
+.verdict-title-group{display:flex;align-items:center;gap:14px;}
+.verdict-icon{font-size:28px;line-height:1;}
+.verdict-title{
+  font-family:var(--font-serif);
+  font-size:26px;font-weight:700;font-style:italic;
+  color:var(--ice);letter-spacing:-.5px;
+}
+.verdict-subtitle{
+  font-size:10px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(226,232,240,0.3);
+  margin-top:2px;
+}
+.btn-pdf{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:10px 20px;border-radius:100px;border:none;cursor:pointer;
+  background:rgba(16,185,129,0.12);
+  color:#34d399;
+  border:1px solid rgba(16,185,129,0.25);
+  transition:all .2s;
+  display:flex;align-items:center;gap:7px;
+}
+.btn-pdf:hover{background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5);}
+.verdict-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(226,232,240,0.1) 20%,rgba(226,232,240,0.1) 80%,transparent);
+  margin:24px 0;
+}
+.verdict-text{
+  font-family:var(--font-serif);
+  font-size:16px;line-height:2;
+  color:rgba(226,232,240,0.85);
+  white-space:pre-wrap;
+}
+
+/* ══════════════════════════════════════════════
+   AGENT GRID
+══════════════════════════════════════════════ */
+.agents-section{animation:fadeUp .5s ease-out .1s both;}
+.agents-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.section-title{
+  font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(226,232,240,0.25);
+}
+.agents-count{
+  font-family:var(--font-mono);
+  font-size:11px;color:rgba(59,130,246,0.5);
+}
+.agents-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:12px;
+}
+.agent-card{
+  background:rgba(10,18,40,0.7);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  transition:border-color .2s,transform .2s;
+  animation:fadeUp .4s ease-out both;
+}
+.agent-card:nth-child(n){animation-delay:calc(var(--i,0) * .04s);}
+.agent-card:hover{border-color:rgba(59,130,246,0.25);transform:translateY(-2px);}
+.agent-summary{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;
+  cursor:pointer;
+  user-select:none;
+  transition:background .15s;
+}
+.agent-summary:hover{background:rgba(59,130,246,0.04);}
+.agent-num{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:500;
+  color:rgba(59,130,246,0.45);
+  flex-shrink:0;width:22px;
+}
+.agent-name{
+  flex:1;
+  font-size:12px;font-weight:700;
+  color:rgba(226,232,240,0.85);
+  letter-spacing:.01em;
+}
+.agent-conf{
+  font-family:var(--font-mono);
+  font-size:10px;color:rgba(226,232,240,0.25);
+  flex-shrink:0;
+}
+.conf-val{color:var(--gold-bright);font-weight:500;}
+.risk-pill{
+  font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 9px;border-radius:100px;flex-shrink:0;
+}
+.risk-CRÍTICO{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+.risk-ALTO{background:rgba(249,115,22,0.15);color:#fdba74;border:1px solid rgba(249,115,22,0.3);}
+.risk-MÉDIO{background:rgba(245,158,11,0.12);color:#fcd34d;border:1px solid rgba(245,158,11,0.25);}
+.risk-BAIXO{background:rgba(16,185,129,0.12);color:#86efac;border:1px solid rgba(16,185,129,0.25);}
+.agent-chevron{color:rgba(226,232,240,0.2);font-size:10px;transition:transform .2s;flex-shrink:0;}
+.agent-card.open .agent-chevron{transform:rotate(180deg);}
+.agent-body{
+  display:none;padding:0 16px 16px;
+  border-top:1px solid var(--border);
+}
+.agent-card.open .agent-body{display:block;animation:fadeUp .2s ease-out;}
+.agent-specialty{
+  font-size:10px;font-style:italic;font-family:var(--font-serif);
+  color:rgba(226,232,240,0.3);
+  margin:12px 0 10px;
+}
+.agent-risk-detail{
+  font-size:10px;font-family:var(--font-mono);
+  color:rgba(239,68,68,0.6);
+  margin-bottom:10px;
+  padding:6px 10px;
+  background:rgba(239,68,68,0.05);
+  border-left:2px solid rgba(239,68,68,0.3);
+  border-radius:0 6px 6px 0;
+}
+.agent-analysis{
+  font-family:var(--font-serif);
+  font-size:14px;line-height:1.85;
+  color:rgba(226,232,240,0.72);
+  white-space:pre-wrap;
+}
+.agent-duration{
+  margin-top:12px;
+  font-family:var(--font-mono);
+  font-size:9px;color:rgba(226,232,240,0.18);
+  text-align:right;
+}
+
+/* ══════════════════════════════════════════════
+   FREE RESULT
+══════════════════════════════════════════════ */
+.free-card{
+  padding:36px 40px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:24px;
+  backdrop-filter:blur(20px);
+  animation:fadeUp .45s ease-out;
+}
+.free-label{
+  font-size:9px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(59,130,246,0.5);margin-bottom:20px;
+}
+.free-verdict{
+  font-family:var(--font-serif);
+  font-size:17px;line-height:1.9;
+  color:rgba(226,232,240,0.85);
+  white-space:pre-wrap;
+  margin-bottom:24px;
+}
+.free-divider{
+  height:1px;
+  background:var(--border);
+  margin:24px 0;
+}
+.free-analysis-label{
+  font-size:11px;font-weight:700;letter-spacing:.12em;
+  color:rgba(59,130,246,0.5);text-transform:uppercase;
+  margin-bottom:12px;
+}
+.free-analysis-text{
+  font-family:var(--font-serif);
+  font-size:14px;line-height:1.85;
+  color:rgba(226,232,240,0.6);
+  white-space:pre-wrap;
+}
+.upgrade-callout{
+  margin-top:28px;padding:28px 32px;
+  background:rgba(245,158,11,0.04);
+  border:1px solid var(--border-gold);
+  border-radius:16px;
+}
+.upgrade-title{
+  font-family:var(--font-serif);
+  font-size:20px;font-weight:600;font-style:italic;
+  color:var(--gold-bright);margin-bottom:6px;
+}
+.upgrade-desc{font-size:12px;color:rgba(226,232,240,0.45);margin-bottom:16px;line-height:1.6;}
+.upgrade-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ══════════════════════════════════════════════
+   LOADING STATE
+══════════════════════════════════════════════ */
+.loader-card{
+  padding:60px 40px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:24px;
+  text-align:center;
+  animation:fadeUp .35s ease-out;
+}
+.loader-ring{
+  width:56px;height:56px;
+  border:2px solid rgba(59,130,246,0.1);
+  border-top:2px solid var(--blue-bright);
+  border-radius:50%;
+  animation:spin .9s linear infinite;
+  margin:0 auto 20px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text{
+  font-family:var(--font-serif);
+  font-size:18px;font-style:italic;
+  color:rgba(226,232,240,0.5);
+}
+
+/* ══════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(2,5,16,0.85);
+  backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.active{display:flex;animation:fadeIn .2s ease-out;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-box{
+  background:rgba(10,18,40,0.98);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:44px 40px;
+  width:100%;max-width:400px;
+  animation:modalIn .3s cubic-bezier(.16,1,.3,1);
+  position:relative;
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.95);}to{opacity:1;transform:none;}}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--ghost);border:none;cursor:pointer;
+  color:rgba(226,232,240,0.4);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-close:hover{background:rgba(226,232,240,0.1);color:var(--ice);}
+.modal-title{
+  font-family:var(--font-serif);
+  font-size:32px;font-weight:700;font-style:italic;
+  margin-bottom:28px;letter-spacing:-.5px;
+}
+.modal-input{
+  width:100%;padding:13px 16px;
+  background:rgba(226,232,240,0.04);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--ice);font-family:var(--font-sans);font-size:14px;
+  outline:none;
+  transition:border-color .2s;
+  margin-bottom:12px;
+}
+.modal-input:focus{border-color:rgba(59,130,246,0.4);}
+.modal-input::placeholder{color:rgba(226,232,240,0.2);}
+.modal-submit{
+  width:100%;padding:14px;margin-top:4px;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:12px;cursor:pointer;
+  font-family:var(--font-sans);font-size:12px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  transition:all .2s;
+}
+.modal-submit:hover{background:var(--blue-bright);box-shadow:0 0 28px var(--blue-glow);}
+.modal-cancel{
+  width:100%;padding:12px;margin-top:10px;
+  background:transparent;color:rgba(226,232,240,0.3);
+  border:none;border-radius:12px;cursor:pointer;
+  font-size:12px;font-weight:600;transition:color .15s;
+}
+.modal-cancel:hover{color:rgba(226,232,240,0.7);}
+.modal-error{
+  font-size:12px;color:#fca5a5;
+  padding:10px 14px;
+  background:rgba(239,68,68,0.08);
+  border:1px solid rgba(239,68,68,0.2);
+  border-radius:8px;margin-top:10px;display:none;
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════ */
+.admin-fab{
+  position:fixed;bottom:28px;right:28px;z-index:50;
+  display:none;flex-direction:column;gap:8px;
+}
+.admin-fab.visible{display:flex;}
+.fab-btn{
+  padding:10px 18px;border-radius:100px;border:none;cursor:pointer;
+  font-size:11px;font-weight:700;letter-spacing:.06em;
+  transition:all .2s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+.fab-admin{background:rgba(139,92,246,0.8);color:#fff;}
+.fab-admin:hover{background:rgba(139,92,246,1);}
+.fab-hist{background:rgba(30,41,59,0.9);color:var(--ice);}
+.fab-hist:hover{background:rgba(51,65,85,0.9);}
+
+/* ══════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════ */
+.hidden{display:none!important;}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.fade-up{animation:fadeUp .45s ease-out both;}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:680px){
+  .logo{font-size:38px;}
+  .verdict-card{padding:28px 24px;}
+  .score-panel{flex-direction:column;align-items:flex-start;gap:20px;padding:24px;}
+  .agents-grid{grid-template-columns:1fr;}
+  .input-footer{flex-direction:column;align-items:flex-start;}
+  .btn-cluster{width:100%;}
+  .btn-action{flex:1;justify-content:center;}
+  textarea#txt{padding:28px 24px 20px;}
+}
+
+/* Scanning line effect on log panel */
+.log-panel::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(59,130,246,0.4),transparent);
+  animation:scanLine 3s ease-in-out infinite;
+  pointer-events:none;
+}
+.log-panel{position:relative;}
+@keyframes scanLine{
+  0%{top:56px;opacity:0;}
+  10%{opacity:1;}
+  90%{opacity:1;}
+  100%{top:calc(100% - 2px);opacity:0;}
+}
+</style>
 </head>
-<body class="flex flex-col items-center p-4 md:p-10">
+<body>
 
-    <!-- HEADER -->
-    <header class="w-full max-w-5xl flex justify-between items-center mb-10 border-b border-white/5 pb-7">
-        <div>
-            <h1 class="text-4xl font-black italic tracking-tighter text-blue-500 uppercase select-none">Jusaii</h1>
-            <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] font-bold">Swarm Intelligence Jurídica</p>
+<!-- BACKGROUNDS -->
+<canvas id="bg-canvas"></canvas>
+<div class="noise-overlay"></div>
+<div class="gradient-orb orb-1"></div>
+<div class="gradient-orb orb-2"></div>
+<div class="gradient-orb orb-3"></div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo">Jusaii</div>
+      <div class="logo-sub">Quantum Legal Intelligence</div>
+    </div>
+    <div class="header-right">
+      <div class="credit-badge">
+        <span class="credit-label">Premium</span>
+        <span class="credit-count" id="p-count">—</span>
+      </div>
+      <span class="user-email hidden" id="user-email"></span>
+      <div id="auth-buttons">
+        <button class="btn-auth btn-auth-login" onclick="showLogin()">Login</button>
+        <button class="btn-auth btn-auth-register" onclick="showRegister()">Registrar</button>
+      </div>
+      <div id="logout-btn" class="hidden">
+        <button class="btn-auth btn-auth-logout" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- INPUT PANEL -->
+    <div class="input-panel" id="input-panel">
+      <div class="input-panel-glow"></div>
+      <div class="corner-mark tl"></div>
+      <div class="corner-mark tr"></div>
+      <div class="corner-mark bl"></div>
+      <div class="corner-mark br"></div>
+      <textarea id="txt"
+        placeholder="Descreva os fatos do caso jurídico com o máximo de detalhes...&#10;&#10;Exemplo: Fui demitido sem justa causa após 3 anos de empresa e não recebi FGTS nem aviso prévio indenizado. O que posso fazer?"></textarea>
+      <div class="input-footer">
+        <div class="status-cluster">
+          <div class="status-dot" id="st-dot"></div>
+          <span class="status-text" id="st-msg">Swarm Online</span>
         </div>
-        <div class="flex gap-3 items-center flex-wrap justify-end">
-            <div class="glass-blue px-4 py-2 rounded-2xl flex items-center gap-2">
-                <span class="text-[10px] font-bold opacity-60 uppercase">Premium:</span>
-                <span id="p-count" class="font-black text-white italic text-xl">--</span>
-            </div>
-            <span id="user-email" class="text-xs text-slate-400 hidden"></span>
-            <div id="auth-buttons" class="flex gap-2">
-                <button onclick="showLogin()" class="text-sm bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20 transition">Login</button>
-                <button onclick="showRegister()" class="text-sm bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-500 transition">Registrar</button>
-            </div>
-            <div id="logout-button" class="hidden">
-                <button onclick="logout()" class="text-sm bg-red-600/20 px-4 py-2 rounded-xl hover:bg-red-600/40 transition">Sair</button>
-            </div>
+        <div class="btn-cluster">
+          <button class="btn-action btn-free" id="btn-free" onclick="analisar('free')">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Análise Gratuita
+          </button>
+          <button class="btn-action btn-premium" id="btn-premium" onclick="analisar('premium')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Swarm Premium — 16 Esp.
+          </button>
+          <button class="btn-action btn-buy" onclick="comprar()">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Comprar — R$&nbsp;19,90
+          </button>
         </div>
-    </header>
-
-    <!-- MAIN -->
-    <main class="w-full max-w-4xl space-y-6">
-
-        <!-- INPUT -->
-        <section class="glass rounded-[2.5rem] p-2 shadow-2xl">
-            <textarea id="txt-input"
-                class="w-full h-56 p-8 bg-transparent border-none outline-none text-base leading-relaxed placeholder:opacity-30 resize-none text-white"
-                placeholder="Descreva os fatos do caso jurídico com o máximo de detalhes...&#10;&#10;Ex: Fui demitido sem justa causa após 3 anos e não recebi FGTS nem aviso prévio..."></textarea>
-            <div class="p-5 flex flex-col md:flex-row justify-between items-center border-t border-white/5 gap-4">
-                <div class="flex items-center gap-2">
-                    <div id="status-dot" class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
-                    <span id="st-msg" class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Swarm Online</span>
-                </div>
-                <div class="flex gap-3 flex-wrap justify-center">
-                    <button onclick="analisar('free')" id="btn-free"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
-                        ⚡ Análise Gratuita
-                    </button>
-                    <button onclick="analisar('premium')" id="btn-premium"
-                        class="btn-premium hover:opacity-90 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition disabled:opacity-40">
-                        ⭐ Swarm Premium (16 Esp.)
-                    </button>
-                    <button onclick="comprar()" id="btn-buy"
-                        class="btn-buy hover:opacity-90 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition">
-                        🛒 Comprar (R$ 19,90)
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- SINGULARITY LOG (SSE Stream) -->
-        <div id="singularity-panel" class="hidden glass rounded-3xl overflow-hidden">
-            <div class="flex items-center gap-3 px-6 py-4 border-b border-white/5">
-                <div class="w-2 h-2 bg-blue-400 rounded-full pulse-dot"></div>
-                <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Singularity Log — Rede de Agentes</span>
-                <span id="agent-counter" class="ml-auto text-xs text-slate-500"></span>
-            </div>
-            <div id="log-feed" class="p-5 max-h-72 overflow-y-auto space-y-1 leading-relaxed"></div>
-        </div>
-
-        <!-- OUTPUT PRINCIPAL -->
-        <div id="output-area" class="space-y-4 pb-32"></div>
-
-    </main>
-
-    <!-- MODAL LOGIN -->
-    <div id="login-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
-        <div class="glass p-8 rounded-2xl w-full max-w-sm">
-            <h2 class="text-2xl font-bold mb-6">Entrar</h2>
-            <input type="email" id="login-email" placeholder="Email"
-                class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white outline-none border border-white/10 focus:border-blue-500">
-            <input type="password" id="login-password" placeholder="Senha"
-                class="w-full p-3 rounded-xl bg-white/10 mb-5 text-white outline-none border border-white/10 focus:border-blue-500">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Entrar</button>
-            <button onclick="closeModals()" class="w-full mt-3 text-sm opacity-50 hover:opacity-100 transition">Cancelar</button>
-            <p id="login-error" class="text-red-400 text-sm mt-3 hidden"></p>
-        </div>
+      </div>
     </div>
 
-    <!-- MODAL REGISTER -->
-    <div id="register-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 p-4">
-        <div class="glass p-8 rounded-2xl w-full max-w-sm">
-            <h2 class="text-2xl font-bold mb-6">Criar Conta</h2>
-            <input type="email" id="reg-email" placeholder="Email"
-                class="w-full p-3 rounded-xl bg-white/10 mb-3 text-white outline-none border border-white/10 focus:border-blue-500">
-            <input type="password" id="reg-password" placeholder="Senha"
-                class="w-full p-3 rounded-xl bg-white/10 mb-5 text-white outline-none border border-white/10 focus:border-blue-500">
-            <button onclick="register()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition">Criar conta</button>
-            <button onclick="closeModals()" class="w-full mt-3 text-sm opacity-50 hover:opacity-100 transition">Cancelar</button>
-            <p id="reg-error" class="text-red-400 text-sm mt-3 hidden"></p>
-        </div>
+    <!-- TRIBUNAL BAR -->
+    <div class="tribunal-bar hidden" id="tribunal-bar">
+      <span class="tribunal-icon">⚖</span>
+      <span>Tribunal detectado:</span>
+      <span class="tribunal-name" id="tribunal-name">—</span>
+      <span style="color:rgba(226,232,240,0.3);font-size:10px;margin-left:4px;" id="state-name"></span>
     </div>
 
-    <!-- ADMIN PANEL -->
-    <div id="admin-panel" class="hidden fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-        <button onclick="adminAddCredits()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">👑 Admin +Crédito</button>
-        <button onclick="verHistorico()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-full shadow-lg text-sm transition">📋 Histórico</button>
+    <!-- SINGULARITY LOG -->
+    <div class="log-panel" id="log-panel">
+      <div class="log-header">
+        <div class="log-title-dot"></div>
+        <span class="log-title">Singularity Log — Rede Swarm</span>
+        <span class="log-progress-text" id="log-counter"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="log-progress"></div></div>
+      <div id="log-feed"></div>
     </div>
+
+    <!-- OUTPUT -->
+    <div id="output"></div>
+
+  </main>
+</div>
+
+<!-- MODAIS -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModals()">✕</button>
+    <div class="modal-title">Entrar</div>
+    <input class="modal-input" type="email" id="login-email" placeholder="seu@email.com">
+    <input class="modal-input" type="password" id="login-pw" placeholder="Senha">
+    <button class="modal-submit" onclick="login()">Entrar</button>
+    <button class="modal-cancel" onclick="closeModals()">Cancelar</button>
+    <div class="modal-error" id="login-err"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-register">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModals()">✕</button>
+    <div class="modal-title">Criar Conta</div>
+    <input class="modal-input" type="email" id="reg-email" placeholder="seu@email.com">
+    <input class="modal-input" type="password" id="reg-pw" placeholder="Senha (mín. 8 caracteres)">
+    <button class="modal-submit" onclick="register()">Criar conta</button>
+    <button class="modal-cancel" onclick="closeModals()">Cancelar</button>
+    <div class="modal-error" id="reg-err"></div>
+  </div>
+</div>
+
+<!-- ADMIN FAB -->
+<div class="admin-fab" id="admin-fab">
+  <button class="fab-btn fab-admin" onclick="adminAddCredits()">👑 Admin</button>
+  <button class="fab-btn fab-hist" onclick="verHistorico()">📋 Histórico</button>
+</div>
 
 <script>
-// ── CORREÇÃO 1: URL correta do backend ────────────────────────────
-const API = "https://jusaii-app.onrender.com";
+/* ──────────────────────────────────────────────
+   CANVAS STARS
+────────────────────────────────────────────── */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], links = [];
+  const N = 80;
 
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(let i=0;i<N;i++){
+    stars.push({
+      x:Math.random()*window.innerWidth,
+      y:Math.random()*window.innerHeight,
+      r:Math.random()*.9+.2,
+      vx:(Math.random()-.5)*.12,
+      vy:(Math.random()-.5)*.12,
+      o:Math.random()*.5+.1
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Stars
+    stars.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      if(s.x<0)s.x=W; if(s.x>W)s.x=0;
+      if(s.y<0)s.y=H; if(s.y>H)s.y=0;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(148,163,184,${s.o})`;
+      ctx.fill();
+    });
+    // Links
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=stars[i].x-stars[j].x;
+        const dy=stars[i].y-stars[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<140){
+          ctx.beginPath();
+          ctx.moveTo(stars[i].x,stars[i].y);
+          ctx.lineTo(stars[j].x,stars[j].y);
+          ctx.strokeStyle=`rgba(37,99,235,${.06*(1-dist/140)})`;
+          ctx.lineWidth=.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ──────────────────────────────────────────────
+   CONSTANTS & STATE
+────────────────────────────────────────────── */
+const API = "https://jusaii-app.onrender.com";
 let token = localStorage.getItem("token");
 let userId = null;
-let _abortController = null;
+let _agentDone = 0, _agentTotal = 0;
 
-// ── UI ─────────────────────────────────────────────────────────────
-function updateUI() {
-    if (token) {
-        document.getElementById("auth-buttons").classList.add("hidden");
-        document.getElementById("logout-button").classList.remove("hidden");
-        fetch(API + "/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById("p-count").innerText = data.premium_credits ?? 0;
-                document.getElementById("user-email").innerText = data.email || "";
-                document.getElementById("user-email").classList.remove("hidden");
-                userId = data.id;
-                if (data.is_admin) document.getElementById("admin-panel").classList.remove("hidden");
-            })
-            .catch(() => { localStorage.removeItem("token"); token = null; updateUI(); });
-    } else {
-        document.getElementById("auth-buttons").classList.remove("hidden");
-        document.getElementById("logout-button").classList.add("hidden");
-        document.getElementById("user-email").classList.add("hidden");
-        document.getElementById("p-count").innerText = "--";
-        document.getElementById("admin-panel").classList.add("hidden");
-    }
+/* ──────────────────────────────────────────────
+   UI UTILITIES
+────────────────────────────────────────────── */
+function setStatus(msg, state="idle"){
+  const dot = document.getElementById("st-dot");
+  const txt = document.getElementById("st-msg");
+  txt.textContent = msg;
+  dot.className = "status-dot" + (state==="loading"?" loading":state==="error"?" error":"");
 }
 
-function setStatus(msg, cls = "text-slate-500") {
-    const el = document.getElementById("st-msg");
-    el.innerText = msg;
-    el.className = `text-[10px] uppercase font-bold tracking-widest ${cls}`;
+function setLoading(on){
+  document.getElementById("btn-free").disabled = on;
+  document.getElementById("btn-premium").disabled = on;
+  setStatus(on?"Processando...":"Swarm Online", on?"loading":"idle");
 }
 
-function setLoading(on) {
-    document.getElementById("btn-free").disabled = on;
-    document.getElementById("btn-premium").disabled = on;
-    setStatus(on ? "Processando..." : "Swarm Online", on ? "text-blue-400" : "text-slate-500");
+function updateUI(){
+  if(token){
+    document.getElementById("auth-buttons").classList.add("hidden");
+    document.getElementById("logout-btn").classList.remove("hidden");
+    fetch(API+"/api/auth/me",{headers:{Authorization:`Bearer ${token}`}})
+      .then(r=>r.json())
+      .then(d=>{
+        document.getElementById("p-count").textContent = d.premium_credits ?? 0;
+        const em = document.getElementById("user-email");
+        em.textContent = d.email||"";
+        em.classList.remove("hidden");
+        userId = d.id;
+        if(d.is_admin) document.getElementById("admin-fab").classList.add("visible");
+      })
+      .catch(()=>{ localStorage.removeItem("token"); token=null; updateUI(); });
+  } else {
+    document.getElementById("auth-buttons").classList.remove("hidden");
+    document.getElementById("logout-btn").classList.add("hidden");
+    document.getElementById("user-email").classList.add("hidden");
+    document.getElementById("p-count").textContent = "—";
+    document.getElementById("admin-fab").classList.remove("visible");
+  }
 }
 
-// ── SINGULARITY LOG ────────────────────────────────────────────────
-let _agentDone = 0;
-let _agentTotal = 0;
+/* ──────────────────────────────────────────────
+   INPUT FOCUS EFFECT
+────────────────────────────────────────────── */
+document.getElementById("txt").addEventListener("focus",()=>{
+  document.getElementById("input-panel").classList.add("focused");
+});
+document.getElementById("txt").addEventListener("blur",()=>{
+  document.getElementById("input-panel").classList.remove("focused");
+});
 
-function resetLog() {
-    document.getElementById("log-feed").innerHTML = "";
-    document.getElementById("singularity-panel").classList.add("hidden");
-    document.getElementById("agent-counter").innerText = "";
-    _agentDone = 0; _agentTotal = 0;
+/* ──────────────────────────────────────────────
+   LOG
+────────────────────────────────────────────── */
+function resetLog(){
+  document.getElementById("log-feed").innerHTML="";
+  document.getElementById("log-panel").classList.remove("active");
+  document.getElementById("log-counter").textContent="";
+  document.getElementById("log-progress").style.width="0%";
+  document.getElementById("tribunal-bar").classList.add("hidden");
+  _agentDone=0; _agentTotal=0;
 }
 
-function pushLog(msg, cls = "log-thinking") {
-    const panel = document.getElementById("singularity-panel");
-    panel.classList.remove("hidden");
-    const feed = document.getElementById("log-feed");
-    const line = document.createElement("div");
-    const ts = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    line.className = cls;
-    line.innerHTML = `<span class="opacity-40">[${ts}]</span> ${escHtml(msg)}`;
-    feed.appendChild(line);
-    feed.scrollTop = feed.scrollHeight;
+function pushLog(msg, cls="log-thinking"){
+  const panel = document.getElementById("log-panel");
+  panel.classList.add("active");
+  const feed = document.getElementById("log-feed");
+  const ts = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const line = document.createElement("div");
+  line.className = `log-line ${cls}`;
+  line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-msg">${esc(msg)}</span>`;
+  feed.appendChild(line);
+  feed.scrollTop = feed.scrollHeight;
 }
 
-function updateCounter() {
-    const el = document.getElementById("agent-counter");
-    if (_agentTotal > 0) el.innerText = `${_agentDone}/${_agentTotal} concluídos`;
+function updateProgress(){
+  const pct = _agentTotal>0 ? (_agentDone/_agentTotal)*100 : 0;
+  document.getElementById("log-progress").style.width = pct+"%";
+  document.getElementById("log-counter").textContent =
+    _agentTotal>0 ? `${_agentDone} / ${_agentTotal} concluídos` : "";
 }
 
-// ── CORREÇÃO 2: Warm-up do servidor antes da análise ──────────────
-async function warmUpServer() {
-    try {
-        setStatus("Acordando servidor...", "text-slate-400");
-        pushLog("🔄 Verificando servidor — aguarde...", "log-warmup");
-        await fetch(API + "/", { signal: AbortSignal.timeout(15000) });
-        pushLog("✅ Servidor ativo.", "log-warmup");
-    } catch {
-        pushLog("⚠ Servidor demorou a responder, continuando...", "log-warmup");
-    }
-}
-
-// ── AUTH ───────────────────────────────────────────────────────────
-async function login() {
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-    const errEl = document.getElementById("login-error");
-    errEl.classList.add("hidden");
-    if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
-    try {
-        const res = await fetch(API + "/api/auth/login", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-            signal: AbortSignal.timeout(20000)
-        });
-        const data = await res.json();
-        if (res.ok) { token = data.token; localStorage.setItem("token", token); closeModals(); updateUI(); }
-        else showErr(errEl, data.detail || data.error || "Erro no login");
-    } catch { showErr(errEl, "Erro de conexão com o servidor."); }
-}
-
-async function register() {
-    const email = document.getElementById("reg-email").value.trim();
-    const password = document.getElementById("reg-password").value;
-    const errEl = document.getElementById("reg-error");
-    errEl.classList.add("hidden");
-    if (!email || !password) { showErr(errEl, "Preencha email e senha."); return; }
-    try {
-        const res = await fetch(API + "/api/auth/register", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-            signal: AbortSignal.timeout(20000)
-        });
-        const data = await res.json();
-        if (res.ok) {
-            closeModals(); showLogin();
-            document.getElementById("login-email").value = email;
-            alert("Conta criada! Você tem 5 análises gratuitas.");
-        } else showErr(errEl, data.detail || "Erro ao criar conta");
-    } catch { showErr(errEl, "Erro de conexão."); }
-}
-
-function logout() {
-    localStorage.removeItem("token"); token = null; userId = null;
-    document.getElementById("output-area").innerHTML = "";
-    resetLog(); updateUI();
-}
-
-// ── ANÁLISE PRINCIPAL ──────────────────────────────────────────────
-async function analisar(tipo) {
-    const prompt = document.getElementById("txt-input").value.trim();
-    if (!prompt || prompt.length < 20) { alert("Descreva o caso com pelo menos 20 caracteres."); return; }
-    if (tipo === "premium" && !token) { alert("Faça login para usar o relatório premium."); showLogin(); return; }
-
-    const output = document.getElementById("output-area");
-    output.innerHTML = "";
-    resetLog();
-    setLoading(true);
-
-    try {
-        // CORREÇÃO 3: Warm-up antes de qualquer análise
-        await warmUpServer();
-
-        if (tipo === "free") {
-            await analisarFree(prompt, output);
-        } else {
-            await analisarPremiumSSE(prompt, output);
-        }
-    } catch (err) {
-        const msg = err.name === "TimeoutError"
-            ? "O servidor demorou muito para responder. Tente novamente em instantes."
-            : (err.message || "Erro desconhecido");
-        output.innerHTML = `
-            <div class="glass p-8 rounded-2xl text-center fade-up">
-                <p class="text-red-400 font-bold text-lg">❌ ${escHtml(msg)}</p>
-                <p class="text-slate-500 text-sm mt-2">O servidor gratuito pode estar acordando. Aguarde 30 segundos e tente novamente.</p>
-            </div>`;
-    } finally {
-        setLoading(false);
-    }
-}
-
-// ── GRATUITA ───────────────────────────────────────────────────────
-async function analisarFree(prompt, output) {
-    setStatus("Consultando especialista...", "text-blue-400");
-    // CORREÇÃO 4: Timeout aumentado para 120 segundos
-    const res = await fetch(API + "/api/analyze", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(120000)
+/* ──────────────────────────────────────────────
+   AUTH
+────────────────────────────────────────────── */
+async function login(){
+  const email = document.getElementById("login-email").value.trim();
+  const pw    = document.getElementById("login-pw").value;
+  const errEl = document.getElementById("login-err");
+  errEl.style.display="none";
+  if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
+  try{
+    const res = await fetch(API+"/api/auth/login",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email,password:pw}),
+      signal:AbortSignal.timeout(20000)
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || `Erro ${res.status}`);
-    }
-    const data = await res.json();
-    renderFree(data, output);
+    const d = await res.json();
+    if(res.ok){ token=d.token; localStorage.setItem("token",token); closeModals(); updateUI(); }
+    else showModalErr(errEl, d.detail||"Credenciais inválidas");
+  }catch{ showModalErr(errEl,"Erro de conexão."); }
 }
 
-// ── PREMIUM SSE STREAM ─────────────────────────────────────────────
-async function analisarPremiumSSE(prompt, output) {
-    _abortController = new AbortController();
-
-    // CORREÇÃO 5: Timeout de 5 minutos para SSE (análise com 16 agentes é longa)
-    const timeoutId = setTimeout(() => _abortController.abort(), 300000);
-
-    const results = [];
-    let verdictText = "";
-    let analysisId = null;
-    let vetoTriggered = false;
-
-    setStatus("Conectando ao Swarm...", "text-blue-400");
-
-    let res;
-    try {
-        res = await fetch(API + "/api/analyze/premium/stream", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-            body: JSON.stringify({ prompt }),
-            signal: _abortController.signal
-        });
-    } catch (err) {
-        clearTimeout(timeoutId);
-        throw err;
-    }
-
-    if (!res.ok) {
-        clearTimeout(timeoutId);
-        const err = await res.json().catch(() => ({}));
-        if (res.status === 402) {
-            output.innerHTML = `
-                <div class="glass p-8 rounded-2xl text-center fade-up">
-                    <p class="text-yellow-400 text-lg font-bold mb-2">⚠ Sem créditos premium</p>
-                    <p class="text-slate-400 mb-4">Adquira um relatório para continuar.</p>
-                    <button onclick="comprar()" class="btn-buy px-8 py-3 rounded-xl font-bold text-white">🛒 Comprar — R$ 19,90</button>
-                </div>`;
-            return;
-        }
-        throw new Error(err.detail || `Erro ${res.status}`);
-    }
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop();
-
-            for (const line of lines) {
-                if (!line.startsWith("data: ")) continue;
-                const raw = line.slice(6).trim();
-                if (raw === "[DONE]") break;
-
-                let ev;
-                try { ev = JSON.parse(raw); } catch { continue; }
-
-                handleSSEEvent(ev, results, output);
-                if (ev.type === "verdict") { verdictText = ev.verdict; vetoTriggered = ev.veto_triggered; }
-                if (ev.type === "saved")   { analysisId = ev.analysis_id; updateUI(); }
-                if (ev.type === "error")   throw new Error(ev.message);
-            }
-        }
-    } finally {
-        clearTimeout(timeoutId);
-    }
-
-    if (verdictText) renderPremiumFinal(verdictText, results, analysisId, vetoTriggered, output);
+async function register(){
+  const email = document.getElementById("reg-email").value.trim();
+  const pw    = document.getElementById("reg-pw").value;
+  const errEl = document.getElementById("reg-err");
+  errEl.style.display="none";
+  if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
+  try{
+    const res = await fetch(API+"/api/auth/register",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email,password:pw}),
+      signal:AbortSignal.timeout(20000)
+    });
+    const d = await res.json();
+    if(res.ok){
+      closeModals(); showLogin();
+      document.getElementById("login-email").value=email;
+      pushLog("✓ Conta criada! Use suas credenciais para entrar.","log-done");
+    } else showModalErr(errEl, d.detail||"Erro ao criar conta");
+  }catch{ showModalErr(errEl,"Erro de conexão."); }
 }
 
-// ── SSE EVENT HANDLER ──────────────────────────────────────────────
-function handleSSEEvent(ev, results, output) {
-    switch (ev.type) {
-        case "start":
-            _agentTotal = ev.total || 16;
-            pushLog(ev.message, "log-thinking");
-            updateCounter();
-            break;
-
-        case "agent_thinking":
-            pushLog(ev.message, "log-thinking");
-            break;
-
-        case "agent_done":
-            _agentDone++;
-            updateCounter();
-            pushLog(ev.message, "log-done");
-            results.push(ev);
-            break;
-
-        case "agent_skip":
-            pushLog(ev.message, "log-skip");
-            break;
-
-        case "veto":
-            pushLog(ev.message, "log-veto");
-            results.push(ev);
-            const vetoAlert = document.createElement("div");
-            vetoAlert.className = "veto-box glass p-6 rounded-2xl fade-up";
-            vetoAlert.innerHTML = `
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="text-2xl">🚨</span>
-                    <h3 class="font-black text-red-400 text-lg">VETO EMITIDO — Análise Interrompida</h3>
-                </div>
-                <p class="text-red-300 text-sm"><b>${escHtml(ev.area)}</b>: ${escHtml(ev.veto_reason || "")}</p>`;
-            output.prepend(vetoAlert);
-            break;
-
-        case "devil_thinking":
-            pushLog(ev.message, "log-judge");
-            break;
-
-        case "devil_done":
-            pushLog(ev.message, "log-done");
-            break;
-
-        case "judge_thinking":
-            pushLog(ev.message, "log-judge");
-            break;
-
-        case "verdict":
-            pushLog("⚖ Veredito gerado.", "log-verdict");
-            break;
-    }
+function logout(){
+  localStorage.removeItem("token"); token=null; userId=null;
+  document.getElementById("output").innerHTML="";
+  resetLog(); updateUI();
 }
 
-// ── RENDER FINAL (premium) ─────────────────────────────────────────
-function renderPremiumFinal(verdict, results, analysisId, isVeto, output) {
-    const pdfBtn = analysisId
-        ? `<button onclick="downloadPDF(${analysisId})" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">📄 PDF</button>`
-        : "";
-    const boxClass = isVeto ? "veto-box" : "veredito-box";
-    const icon = isVeto ? "🚨" : "⚖";
-    const title = isVeto ? "Veredito de VETO" : "Veredito do Juiz IA";
+/* ──────────────────────────────────────────────
+   WARM-UP
+────────────────────────────────────────────── */
+async function warmUp(){
+  try{
+    setStatus("Verificando servidor...","loading");
+    pushLog("⏳ Verificando disponibilidade do servidor...","log-warmup");
+    await fetch(API+"/",{signal:AbortSignal.timeout(15000)});
+    pushLog("✓ Servidor ativo. Iniciando análise...","log-warmup");
+  }catch{
+    pushLog("⚠ Servidor respondeu lentamente, prosseguindo...","log-warmup");
+  }
+}
 
-    const verdictCard = document.createElement("div");
-    verdictCard.className = `${boxClass} glass p-8 rounded-2xl fade-up`;
-    verdictCard.innerHTML = `
-        <div class="flex justify-between items-start flex-wrap gap-3 mb-4">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">${icon}</span>
-                <h2 class="text-xl font-bold ${isVeto ? "text-red-300" : "text-blue-300"}">${title}</h2>
-            </div>
-            ${pdfBtn}
+/* ──────────────────────────────────────────────
+   ANALISAR
+────────────────────────────────────────────── */
+async function analisar(tipo){
+  const prompt = document.getElementById("txt").value.trim();
+  if(!prompt||prompt.length<20){ alert("Descreva o caso com pelo menos 20 caracteres."); return; }
+  if(tipo==="premium"&&!token){ alert("Faça login para usar o relatório premium."); showLogin(); return; }
+
+  document.getElementById("output").innerHTML="";
+  resetLog();
+  setLoading(true);
+
+  try{
+    await warmUp();
+    if(tipo==="free") await analisarFree(prompt);
+    else await analisarPremiumSSE(prompt);
+  }catch(err){
+    const msg = err.name==="TimeoutError"
+      ? "O servidor demorou muito para responder. Aguarde 30s e tente novamente."
+      : (err.message||"Erro desconhecido");
+    document.getElementById("output").innerHTML = `
+      <div class="loader-card" style="border-color:rgba(239,68,68,0.2);">
+        <div style="font-size:32px;margin-bottom:16px;">⚠</div>
+        <div class="loader-text" style="color:#fca5a5;">${esc(msg)}</div>
+        <div style="margin-top:10px;font-size:12px;color:rgba(226,232,240,0.3);">O Render pode levar até 60s para acordar — tente novamente.</div>
+      </div>`;
+    setStatus("Erro","error");
+  }finally{
+    setLoading(false);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   FREE
+────────────────────────────────────────────── */
+async function analisarFree(prompt){
+  setStatus("Consultando especialista...","loading");
+  const out = document.getElementById("output");
+  out.innerHTML = `<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Consultando Direito do Consumidor...</div></div>`;
+
+  const res = await fetch(API+"/api/analyze",{
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({prompt}),
+    signal:AbortSignal.timeout(120000)
+  });
+  if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.detail||`Erro ${res.status}`); }
+  const d = await res.json();
+
+  // Show tribunal if returned
+  if(d.tribunal_detectado){
+    const tb = document.getElementById("tribunal-bar");
+    document.getElementById("tribunal-name").textContent = d.tribunal_detectado;
+    tb.classList.remove("hidden");
+  }
+
+  out.innerHTML="";
+  out.innerHTML = `
+    <div class="free-card">
+      <div class="free-label">⚖ Veredito — Juiz IA</div>
+      <div class="free-verdict">${esc(d.veredito||"")}</div>
+      <div class="free-divider"></div>
+      <div class="free-analysis-label">📋 Parecer — Direito do Consumidor</div>
+      <div class="free-analysis-text">${esc(d.free_analysis||"")}</div>
+      <div class="upgrade-callout">
+        <div class="upgrade-title">Desbloqueie a Análise Swarm Completa</div>
+        <div class="upgrade-desc">16 especialistas em paralelo · Contraditório Obrigatório · Juiz IA com deliberação ponderada · PDF profissional · Jusaii Score 0-100</div>
+        <div class="upgrade-buttons">
+          <button class="btn-action btn-premium" onclick="analisar('premium')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Usar Crédito Premium
+          </button>
+          <button class="btn-action btn-buy" onclick="comprar()">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            Comprar — R$ 19,90
+          </button>
         </div>
-        <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(verdict)}</div>`;
-    output.appendChild(verdictCard);
-
-    const agentsDone = results.filter(r => r.type === "agent_done");
-    if (agentsDone.length) {
-        const section = document.createElement("div");
-        section.className = "space-y-3 fade-up";
-        section.innerHTML = `<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">Pareceres dos Especialistas (${agentsDone.length})</h3>`;
-
-        agentsDone.forEach((r, i) => {
-            const risk = r.risk_level || "MÉDIO";
-            const card = document.createElement("details");
-            if (i === 0) card.open = true;
-            card.className = "glass rounded-2xl overflow-hidden";
-            card.innerHTML = `
-                <summary class="p-4 hover:bg-white/5 transition flex items-center gap-3 select-none">
-                    <span class="text-xs bg-blue-600/30 px-2 py-1 rounded-lg font-bold text-blue-300">${String(i+1).padStart(2,"0")}</span>
-                    <span class="font-bold text-blue-300 text-sm">${escHtml(r.area)}</span>
-                    <span class="risk-badge risk-${risk} ml-auto shrink-0">${risk}</span>
-                    <span class="text-slate-500 text-xs">${r.duration_ms || 0}ms ▸</span>
-                </summary>
-                <div class="px-5 pb-5 pt-2 border-t border-white/5 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                    <p class="text-xs text-slate-500 mb-3 italic">${escHtml(r.specialty || "")}</p>
-                    ${escHtml(r.analysis || "")}
-                </div>`;
-            section.appendChild(card);
-        });
-        output.appendChild(section);
-    }
+      </div>
+    </div>`;
 }
 
-// ── RENDER FREE ────────────────────────────────────────────────────
-function renderFree(data, output) {
-    output.innerHTML = `
-        <div class="veredito-box glass p-8 rounded-2xl fade-up">
-            <div class="flex items-center gap-3 mb-4">
-                <span class="text-2xl">⚖</span>
-                <h2 class="text-xl font-bold text-blue-300">Veredito do Juiz IA</h2>
-            </div>
-            <div class="whitespace-pre-wrap text-sm leading-relaxed">${escHtml(data.veredito)}</div>
-        </div>
-        <div class="glass p-6 rounded-2xl fade-up">
-            <h3 class="text-sm font-bold text-blue-300 mb-3">📋 Análise — Direito do Consumidor</h3>
-            <p class="text-slate-300 text-sm leading-relaxed">${escHtml(data.free_analysis)}</p>
-        </div>
-        <div class="glass p-6 rounded-2xl text-center fade-up border border-yellow-500/20">
-            <p class="text-yellow-400 font-bold mb-1">🔓 Desbloqueie o Relatório Swarm Completo</p>
-            <p class="text-slate-400 text-sm mb-4">16 especialistas jurídicos em paralelo + logs em tempo real + PDF profissional</p>
-            <div class="flex gap-3 justify-center flex-wrap">
-                <button onclick="analisar('premium')" class="btn-premium px-6 py-3 rounded-xl font-bold text-white text-sm">⭐ Usar Crédito Premium</button>
-                <button onclick="comprar()" class="btn-buy px-6 py-3 rounded-xl font-bold text-white text-sm">🛒 Comprar — R$ 19,90</button>
-            </div>
+/* ──────────────────────────────────────────────
+   PREMIUM SSE
+────────────────────────────────────────────── */
+async function analisarPremiumSSE(prompt){
+  const out = document.getElementById("output");
+  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Conectando ao Swarm...</div></div>`;
+
+  const results=[], verdicts={text:"",veto:false};
+  let analysisId=null, jusaiiScore=0, tribunal="", state="";
+
+  const res = await fetch(API+"/api/analyze/premium/stream",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
+    body:JSON.stringify({prompt}),
+    signal:AbortSignal.timeout(310000)
+  });
+
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    if(res.status===402){
+      out.innerHTML=`
+        <div class="loader-card" style="border-color:rgba(245,158,11,0.2);">
+          <div style="font-size:32px;margin-bottom:16px;">⚠</div>
+          <div class="loader-text" style="color:#fcd34d;">Sem créditos premium</div>
+          <div style="margin-top:16px;"><button class="btn-action btn-buy" onclick="comprar()" style="margin:0 auto;">Comprar — R$ 19,90</button></div>
         </div>`;
+      return;
+    }
+    throw new Error(e.detail||`Erro ${res.status}`);
+  }
+
+  out.innerHTML=""; // clear loader when stream starts
+
+  const reader=res.body.getReader();
+  const dec=new TextDecoder();
+  let buf="";
+
+  while(true){
+    const {done,value}=await reader.read();
+    if(done) break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split("\n"); buf=lines.pop();
+    for(const line of lines){
+      if(!line.startsWith("data:")) continue;
+      const raw=line.slice(5).trim();
+      if(raw==="[DONE]") break;
+      let ev; try{ev=JSON.parse(raw);}catch{continue;}
+
+      if(ev.type==="start"){
+        _agentTotal=ev.total||16;
+        if(ev.tribunal){
+          tribunal=ev.tribunal;
+          document.getElementById("tribunal-name").textContent=tribunal;
+          document.getElementById("tribunal-bar").classList.remove("hidden");
+        }
+        pushLog(ev.message,"log-thinking");
+        updateProgress();
+      }
+      else if(ev.type==="agent_thinking") pushLog(ev.message,"log-thinking");
+      else if(ev.type==="agent_done"){
+        _agentDone++; updateProgress();
+        pushLog(ev.message,"log-done");
+        results.push(ev);
+      }
+      else if(ev.type==="agent_skip") pushLog(ev.message,"log-skip");
+      else if(ev.type==="veto"){
+        pushLog(ev.message,"log-veto");
+        results.push(ev);
+        const vCard=document.createElement("div");
+        vCard.className="verdict-card veto";
+        vCard.innerHTML=`<div class="verdict-header"><div class="verdict-title-group"><span class="verdict-icon">🚨</span><div><div class="verdict-title">Veto Emitido</div><div class="verdict-subtitle">${esc(ev.area||"")}</div></div></div></div><div class="verdict-text">${esc(ev.veto_reason||"")}</div>`;
+        out.prepend(vCard);
+      }
+      else if(ev.type==="devil_thinking") pushLog(ev.message,"log-judge");
+      else if(ev.type==="devil_done")     pushLog(ev.message,"log-done");
+      else if(ev.type==="judge_thinking") pushLog(ev.message,"log-judge");
+      else if(ev.type==="score"){
+        jusaiiScore=ev.jusaii_score||0;
+        pushLog(`⬡ Jusaii Score calculado: ${jusaiiScore.toFixed(0)}/100`,"log-score");
+      }
+      else if(ev.type==="verdict"){
+        verdicts.text=ev.verdict||"";
+        verdicts.veto=ev.veto_triggered||false;
+        if(ev.jusaii_score) jusaiiScore=ev.jusaii_score;
+        pushLog("⚖ Veredito final gerado.","log-verdict");
+      }
+      else if(ev.type==="saved"){
+        analysisId=ev.analysis_id;
+        if(ev.jusaii_score) jusaiiScore=ev.jusaii_score;
+        if(ev.tribunal) tribunal=ev.tribunal;
+        updateUI();
+      }
+      else if(ev.type==="error") throw new Error(ev.message);
+    }
+  }
+
+  if(verdicts.text) renderPremiumResult(verdicts.text,results,analysisId,verdicts.veto,jusaiiScore,tribunal,out);
 }
 
-// ── PDF ────────────────────────────────────────────────────────────
-async function downloadPDF(id) {
-    if (!token) { alert("Faça login para baixar o PDF."); return; }
-    try {
-        const res = await fetch(API + `/api/report/pdf/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: AbortSignal.timeout(30000)
-        });
-        if (!res.ok) { alert("Erro ao baixar PDF."); return; }
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `jusaii_relatorio_${id}.pdf`;
-        document.body.appendChild(a); a.click();
-        document.body.removeChild(a); URL.revokeObjectURL(url);
-    } catch { alert("Erro ao baixar PDF."); }
+/* ──────────────────────────────────────────────
+   RENDER PREMIUM
+────────────────────────────────────────────── */
+function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribunal, out){
+  out.innerHTML="";
+
+  // Score ring
+  if(!isVeto && score>0){
+    const scoreCard = buildScoreCard(score, tribunal, results.length);
+    out.appendChild(scoreCard);
+    // Animate arc after append
+    setTimeout(()=>{
+      const arc = scoreCard.querySelector(".score-arc");
+      const pct = Math.min(score/100,1);
+      arc.style.strokeDashoffset = 314*(1-pct);
+    },100);
+  }
+
+  // Verdict card
+  const pdfBtn = analysisId
+    ? `<button class="btn-pdf" onclick="downloadPDF(${analysisId})"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>PDF</button>`
+    : "";
+  const vCard = document.createElement("div");
+  vCard.className = `verdict-card ${isVeto?"veto":"favorable"}`;
+  vCard.innerHTML = `
+    <div class="verdict-header">
+      <div class="verdict-title-group">
+        <span class="verdict-icon">${isVeto?"🚨":"⚖"}</span>
+        <div>
+          <div class="verdict-title">${isVeto?"Veredito de Veto":"Veredito do Juiz IA"}</div>
+          <div class="verdict-subtitle">Quantum Jurist — Deliberação Ponderada</div>
+        </div>
+      </div>
+      ${pdfBtn}
+    </div>
+    <div class="verdict-divider"></div>
+    <div class="verdict-text">${esc(verdict)}</div>`;
+  out.appendChild(vCard);
+
+  // Agent cards
+  const agentsDone = results.filter(r=>r.type==="agent_done");
+  if(agentsDone.length){
+    const section = document.createElement("div");
+    section.className="agents-section";
+    section.innerHTML=`
+      <div class="agents-header">
+        <span class="section-title">Pareceres dos Especialistas</span>
+        <span class="agents-count" style="font-family:var(--font-mono)">${agentsDone.length} / 16</span>
+      </div>
+      <div class="agents-grid" id="agents-grid"></div>`;
+    out.appendChild(section);
+    const grid = section.querySelector("#agents-grid");
+    agentsDone.forEach((r,i)=>{
+      const card = buildAgentCard(r,i);
+      grid.appendChild(card);
+    });
+  }
 }
 
-// ── HISTÓRICO ──────────────────────────────────────────────────────
-async function verHistorico() {
-    if (!token) return;
-    try {
-        const res = await fetch(API + "/api/analyses", {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: AbortSignal.timeout(20000)
-        });
-        const data = await res.json();
-        if (!data.length) { alert("Nenhum relatório encontrado."); return; }
-        const output = document.getElementById("output-area");
-        output.innerHTML = `<h3 class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-4">📋 Seus Relatórios</h3>`;
-        data.forEach(r => {
-            const card = document.createElement("div");
-            card.className = "glass p-5 rounded-2xl fade-up border border-white/5 hover:border-blue-500/30 transition";
-            card.innerHTML = `
-                <div class="flex justify-between items-start gap-3">
-                    <div>
-                        <p class="text-sm text-slate-300">${escHtml(r.prompt)}</p>
-                        <p class="text-xs text-slate-500 mt-1">${r.created_at}</p>
-                    </div>
-                    <button onclick="downloadPDF(${r.id})" class="bg-green-600/20 hover:bg-green-600/40 text-green-400 px-3 py-1 rounded-lg text-xs transition shrink-0">📄 PDF</button>
-                </div>`;
-            output.appendChild(card);
-        });
-    } catch { alert("Erro ao carregar histórico."); }
+function buildScoreCard(score, tribunal, agentCount){
+  const div = document.createElement("div");
+  div.className="score-panel";
+
+  let label="Alto Risco Jurídico", chipClass="chip-red";
+  if(score>=75){ label="Alta Probabilidade de Êxito"; chipClass="chip-green"; }
+  else if(score>=50){ label="Viável com Ressalvas"; chipClass="chip-amber"; }
+
+  // Arc color
+  let arcColor="#2563eb";
+  if(score>=75) arcColor="#10b981";
+  else if(score>=50) arcColor="#f59e0b";
+  else arcColor="#ef4444";
+
+  div.innerHTML=`
+    <div class="score-ring-wrap">
+      <svg class="score-svg" viewBox="0 0 120 120">
+        <circle class="score-track" cx="60" cy="60" r="50"/>
+        <circle class="score-arc" cx="60" cy="60" r="50" stroke="${arcColor}" style="stroke-dashoffset:314;"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-num">${Math.round(score)}</div>
+        <div class="score-label-ring">Score</div>
+      </div>
+    </div>
+    <div class="score-meta">
+      <div class="score-meta-title">Jusaii Score</div>
+      <div class="score-chips">
+        <span class="chip ${chipClass}">${label}</span>
+        ${tribunal?`<span class="chip chip-blue">${tribunal}</span>`:""}
+        <span class="chip chip-muted">${agentCount} especialistas</span>
+      </div>
+      <div class="score-desc">Score calculado com base na confiança ponderada dos 16 agentes, contraditório do Advogado do Diabo e completude da análise.</div>
+    </div>`;
+  return div;
 }
 
-// ── PAGAMENTO ──────────────────────────────────────────────────────
-async function comprar() {
-    if (!token) { alert("Faça login primeiro."); showLogin(); return; }
-    try {
-        const res = await fetch(API + "/api/create-checkout-session", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            signal: AbortSignal.timeout(20000)
-        });
-        const data = await res.json();
-        if (res.ok && data.url) window.location.href = data.url;
-        else alert(data.detail || "Erro ao iniciar pagamento.");
-    } catch { alert("Erro de conexão."); }
+function buildAgentCard(r, i){
+  const card = document.createElement("div");
+  card.className="agent-card";
+  card.style.setProperty("--i", i);
+
+  const risk = r.risk_level||"MÉDIO";
+  const conf = r.confidence||0;
+
+  card.innerHTML=`
+    <div class="agent-summary" onclick="toggleAgent(this)">
+      <span class="agent-num">${String(i+1).padStart(2,"0")}</span>
+      <span class="agent-name">${esc(r.area||"")}</span>
+      ${conf>0?`<span class="agent-conf"><span class="conf-val">${conf}%</span></span>`:""}
+      <span class="risk-pill risk-${risk}">${risk}</span>
+      <span class="agent-chevron">▾</span>
+    </div>
+    <div class="agent-body">
+      ${r.specialty?`<div class="agent-specialty">${esc(r.specialty)}</div>`:""}
+      ${r.top_risk?`<div class="agent-risk-detail">⚠ ${esc(r.top_risk)}</div>`:""}
+      <div class="agent-analysis">${esc(r.analysis||"")}</div>
+      ${r.duration_ms?`<div class="agent-duration">${r.duration_ms}ms</div>`:""}
+    </div>`;
+
+  if(i===0) card.classList.add("open");
+  return card;
 }
 
-// ── ADMIN ──────────────────────────────────────────────────────────
-async function adminAddCredits() {
-    if (!userId) return;
-    const secret = prompt("Senha administrativa:");
-    if (!secret) return;
-    const targetId = prompt("ID do usuário (vazio = você):");
-    const uid = targetId ? parseInt(targetId) : userId;
-    try {
-        const res = await fetch(API + "/api/admin/add-credits", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
-            body: JSON.stringify({ user_id: uid, amount: 1 }),
-            signal: AbortSignal.timeout(20000)
-        });
-        const data = await res.json();
-        if (res.ok) { alert(`✓ ${data.message}\nNovo saldo: ${data.new_balance}`); updateUI(); }
-        else alert(data.detail || "Erro");
-    } catch { alert("Erro de conexão."); }
+function toggleAgent(summary){
+  const card = summary.closest(".agent-card");
+  card.classList.toggle("open");
 }
 
-// ── MODAIS ─────────────────────────────────────────────────────────
-function showLogin()    { closeModals(); document.getElementById("login-modal").classList.remove("hidden"); setTimeout(() => document.getElementById("login-email").focus(), 100); }
-function showRegister() { closeModals(); document.getElementById("register-modal").classList.remove("hidden"); setTimeout(() => document.getElementById("reg-email").focus(), 100); }
-function closeModals()  { ["login-modal","register-modal"].forEach(id => document.getElementById(id).classList.add("hidden")); }
-
-document.getElementById("login-modal").addEventListener("click",    e => { if (e.target === e.currentTarget) closeModals(); });
-document.getElementById("register-modal").addEventListener("click", e => { if (e.target === e.currentTarget) closeModals(); });
-document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
-document.getElementById("reg-password").addEventListener("keydown",   e => { if (e.key === "Enter") register(); });
-
-// ── UTILS ──────────────────────────────────────────────────────────
-function escHtml(str) {
-    if (!str) return "";
-    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+/* ──────────────────────────────────────────────
+   PDF
+────────────────────────────────────────────── */
+async function downloadPDF(id){
+  if(!token){ alert("Faça login para baixar o PDF."); return; }
+  try{
+    const res=await fetch(API+`/api/report/pdf/${id}`,{
+      headers:{Authorization:`Bearer ${token}`},
+      signal:AbortSignal.timeout(30000)
+    });
+    if(!res.ok){ alert("Erro ao baixar PDF."); return; }
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=`jusaii_${id}.pdf`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }catch{ alert("Erro ao baixar PDF."); }
 }
-function showErr(el, msg) { el.innerText = msg; el.classList.remove("hidden"); }
 
-// Init
+/* ──────────────────────────────────────────────
+   HISTÓRICO
+────────────────────────────────────────────── */
+async function verHistorico(){
+  if(!token) return;
+  const out = document.getElementById("output");
+  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Carregando histórico...</div></div>`;
+  try{
+    const res=await fetch(API+"/api/analyses",{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(20000)});
+    const data=await res.json();
+    if(!Array.isArray(data)||!data.length){
+      out.innerHTML=`<div class="loader-card"><div class="loader-text" style="color:rgba(226,232,240,0.3);">Nenhum relatório encontrado.</div></div>`;
+      return;
+    }
+    out.innerHTML=`<div class="section-title" style="margin-bottom:20px;display:block;">📋 Seus Relatórios</div>`;
+    data.forEach(r=>{
+      const card=document.createElement("div");
+      card.className="agent-card fade-up";
+      card.style.marginBottom="10px";
+      card.innerHTML=`
+        <div class="agent-summary" style="cursor:default;">
+          <span class="agent-name" style="flex:1">${esc(r.prompt)}</span>
+          ${r.jusaii_score>0?`<span class="chip chip-blue" style="flex-shrink:0">${r.jusaii_score} pts</span>`:""}
+          ${r.tribunal?`<span class="chip chip-muted" style="flex-shrink:0">${esc(r.tribunal)}</span>`:""}
+          <span class="agent-conf" style="flex-shrink:0">${r.created_at||""}</span>
+          <button class="btn-pdf" onclick="downloadPDF(${r.id})" style="flex-shrink:0;margin-left:8px;">📄 PDF</button>
+        </div>`;
+      out.appendChild(card);
+    });
+  }catch{ out.innerHTML=`<div class="loader-card"><div class="loader-text" style="color:#fca5a5;">Erro ao carregar histórico.</div></div>`; }
+}
+
+/* ──────────────────────────────────────────────
+   PAGAMENTO
+────────────────────────────────────────────── */
+async function comprar(){
+  if(!token){ alert("Faça login primeiro."); showLogin(); return; }
+  try{
+    const res=await fetch(API+"/api/create-checkout-session",{
+      method:"POST", headers:{Authorization:`Bearer ${token}`},
+      signal:AbortSignal.timeout(20000)
+    });
+    const d=await res.json();
+    if(res.ok&&d.url) window.location.href=d.url;
+    else alert(d.detail||"Erro ao iniciar pagamento.");
+  }catch{ alert("Erro de conexão."); }
+}
+
+/* ──────────────────────────────────────────────
+   ADMIN
+────────────────────────────────────────────── */
+async function adminAddCredits(){
+  if(!userId) return;
+  const secret=prompt("Senha administrativa:");
+  if(!secret) return;
+  const targetId=prompt("ID do usuário (vazio = você):");
+  const uid=targetId?parseInt(targetId):userId;
+  try{
+    const res=await fetch(API+"/api/admin/add-credits",{
+      method:"POST",
+      headers:{"Content-Type":"application/json",Authorization:`Bearer ${secret}`},
+      body:JSON.stringify({user_id:uid,amount:1}),
+      signal:AbortSignal.timeout(20000)
+    });
+    const d=await res.json();
+    if(res.ok){ alert(`✓ ${d.message}\nNovo saldo: ${d.new_balance}`); updateUI(); }
+    else alert(d.detail||"Erro");
+  }catch{ alert("Erro de conexão."); }
+}
+
+/* ──────────────────────────────────────────────
+   MODAIS
+────────────────────────────────────────────── */
+function showLogin(){
+  closeModals();
+  document.getElementById("modal-login").classList.add("active");
+  setTimeout(()=>document.getElementById("login-email").focus(),150);
+}
+function showRegister(){
+  closeModals();
+  document.getElementById("modal-register").classList.add("active");
+  setTimeout(()=>document.getElementById("reg-email").focus(),150);
+}
+function closeModals(){
+  document.querySelectorAll(".modal-overlay").forEach(m=>m.classList.remove("active"));
+}
+document.querySelectorAll(".modal-overlay").forEach(m=>{
+  m.addEventListener("click",e=>{ if(e.target===m) closeModals(); });
+});
+document.getElementById("login-pw").addEventListener("keydown",e=>{ if(e.key==="Enter") login(); });
+document.getElementById("reg-pw").addEventListener("keydown",e=>{ if(e.key==="Enter") register(); });
+
+/* ──────────────────────────────────────────────
+   UTILS
+────────────────────────────────────────────── */
+function esc(s){
+  if(!s) return "";
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\n/g,"<br>");
+}
+function showModalErr(el, msg){
+  el.textContent=msg;
+  el.style.display="block";
+}
+
+/* INIT */
 updateUI();
 </script>
 </body>
