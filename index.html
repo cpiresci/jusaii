@@ -1275,6 +1275,25 @@ function updateProgress(){
 /* ──────────────────────────────────────────────
    AUTH
 ────────────────────────────────────────────── */
+async function _fetchWithTimeout(url, opts, ms){
+  const ctrl = new AbortController();
+  const tid  = setTimeout(()=>ctrl.abort(), ms);
+  try{ return await fetch(url, {...opts, signal:ctrl.signal}); }
+  finally{ clearTimeout(tid); }
+}
+
+async function _wakeServer(errEl){
+  for(let i=1;i<=3;i++){
+    errEl.textContent="⏳ Acordando servidor... tentativa "+i+"/3";
+    try{
+      const r = await _fetchWithTimeout(API+"/", {method:"GET"}, 35000);
+      if(r.ok || r.status===405) return true;
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,2000));
+  }
+  return false;
+}
+
 async function login(){
   const email = document.getElementById("login-email").value.trim();
   const pw    = document.getElementById("login-pw").value;
@@ -1283,23 +1302,18 @@ async function login(){
   if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
   errEl.style.display="block";
   errEl.style.color="#a0aec0";
+  errEl.textContent="⏳ Conectando...";
+  await _wakeServer(errEl);
   errEl.textContent="⏳ Entrando...";
-  let secs=0;
-  const _t=setInterval(()=>{
-    secs++;
-    if(secs>=10) errEl.textContent="⏳ Servidor acordando... "+secs+"s (pode levar ate 90s na 1a vez)";
-  },1000);
   try{
-    const res = await fetch(API+"/api/auth/login",{
+    const res = await _fetchWithTimeout(API+"/api/auth/login",{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password:pw}),
-      signal:AbortSignal.timeout(90000)
-    });
-    clearInterval(_t);
+      body:JSON.stringify({email,password:pw})
+    }, 30000);
     const d = await res.json();
     if(res.ok){ token=d.token; localStorage.setItem("token",token); closeModals(); updateUI(); }
     else showModalErr(errEl, d.detail||"Credenciais inválidas");
-  }catch(e){ clearInterval(_t); showModalErr(errEl,"Servidor nao respondeu. Tente novamente."); }
+  }catch(e){ showModalErr(errEl,"Falha: "+e.message+". Tente novamente."); }
 }
 
 async function register(){
@@ -1310,26 +1324,21 @@ async function register(){
   if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
   errEl.style.display="block";
   errEl.style.color="#a0aec0";
+  errEl.textContent="⏳ Conectando...";
+  await _wakeServer(errEl);
   errEl.textContent="⏳ Criando conta...";
-  let secs=0;
-  const _t=setInterval(()=>{
-    secs++;
-    if(secs>=10) errEl.textContent="⏳ Servidor acordando... "+secs+"s (pode levar ate 90s na 1a vez)";
-  },1000);
   try{
-    const res = await fetch(API+"/api/auth/register",{
+    const res = await _fetchWithTimeout(API+"/api/auth/register",{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password:pw}),
-      signal:AbortSignal.timeout(90000)
-    });
-    clearInterval(_t);
+      body:JSON.stringify({email,password:pw})
+    }, 30000);
     const d = await res.json();
     if(res.ok){
       closeModals(); showLogin();
       document.getElementById("login-email").value=email;
       pushLog("✓ Conta criada! Use suas credenciais para entrar.","log-done");
     } else showModalErr(errEl, d.detail||"Erro ao criar conta");
-  }catch{ clearInterval(_t); showModalErr(errEl,"Servidor nao respondeu. Tente novamente."); }
+  }catch(e){ showModalErr(errEl,"Falha: "+e.message+". Tente novamente."); }
 }
 
 function logout(){
