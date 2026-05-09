@@ -1514,7 +1514,7 @@ async function analisarPremiumSSE(prompt){
   const POLL_INTERVAL_MS       = 3000;
   const POLL_TIMEOUT_MS        = 45000;  // FIX #A — era 15 000
   const MAX_POLLS              = 200;    // FIX #B — era 120
-  const MAX_CONSECUTIVE_ERRORS = 5;     // FIX #C — novo
+  const MAX_CONSECUTIVE_ERRORS = 10;    // v6.2 — era 5; tolerância para pico do judge
   const POLLS_PER_AREA         = 2;
 
   let lastLoggedAreaIdx = -1;
@@ -1522,13 +1522,15 @@ async function analisarPremiumSSE(prompt){
 
   for(let poll = 0; poll < MAX_POLLS; poll++){
 
-    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
-
     /* ── Animação circular de área (loop infinito) ── */
     const linearStep     = Math.floor(poll / POLLS_PER_AREA);
     const currentAreaIdx = linearStep % AREAS.length;
     const currentArea    = AREAS[currentAreaIdx];
     const elapsed        = (poll + 1) * POLL_INTERVAL_MS / 1000;
+
+    /* v6.2 — intervalo dinâmico: 5 s na fase do judge para aliviar o servidor */
+    const dynamicInterval = elapsed > 150 ? 5000 : POLL_INTERVAL_MS;
+    await new Promise(r => setTimeout(r, dynamicInterval));
 
     if(currentAreaIdx !== lastLoggedAreaIdx){
       pushLog(`[${currentArea}]: Analisando...`, "log-thinking");
@@ -1572,12 +1574,39 @@ async function analisarPremiumSSE(prompt){
         "log-skip",
       );
 
-      /* FIX #C — falha definitiva após MAX_CONSECUTIVE_ERRORS seguidas */
+      /* v6.2 — antes de desistir, tenta uma recuperação final com 60 s */
       if(consecutiveErrors >= MAX_CONSECUTIVE_ERRORS){
-        throw new Error(
-          `Conexão perdida após ${MAX_CONSECUTIVE_ERRORS} falhas consecutivas. ` +
-          `O servidor pode estar sobrecarregado. Aguarde alguns minutos e tente novamente.`,
-        );
+        pushLog("🔄 Tentativa de recuperação final (60s)...", "log-warmup");
+        try{
+          const recovery = await _fetchWithTimeout(
+            API + `/api/job/${jobId}`,
+            { headers:{"Authorization":`Bearer ${token}`} },
+            60000,
+          );
+          if(recovery.ok){
+            consecutiveErrors = 0;
+            pollRes = recovery;
+            /* cai para o processamento normal abaixo */
+          } else if(recovery.status === 202){
+            consecutiveErrors = 0;
+            continue;
+          } else if(recovery.status === 404){
+            throw new Error(
+              "O servidor foi reiniciado e o job expirou. " +
+              "Seu crédito foi preservado. Inicie uma nova análise.",
+            );
+          } else {
+            throw new Error(`Recuperação falhou (HTTP ${recovery.status}).`);
+          }
+        }catch(recoveryErr){
+          if(recoveryErr.message.includes("expirou") || recoveryErr.message.includes("Recuperação")){
+            throw recoveryErr;
+          }
+          throw new Error(
+            `Conexão perdida após ${MAX_CONSECUTIVE_ERRORS} falhas + 1 tentativa de recuperação. ` +
+            `O job pode ter concluído — tente novamente em instantes para verificar seu histórico.`,
+          );
+        }
       }
 
       /* FIX #C — backoff exponencial: 2 s, 4 s, 8 s, 16 s */
