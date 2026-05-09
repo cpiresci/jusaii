@@ -1282,38 +1282,98 @@ async function _fetchWithTimeout(url, opts, ms){
   finally{ clearTimeout(tid); }
 }
 
-async function _wakeServer(errEl){
-  for(let i=1;i<=3;i++){
-    errEl.textContent="⏳ Acordando servidor... tentativa "+i+"/3";
-    try{
-      const r = await _fetchWithTimeout(API+"/", {method:"GET"}, 35000);
-      if(r.ok || r.status===405) return true;
-    }catch(e){}
-    await new Promise(r=>setTimeout(r,2000));
+// ─────────────────────────────────────────────────────────────────────────────
+// _wakeServer — acorda o servidor via /ping (endpoint leve, sem JSON pesado).
+// Tenta até MAX_WAKE_ATTEMPTS vezes com backoff exponencial entre tentativas.
+// ─────────────────────────────────────────────────────────────────────────────
+const MAX_WAKE_ATTEMPTS = 3;
+const WAKE_BASE_DELAY_MS = 2000; // 2 s → 4 s → 8 s (exponencial)
+
+async function _wakeServer(errEl) {
+  for (let i = 1; i <= MAX_WAKE_ATTEMPTS; i++) {
+    errEl.textContent = `⏳ Acordando servidor... tentativa ${i}/${MAX_WAKE_ATTEMPTS}`;
+    try {
+      // BUG FIX #2: usa /ping (leve) em vez de / (JSON pesado com métricas)
+      const r = await _fetchWithTimeout(API + "/ping", { method: "GET" }, 35000);
+      if (r.ok) return true;
+    } catch (e) { /* timeout ou rede — tenta novamente */ }
+    if (i < MAX_WAKE_ATTEMPTS) {
+      const delay = WAKE_BASE_DELAY_MS * Math.pow(2, i - 1); // 2s, 4s, 8s
+      await new Promise(r => setTimeout(r, delay));
+    }
   }
-  return false;
+  return false; // servidor não respondeu após todas as tentativas
 }
 
-async function login(){
+// ─────────────────────────────────────────────────────────────────────────────
+// _retryLoginRequest — envia o POST de login com até MAX_LOGIN_RETRIES tentativas
+// e backoff exponencial entre elas.  Só repete em falhas de rede/timeout;
+// erros HTTP 4xx (credenciais inválidas, etc.) são retornados imediatamente
+// pois não adianta repetir a mesma requisição.
+// ─────────────────────────────────────────────────────────────────────────────
+const MAX_LOGIN_RETRIES   = 3;
+const LOGIN_BASE_DELAY_MS = 1500; // 1,5 s → 3 s → 6 s
+
+async function _retryLoginRequest(email, pw) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= MAX_LOGIN_RETRIES; attempt++) {
+    try {
+      const res = await _fetchWithTimeout(
+        API + "/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password: pw }),
+        },
+        30000
+      );
+      // Erro HTTP da aplicação (ex: 401 credenciais inválidas) → não repetir
+      if (!res.ok && res.status >= 400 && res.status < 500) return res;
+      // Sucesso (2xx) ou erro de servidor (5xx que pode ser transitório)
+      if (res.ok) return res;
+      // 5xx: pode ser transitório, armazena e tenta de novo
+      lastError = new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      // Falha de rede / timeout
+      lastError = e;
+    }
+    if (attempt < MAX_LOGIN_RETRIES) {
+      const delay = LOGIN_BASE_DELAY_MS * Math.pow(2, attempt - 1); // 1,5s → 3s → 6s
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastError; // todas as tentativas falharam
+}
+
+async function login() {
   const email = document.getElementById("login-email").value.trim();
   const pw    = document.getElementById("login-pw").value;
   const errEl = document.getElementById("login-err");
-  errEl.style.display="none";
-  if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
-  errEl.style.display="block";
-  errEl.style.color="#a0aec0";
-  errEl.textContent="⏳ Conectando...";
+  errEl.style.display = "none";
+  if (!email || !pw) { showModalErr(errEl, "Preencha email e senha."); return; }
+  errEl.style.display = "block";
+  errEl.style.color   = "#a0aec0";
+  errEl.textContent   = "⏳ Conectando...";
+
+  // 1. Acorda o servidor via /ping (leve)
   await _wakeServer(errEl);
-  errEl.textContent="⏳ Entrando...";
-  try{
-    const res = await _fetchWithTimeout(API+"/api/auth/login",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password:pw})
-    }, 30000);
-    const d = await res.json();
-    if(res.ok){ token=d.token; localStorage.setItem("token",token); closeModals(); updateUI(); }
-    else showModalErr(errEl, d.detail||"Credenciais inválidas");
-  }catch(e){ showModalErr(errEl,"Falha: "+e.message+". Tente novamente."); }
+
+  // 2. Tenta o login com retry automático (BUG FIX #3)
+  errEl.textContent = "⏳ Entrando...";
+  try {
+    const res = await _retryLoginRequest(email, pw);
+    const d   = await res.json();
+    if (res.ok) {
+      token = d.token;
+      localStorage.setItem("token", token);
+      closeModals();
+      updateUI();
+    } else {
+      showModalErr(errEl, d.detail || "Credenciais inválidas");
+    }
+  } catch (e) {
+    showModalErr(errEl, "Falha de conexão após " + MAX_LOGIN_RETRIES + " tentativas: " + e.message + ". Verifique sua internet e tente novamente.");
+  }
 }
 
 async function register(){
@@ -1354,7 +1414,8 @@ async function warmUp(){
   try{
     setStatus("Verificando servidor...","loading");
     pushLog("⏳ Verificando disponibilidade do servidor...","log-warmup");
-    await fetch(API+"/",{signal:AbortSignal.timeout(15000)});
+    // BUG FIX #2: usa /ping (leve) em vez de / (JSON pesado)
+    await fetch(API+"/ping",{signal:AbortSignal.timeout(15000)});
     pushLog("✓ Servidor ativo. Iniciando análise...","log-warmup");
   }catch{
     pushLog("⚠ Servidor respondeu lentamente, prosseguindo...","log-warmup");
