@@ -583,6 +583,15 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   font-size:18px;font-style:italic;
   color:rgba(255,255,255,0.95);
 }
+/* Sub-label below main loader text — for area detail */
+.loader-sub{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:rgba(100,170,255,0.80);
+  margin-top:10px;
+  letter-spacing:.06em;
+  min-height:18px; /* reserve space to avoid layout jump */
+}
 
 /* ══════════════════════════════════════════════
    MODALS
@@ -675,7 +684,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .fab-hist{background:rgba(30,41,59,0.9);color:var(--ice);}
 .fab-hist:hover{background:rgba(51,65,85,0.9);}
 
-/* Admin Overlay */
 .admin-overlay{
   position:fixed;inset:0;z-index:100;
   background:rgba(2,5,16,0.85);backdrop-filter:blur(8px);
@@ -726,7 +734,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .admin-section{display:none;}
 .admin-section.visible{display:block;}
 
-/* Stats Grid */
 .stats-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
   margin-bottom:24px;
@@ -758,10 +765,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   font-size:13px;color:var(--mist);
 }
 
-/* Users Section */
-.admin-search{
-  display:flex;gap:8px;margin-bottom:16px;
-}
+.admin-search{display:flex;gap:8px;margin-bottom:16px;}
 .admin-input{
   flex:1;background:var(--deep);border:1px solid rgba(139,92,246,0.2);
   border-radius:8px;padding:9px 14px;color:var(--ice);font-size:13px;
@@ -807,7 +811,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .admin-msg.error{background:rgba(239,68,68,0.08);border-color:rgba(255,110,110,0.60);color:#f87171;}
 .users-loader{text-align:center;padding:40px 0;color:rgba(255,255,255,0.85);font-size:14px;}
 
-/* Share Card */
 .share-card-modal{
   position:fixed;inset:0;z-index:200;
   display:none;align-items:center;justify-content:center;
@@ -830,15 +833,10 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .sc-logo{font-family:var(--font-serif);font-size:30px;font-weight:700;font-style:italic;color:#d97706;margin-bottom:4px;}
 .sc-sub{font-size:12px;letter-spacing:.15em;color:rgba(245,158,11,0.95);text-transform:uppercase;font-weight:700;margin-bottom:20px;}
 .sc-score-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.sc-score-big{
-  font-family:var(--font-mono);font-size:60px;font-weight:500;line-height:1;
-}
+.sc-score-big{font-family:var(--font-mono);font-size:60px;font-weight:500;line-height:1;}
 .sc-score-meta{display:flex;flex-direction:column;gap:6px;}
 .sc-label{font-size:13px;font-weight:600;color:var(--ice);}
-.sc-chip{
-  display:inline-block;padding:3px 10px;border-radius:100px;
-  font-size:12px;font-weight:700;letter-spacing:.05em;
-}
+.sc-chip{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.05em;}
 .sc-excerpt{
   font-size:12px;color:rgba(255,255,255,0.95);line-height:1.8;
   border-top:1px solid rgba(245,158,11,0.12);
@@ -849,16 +847,12 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .sc-footer-tag{font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,0.90);text-transform:uppercase;font-weight:700;}
 .sc-date{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.80);}
 .share-actions{display:flex;gap:10px;margin-top:16px;justify-content:center;}
-.share-btn{
-  padding:10px 22px;border-radius:100px;border:none;cursor:pointer;
-  font-size:12px;font-weight:700;letter-spacing:.05em;transition:all .2s;
-}
+.share-btn{padding:10px 22px;border-radius:100px;border:none;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.05em;transition:all .2s;}
 .share-btn-copy{background:rgba(245,158,11,0.15);color:#d97706;border:1px solid rgba(245,158,11,0.25);}
 .share-btn-copy:hover{background:rgba(245,158,11,0.25);}
 .share-btn-img{background:rgba(37,99,235,0.15);color:#3b82f6;border:1px solid rgba(37,99,235,0.25);}
 .share-btn-img:hover{background:rgba(37,99,235,0.25);}
 
-/* Analysis action buttons */
 .analysis-actions{
   display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;
   padding-top:20px;border-top:1px solid var(--border);
@@ -890,9 +884,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 }
 .fade-up{animation:fadeUp .45s ease-out both;}
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════ */
 @media(max-width:680px){
   .logo{font-size:38px;}
   .verdict-card{padding:28px 24px;}
@@ -904,7 +895,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   textarea#txt{padding:28px 24px 20px;}
 }
 
-/* Scanning line effect on log panel */
 .log-panel::after{
   content:'';
   position:absolute;top:0;left:0;right:0;
@@ -933,8 +923,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 
 <!-- APP -->
 <div id="app">
-
-  <!-- HEADER -->
   <header>
     <div class="logo-block">
       <div class="logo">Jusaii</div>
@@ -956,10 +944,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
     </div>
   </header>
 
-  <!-- MAIN -->
   <main>
-
-    <!-- INPUT PANEL -->
     <div class="input-panel" id="input-panel">
       <div class="input-panel-glow"></div>
       <div class="corner-mark tl"></div>
@@ -990,7 +975,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
       </div>
     </div>
 
-    <!-- TRIBUNAL BAR -->
     <div class="tribunal-bar hidden" id="tribunal-bar">
       <span class="tribunal-icon">⚖</span>
       <span>Tribunal detectado:</span>
@@ -998,7 +982,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
       <span style="color:rgba(255,255,255,1.00);font-size:12px;margin-left:4px;" id="state-name"></span>
     </div>
 
-    <!-- SINGULARITY LOG -->
     <div class="log-panel" id="log-panel">
       <div class="log-header">
         <div class="log-title-dot"></div>
@@ -1009,9 +992,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
       <div id="log-feed"></div>
     </div>
 
-    <!-- OUTPUT -->
     <div id="output"></div>
-
   </main>
 </div>
 
@@ -1046,7 +1027,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   <button class="fab-btn fab-hist" onclick="verHistorico()">📋 Histórico</button>
 </div>
 
-<!-- ADMIN DRAWER OVERLAY -->
+<!-- ADMIN DRAWER -->
 <div class="admin-overlay" id="admin-overlay" onclick="handleAdminOverlayClick(event)">
   <div class="admin-drawer" id="admin-drawer">
     <div class="admin-head">
@@ -1061,8 +1042,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
       </div>
     </div>
     <div class="admin-body">
-
-      <!-- STATS TAB -->
       <div class="admin-section visible" id="tab-stats">
         <div class="stats-grid" id="admin-stats-grid">
           <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-lbl">Usuários</div></div>
@@ -1073,8 +1052,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
           <div class="stat-card"><div class="stat-num" id="s-providers">—</div><div class="stat-lbl">Providers</div></div>
         </div>
       </div>
-
-      <!-- USERS TAB -->
       <div class="admin-section" id="tab-users">
         <div class="admin-search">
           <input class="admin-input" id="user-search" placeholder="Buscar por e-mail ou ID..." oninput="filterUsers()">
@@ -1082,13 +1059,10 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
         </div>
         <div id="users-list"><div class="users-loader">Carregando usuários…</div></div>
       </div>
-
-      <!-- SYSTEM TAB -->
       <div class="admin-section" id="tab-system">
         <div style="margin-bottom:16px;font-size:12px;color:var(--mist);letter-spacing:.06em;text-transform:uppercase;font-weight:700;">Recursos Ativos</div>
         <div class="features-grid" id="features-grid"></div>
       </div>
-
     </div>
   </div>
 </div>
@@ -1129,52 +1103,30 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 (function(){
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
-  let W, H, stars = [], links = [];
+  let W, H, stars = [];
   const N = 80;
-
-  function resize(){
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
-
   for(let i=0;i<N;i++){
-    stars.push({
-      x:Math.random()*window.innerWidth,
-      y:Math.random()*window.innerHeight,
-      r:Math.random()*.9+.2,
-      vx:(Math.random()-.5)*.12,
-      vy:(Math.random()-.5)*.12,
-      o:Math.random()*.5+.1
-    });
+    stars.push({ x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+      r:Math.random()*.9+.2, vx:(Math.random()-.5)*.12, vy:(Math.random()-.5)*.12, o:Math.random()*.5+.1 });
   }
-
   function draw(){
     ctx.clearRect(0,0,W,H);
-    // Stars
     stars.forEach(s=>{
       s.x+=s.vx; s.y+=s.vy;
-      if(s.x<0)s.x=W; if(s.x>W)s.x=0;
-      if(s.y<0)s.y=H; if(s.y>H)s.y=0;
-      ctx.beginPath();
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(148,163,184,${s.o})`;
-      ctx.fill();
+      if(s.x<0)s.x=W; if(s.x>W)s.x=0; if(s.y<0)s.y=H; if(s.y>H)s.y=0;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(148,163,184,${s.o})`; ctx.fill();
     });
-    // Links
     for(let i=0;i<N;i++){
       for(let j=i+1;j<N;j++){
-        const dx=stars[i].x-stars[j].x;
-        const dy=stars[i].y-stars[j].y;
+        const dx=stars[i].x-stars[j].x, dy=stars[i].y-stars[j].y;
         const dist=Math.sqrt(dx*dx+dy*dy);
         if(dist<140){
-          ctx.beginPath();
-          ctx.moveTo(stars[i].x,stars[i].y);
-          ctx.lineTo(stars[j].x,stars[j].y);
-          ctx.strokeStyle=`rgba(37,99,235,${.06*(1-dist/140)})`;
-          ctx.lineWidth=.5;
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(stars[i].x,stars[i].y); ctx.lineTo(stars[j].x,stars[j].y);
+          ctx.strokeStyle=`rgba(37,99,235,${.06*(1-dist/140)})`; ctx.lineWidth=.5; ctx.stroke();
         }
       }
     }
@@ -1187,9 +1139,21 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
    CONSTANTS & STATE
 ────────────────────────────────────────────── */
 const API = "https://jusaii-app.onrender.com";
-let token = localStorage.getItem("token");
-let userId = null;
-let _agentDone = 0, _agentTotal = 0;
+let token    = localStorage.getItem("token");
+let userId   = null;
+let _agentDone  = 0;
+let _agentTotal = 0;
+
+/*
+ * ╔══════════════════════════════════════════════════════════╗
+ * ║  BUG FIX #2 — Race Condition Guard                      ║
+ * ║  Flag global que sinaliza se o Swarm já está rodando.    ║
+ * ║  Impede que um segundo clique inicie outro ciclo         ║
+ * ║  paralelo, corrompendo o estado da UI e desperdiçando    ║
+ * ║  créditos premium.                                       ║
+ * ╚══════════════════════════════════════════════════════════╝
+ */
+let _isProcessing = false;
 
 /* ──────────────────────────────────────────────
    UI UTILITIES
@@ -1202,9 +1166,9 @@ function setStatus(msg, state="idle"){
 }
 
 function setLoading(on){
-  document.getElementById("btn-free").disabled = on;
+  document.getElementById("btn-free").disabled    = on;
   document.getElementById("btn-premium").disabled = on;
-  setStatus(on?"Processando...":"Swarm Online", on?"loading":"idle");
+  setStatus(on ? "Processando..." : "Swarm Online", on ? "loading" : "idle");
 }
 
 function updateUI(){
@@ -1216,7 +1180,7 @@ function updateUI(){
       .then(d=>{
         document.getElementById("p-count").textContent = d.premium_credits ?? 0;
         const em = document.getElementById("user-email");
-        em.textContent = d.email||"";
+        em.textContent = d.email || "";
         em.classList.remove("hidden");
         userId = d.id;
         if(d.is_admin) document.getElementById("admin-fab").classList.add("visible");
@@ -1231,33 +1195,28 @@ function updateUI(){
   }
 }
 
-/* ──────────────────────────────────────────────
-   INPUT FOCUS EFFECT
-────────────────────────────────────────────── */
-document.getElementById("txt").addEventListener("focus",()=>{
-  document.getElementById("input-panel").classList.add("focused");
-});
-document.getElementById("txt").addEventListener("blur",()=>{
-  document.getElementById("input-panel").classList.remove("focused");
-});
+/* ── Input focus effect ─────────────────────── */
+document.getElementById("txt").addEventListener("focus", ()=>document.getElementById("input-panel").classList.add("focused"));
+document.getElementById("txt").addEventListener("blur",  ()=>document.getElementById("input-panel").classList.remove("focused"));
 
 /* ──────────────────────────────────────────────
    LOG
 ────────────────────────────────────────────── */
 function resetLog(){
-  document.getElementById("log-feed").innerHTML="";
+  document.getElementById("log-feed").innerHTML    = "";
   document.getElementById("log-panel").classList.remove("active");
-  document.getElementById("log-counter").textContent="";
-  document.getElementById("log-progress").style.width="0%";
+  document.getElementById("log-counter").textContent = "";
+  document.getElementById("log-progress").style.width = "0%";
   document.getElementById("tribunal-bar").classList.add("hidden");
-  _agentDone=0; _agentTotal=0;
+  _agentDone = 0;
+  _agentTotal = 0;
 }
 
 function pushLog(msg, cls="log-thinking"){
   const panel = document.getElementById("log-panel");
   panel.classList.add("active");
   const feed = document.getElementById("log-feed");
-  const ts = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const ts   = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
   const line = document.createElement("div");
   line.className = `log-line ${cls}`;
   line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-msg">${esc(msg)}</span>`;
@@ -1266,10 +1225,10 @@ function pushLog(msg, cls="log-thinking"){
 }
 
 function updateProgress(){
-  const pct = _agentTotal>0 ? (_agentDone/_agentTotal)*100 : 0;
-  document.getElementById("log-progress").style.width = pct+"%";
-  document.getElementById("log-counter").textContent =
-    _agentTotal>0 ? `${_agentDone} / ${_agentTotal} concluídos` : "";
+  const pct = _agentTotal > 0 ? (_agentDone / _agentTotal) * 100 : 0;
+  document.getElementById("log-progress").style.width = pct + "%";
+  document.getElementById("log-counter").textContent  =
+    _agentTotal > 0 ? `${_agentDone} / ${_agentTotal} concluídos` : "";
 }
 
 /* ──────────────────────────────────────────────
@@ -1282,97 +1241,68 @@ async function _fetchWithTimeout(url, opts, ms){
   finally{ clearTimeout(tid); }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// _wakeServer — acorda o servidor via /ping (endpoint leve, sem JSON pesado).
-// Tenta até MAX_WAKE_ATTEMPTS vezes com backoff exponencial entre tentativas.
-// ─────────────────────────────────────────────────────────────────────────────
-const MAX_WAKE_ATTEMPTS = 3;
-const WAKE_BASE_DELAY_MS = 2000; // 2 s → 4 s → 8 s (exponencial)
+const MAX_WAKE_ATTEMPTS  = 3;
+const WAKE_BASE_DELAY_MS = 2000;
 
-async function _wakeServer(errEl) {
-  for (let i = 1; i <= MAX_WAKE_ATTEMPTS; i++) {
+async function _wakeServer(errEl){
+  for(let i=1; i<=MAX_WAKE_ATTEMPTS; i++){
     errEl.textContent = `⏳ Acordando servidor... tentativa ${i}/${MAX_WAKE_ATTEMPTS}`;
-    try {
-      // BUG FIX #2: usa /ping (leve) em vez de / (JSON pesado com métricas)
-      const r = await _fetchWithTimeout(API + "/ping", { method: "GET" }, 35000);
-      if (r.ok) return true;
-    } catch (e) { /* timeout ou rede — tenta novamente */ }
-    if (i < MAX_WAKE_ATTEMPTS) {
-      const delay = WAKE_BASE_DELAY_MS * Math.pow(2, i - 1); // 2s, 4s, 8s
-      await new Promise(r => setTimeout(r, delay));
+    try{
+      const r = await _fetchWithTimeout(API+"/ping", {method:"GET"}, 35000);
+      if(r.ok) return true;
+    }catch(e){ /* timeout/rede — tenta novamente */ }
+    if(i < MAX_WAKE_ATTEMPTS){
+      const delay = WAKE_BASE_DELAY_MS * Math.pow(2, i-1);
+      await new Promise(r=>setTimeout(r, delay));
     }
   }
-  return false; // servidor não respondeu após todas as tentativas
+  return false;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// _retryLoginRequest — envia o POST de login com até MAX_LOGIN_RETRIES tentativas
-// e backoff exponencial entre elas.  Só repete em falhas de rede/timeout;
-// erros HTTP 4xx (credenciais inválidas, etc.) são retornados imediatamente
-// pois não adianta repetir a mesma requisição.
-// ─────────────────────────────────────────────────────────────────────────────
 const MAX_LOGIN_RETRIES   = 3;
-const LOGIN_BASE_DELAY_MS = 1500; // 1,5 s → 3 s → 6 s
+const LOGIN_BASE_DELAY_MS = 1500;
 
-async function _retryLoginRequest(email, pw) {
+async function _retryLoginRequest(email, pw){
   let lastError = null;
-  for (let attempt = 1; attempt <= MAX_LOGIN_RETRIES; attempt++) {
-    try {
-      const res = await _fetchWithTimeout(
-        API + "/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password: pw }),
-        },
-        30000
-      );
-      // Erro HTTP da aplicação (ex: 401 credenciais inválidas) → não repetir
-      if (!res.ok && res.status >= 400 && res.status < 500) return res;
-      // Sucesso (2xx) ou erro de servidor (5xx que pode ser transitório)
-      if (res.ok) return res;
-      // 5xx: pode ser transitório, armazena e tenta de novo
+  for(let attempt=1; attempt<=MAX_LOGIN_RETRIES; attempt++){
+    try{
+      const res = await _fetchWithTimeout(API+"/api/auth/login",
+        { method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({email, password:pw}) }, 30000);
+      if(!res.ok && res.status >= 400 && res.status < 500) return res;
+      if(res.ok) return res;
       lastError = new Error(`HTTP ${res.status}`);
-    } catch (e) {
-      // Falha de rede / timeout
-      lastError = e;
-    }
-    if (attempt < MAX_LOGIN_RETRIES) {
-      const delay = LOGIN_BASE_DELAY_MS * Math.pow(2, attempt - 1); // 1,5s → 3s → 6s
-      await new Promise(r => setTimeout(r, delay));
+    }catch(e){ lastError = e; }
+    if(attempt < MAX_LOGIN_RETRIES){
+      const delay = LOGIN_BASE_DELAY_MS * Math.pow(2, attempt-1);
+      await new Promise(r=>setTimeout(r, delay));
     }
   }
-  throw lastError; // todas as tentativas falharam
+  throw lastError;
 }
 
-async function login() {
+async function login(){
   const email = document.getElementById("login-email").value.trim();
   const pw    = document.getElementById("login-pw").value;
   const errEl = document.getElementById("login-err");
   errEl.style.display = "none";
-  if (!email || !pw) { showModalErr(errEl, "Preencha email e senha."); return; }
+  if(!email || !pw){ showModalErr(errEl,"Preencha email e senha."); return; }
   errEl.style.display = "block";
   errEl.style.color   = "#a0aec0";
   errEl.textContent   = "⏳ Conectando...";
-
-  // 1. Acorda o servidor via /ping (leve)
   await _wakeServer(errEl);
-
-  // 2. Tenta o login com retry automático (BUG FIX #3)
   errEl.textContent = "⏳ Entrando...";
-  try {
+  try{
     const res = await _retryLoginRequest(email, pw);
     const d   = await res.json();
-    if (res.ok) {
+    if(res.ok){
       token = d.token;
       localStorage.setItem("token", token);
       closeModals();
       updateUI();
-    } else {
-      showModalErr(errEl, d.detail || "Credenciais inválidas");
-    }
-  } catch (e) {
-    showModalErr(errEl, "Falha de conexão após " + MAX_LOGIN_RETRIES + " tentativas: " + e.message + ". Verifique sua internet e tente novamente.");
+    } else showModalErr(errEl, d.detail || "Credenciais inválidas");
+  }catch(e){
+    showModalErr(errEl, "Falha de conexão após "+MAX_LOGIN_RETRIES+" tentativas: "+e.message+". Verifique sua internet e tente novamente.");
   }
 }
 
@@ -1380,30 +1310,29 @@ async function register(){
   const email = document.getElementById("reg-email").value.trim();
   const pw    = document.getElementById("reg-pw").value;
   const errEl = document.getElementById("reg-err");
-  errEl.style.display="none";
-  if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
-  errEl.style.display="block";
-  errEl.style.color="#a0aec0";
-  errEl.textContent="⏳ Conectando...";
+  errEl.style.display = "none";
+  if(!email || !pw){ showModalErr(errEl,"Preencha email e senha."); return; }
+  errEl.style.display = "block";
+  errEl.style.color   = "#a0aec0";
+  errEl.textContent   = "⏳ Conectando...";
   await _wakeServer(errEl);
-  errEl.textContent="⏳ Criando conta...";
+  errEl.textContent = "⏳ Criando conta...";
   try{
-    const res = await _fetchWithTimeout(API+"/api/auth/register",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email,password:pw})
-    }, 30000);
+    const res = await _fetchWithTimeout(API+"/api/auth/register",
+      { method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email, password:pw}) }, 30000);
     const d = await res.json();
     if(res.ok){
       closeModals(); showLogin();
-      document.getElementById("login-email").value=email;
+      document.getElementById("login-email").value = email;
       pushLog("✓ Conta criada! Use suas credenciais para entrar.","log-done");
-    } else showModalErr(errEl, d.detail||"Erro ao criar conta");
+    } else showModalErr(errEl, d.detail || "Erro ao criar conta");
   }catch(e){ showModalErr(errEl,"Falha: "+e.message+". Tente novamente."); }
 }
 
 function logout(){
-  localStorage.removeItem("token"); token=null; userId=null;
-  document.getElementById("output").innerHTML="";
+  localStorage.removeItem("token"); token = null; userId = null;
+  document.getElementById("output").innerHTML = "";
   resetLog(); updateUI();
 }
 
@@ -1414,8 +1343,7 @@ async function warmUp(){
   try{
     setStatus("Verificando servidor...","loading");
     pushLog("⏳ Verificando disponibilidade do servidor...","log-warmup");
-    // BUG FIX #2: usa /ping (leve) em vez de / (JSON pesado)
-    await fetch(API+"/ping",{signal:AbortSignal.timeout(15000)});
+    await fetch(API+"/ping", {signal:AbortSignal.timeout(15000)});
     pushLog("✓ Servidor ativo. Iniciando análise...","log-warmup");
   }catch{
     pushLog("⚠ Servidor respondeu lentamente, prosseguindo...","log-warmup");
@@ -1424,24 +1352,50 @@ async function warmUp(){
 
 /* ──────────────────────────────────────────────
    ANALISAR
+   ─────────────────────────────────────────────
+   BUG FIX #2 — verificação do flag _isProcessing
+   no início da função. Se já estiver rodando,
+   retorna imediatamente sem iniciar um novo ciclo.
 ────────────────────────────────────────────── */
 async function analisar(tipo){
-  const prompt = document.getElementById("txt").value.trim();
-  if(!prompt||prompt.length<20){ alert("Descreva o caso com pelo menos 20 caracteres."); return; }
-  if(tipo==="premium"&&!token){ alert("Faça login para usar o relatório premium."); showLogin(); return; }
+  /*
+   * ┌─────────────────────────────────────────────────────────┐
+   * │  FIX #2 — RACE CONDITION GUARD                          │
+   * │  Verifica se já existe uma análise em andamento.        │
+   * │  Se sim, ignora o clique e avisa no console.            │
+   * └─────────────────────────────────────────────────────────┘
+   */
+  if(_isProcessing){
+    console.warn("[Jusaii] Swarm já em execução — clique duplo ignorado.");
+    return;
+  }
 
-  document.getElementById("output").innerHTML="";
+  const prompt = document.getElementById("txt").value.trim();
+  if(!prompt || prompt.length < 20){
+    alert("Descreva o caso com pelo menos 20 caracteres.");
+    return;
+  }
+  if(tipo === "premium" && !token){
+    alert("Faça login para usar o relatório premium.");
+    showLogin();
+    return;
+  }
+
+  /* Seta a trava ANTES de qualquer operação assíncrona */
+  _isProcessing = true;
+
+  document.getElementById("output").innerHTML = "";
   resetLog();
   setLoading(true);
 
   try{
     await warmUp();
-    if(tipo==="free") await analisarFree(prompt);
-    else await analisarPremiumSSE(prompt);
+    if(tipo === "free") await analisarFree(prompt);
+    else                await analisarPremiumSSE(prompt);
   }catch(err){
-    const msg = err.name==="TimeoutError"
+    const msg = err.name === "TimeoutError"
       ? "O servidor demorou muito para responder. Aguarde 30s e tente novamente."
-      : (err.message||"Erro desconhecido");
+      : (err.message || "Erro desconhecido");
     document.getElementById("output").innerHTML = `
       <div class="loader-card" style="border-color:rgba(255,110,110,0.60);">
         <div style="font-size:32px;margin-bottom:16px;">⚠</div>
@@ -1450,6 +1404,15 @@ async function analisar(tipo){
       </div>`;
     setStatus("Erro","error");
   }finally{
+    /*
+     * ┌─────────────────────────────────────────────────────────┐
+     * │  FIX #2 — LIBERA A TRAVA                               │
+     * │  O bloco finally garante que _isProcessing volte a     │
+     * │  false independentemente de sucesso ou erro, evitando  │
+     * │  que a UI fique travada permanentemente.                │
+     * └─────────────────────────────────────────────────────────┘
+     */
+    _isProcessing = false;
     setLoading(false);
   }
 }
@@ -1470,14 +1433,12 @@ async function analisarFree(prompt){
   if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.detail||`Erro ${res.status}`); }
   const d = await res.json();
 
-  // Show tribunal if returned
   if(d.tribunal_detectado){
     const tb = document.getElementById("tribunal-bar");
     document.getElementById("tribunal-name").textContent = d.tribunal_detectado;
     tb.classList.remove("hidden");
   }
 
-  out.innerHTML="";
   out.innerHTML = `
     <div class="free-card">
       <div class="free-label">⚖ Veredito — Juiz IA</div>
@@ -1504,14 +1465,16 @@ async function analisarFree(prompt){
 
 /* ──────────────────────────────────────────────
    PREMIUM — POLLING (padrão Wuzo)
-   Substitui SSE por: POST → job_id → GET /job/{id}
-   Elimina idle-timeout do Render que derrubava a
-   conexão SSE durante as chamadas longas ao LLM.
+   ─────────────────────────────────────────────
+   CORREÇÕES APLICADAS:
+     FIX #1 — Animação circular sem esgotar áreas
+     FIX #2 — Protegida pela trava em analisar()
+     FIX #3 — Texto do loader atualizado dinamicamente
 ────────────────────────────────────────────── */
 async function analisarPremiumSSE(prompt){
   const out = document.getElementById("output");
 
-  // ── Áreas para log animado durante o polling ─────────────────────
+  /* Lista de todas as 16 áreas — espelha exatamente os agentes do backend */
   const AREAS = [
     "DIREITO CIVIL","DIREITO PENAL","DIREITO TRABALHISTA",
     "DIREITO DE FAMÍLIA","DIREITO DO CONSUMIDOR","DIREITO TRIBUTÁRIO",
@@ -1520,9 +1483,23 @@ async function analisarPremiumSSE(prompt){
     "DIREITO À SAÚDE","DIREITO INTERNACIONAL","DIREITO ELEITORAL","DIREITO AGRÁRIO",
   ];
 
-  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Iniciando Swarm...</div></div>`;
+  /*
+   * ┌─────────────────────────────────────────────────────────┐
+   * │  FIX #3 — LOADER COM ID PARA ATUALIZAÇÃO DINÂMICA      │
+   * │  O elemento principal (#loader-status-text) e o sub-    │
+   * │  texto (#loader-area-text) recebem IDs únicos para que  │
+   * │  possamos atualizar o conteúdo a cada ciclo do poll,    │
+   * │  sem recriar o DOM inteiro.                             │
+   * └─────────────────────────────────────────────────────────┘
+   */
+  out.innerHTML = `
+    <div class="loader-card">
+      <div class="loader-ring"></div>
+      <div class="loader-text" id="loader-status-text">Iniciando Swarm...</div>
+      <div class="loader-sub"  id="loader-area-text">Preparando 16 especialistas Quantum Jurist…</div>
+    </div>`;
 
-  // ── PASSO 1: POST — dispara o job e recebe job_id imediatamente ──
+  /* ── PASSO 1: POST — dispara o job e recebe job_id imediatamente ── */
   const startRes = await _fetchWithTimeout(
     API+"/api/analyze/premium",
     { method:"POST",
@@ -1533,8 +1510,8 @@ async function analisarPremiumSSE(prompt){
 
   if(!startRes.ok){
     const e = await startRes.json().catch(()=>({}));
-    if(startRes.status===402){
-      out.innerHTML=`
+    if(startRes.status === 402){
+      out.innerHTML = `
         <div class="loader-card" style="border-color:rgba(245,200,50,0.65);">
           <div style="font-size:32px;margin-bottom:16px;">⚠</div>
           <div class="loader-text" style="color:#fcd34d;">Sem créditos premium</div>
@@ -1542,91 +1519,135 @@ async function analisarPremiumSSE(prompt){
         </div>`;
       return;
     }
-    throw new Error(e.detail||`Erro ${startRes.status}`);
+    throw new Error(e.detail || `Erro ${startRes.status}`);
   }
 
-  const startData  = await startRes.json();
-  const jobId      = startData.job_id;
-  let   tribunal   = startData.tribunal_detectado || "";
+  const startData = await startRes.json();
+  const jobId     = startData.job_id;
+  let   tribunal  = startData.tribunal_detectado || "";
 
-  // Mostra tribunal detectado imediatamente
+  /* Mostra tribunal detectado imediatamente */
   if(tribunal){
     document.getElementById("tribunal-name").textContent = tribunal;
     document.getElementById("tribunal-bar").classList.remove("hidden");
   }
 
-  // Inicia contadores de progresso e log
-  _agentTotal = 16; _agentDone = 0; updateProgress();
-  pushLog(`⚖ 16 especialistas Quantum Jurist iniciados. Tribunal: ${tribunal}`,"log-thinking");
+  /* Inicia contadores */
+  _agentTotal = 16;
+  _agentDone  = 0;
+  updateProgress();
+  pushLog(`⚖ 16 especialistas Quantum Jurist iniciados. Tribunal: ${tribunal}`, "log-thinking");
 
-  // ── PASSO 2: POLLING — consulta /api/job/{id} até concluir ──────
-  // Mesmo padrão do Wuzo: cada poll é uma requisição curta que retorna
-  // imediatamente, sem manter conexão aberta — sem risco de idle timeout.
-  const POLL_INTERVAL_MS = 3000;  // 3 s entre polls
-  const MAX_POLLS        = 120;   // 120 × 3 s = 6 min máximo
-  let   areaIdx          = 0;
-  let   lastLoggedArea   = -1;
+  /* ── PASSO 2: POLLING ─────────────────────────────────────────── */
+
+  const POLL_INTERVAL_MS = 3000;   // 3 s entre cada poll
+  const MAX_POLLS        = 120;    // 120 × 3 s = 6 min máximo
+
+  /*
+   * ┌─────────────────────────────────────────────────────────────────┐
+   * │  FIX #1 — CORREÇÃO DO LOOP DE ANIMAÇÃO                         │
+   * │                                                                 │
+   * │  PROBLEMA ORIGINAL:                                             │
+   * │    areaIdx = Math.min(poll * 2, AREAS.length - 1)              │
+   * │    Com poll=8 → 8×2=16 → índice trava em 15 para sempre.       │
+   * │    Em ~24 segundos a animação silenciava completamente.         │
+   * │                                                                 │
+   * │  SOLUÇÃO:                                                       │
+   * │    Usamos módulo (%) para criar um loop circular infinito:      │
+   * │      currentAreaIdx = Math.floor(poll / POLLS_PER_AREA)        │
+   * │                        % AREAS.length                          │
+   * │    Com POLLS_PER_AREA=2 cada área aparece por 6s, e após       │
+   * │    cobertura completa das 16 áreas (~96s) o ciclo recomeça     │
+   * │    do índice 0 — garantindo animação até o job terminar.       │
+   * │                                                                 │
+   * │  FASES DE FEEDBACK:                                             │
+   * │    0–60s  → "Consultando: [ÁREA]" (animação circular)          │
+   * │    60–120s → "Advogado do Diabo executando contraditório"       │
+   * │    120s+  → "Juiz IA deliberando veredito final"                │
+   * └─────────────────────────────────────────────────────────────────┘
+   */
+  const POLLS_PER_AREA     = 2;  // avança 1 área a cada 2 polls (6s por área)
+  let   lastLoggedAreaIdx  = -1; // evita logar a mesma área duas vezes seguidas
 
   for(let poll = 0; poll < MAX_POLLS; poll++){
+
+    /* Aguarda o intervalo antes de fazer o próximo poll */
     await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
 
-    // Animação de log: avança uma área por poll enquanto aguarda
-    if(areaIdx < AREAS.length && areaIdx !== lastLoggedArea){
-      pushLog(`[${AREAS[areaIdx]}]: Analisando...`,"log-thinking");
-      lastLoggedArea = areaIdx;
+    /* ── FIX #1: cálculo do índice de área com wrap circular ──── */
+    const linearStep     = Math.floor(poll / POLLS_PER_AREA);
+    const currentAreaIdx = linearStep % AREAS.length;
+    const currentArea    = AREAS[currentAreaIdx];
+    const elapsed        = (poll + 1) * POLL_INTERVAL_MS / 1000; // segundos
+
+    /* Loga no Singularity Log apenas quando a área muda */
+    if(currentAreaIdx !== lastLoggedAreaIdx){
+      pushLog(`[${currentArea}]: Analisando...`, "log-thinking");
+      lastLoggedAreaIdx = currentAreaIdx;
     }
 
+    /*
+     * ── FIX #3: atualiza os dois elementos de texto do loader ──
+     * loader-status-text → fase atual (área / contraditório / juiz)
+     * loader-area-text   → detalhe de progresso numérico
+     */
+    const statusEl = document.getElementById("loader-status-text");
+    const areaEl   = document.getElementById("loader-area-text");
+
+    if(statusEl && areaEl){
+      if(elapsed < 60){
+        /* Fase 1 — consulta dos 16 especialistas */
+        statusEl.textContent = `Consultando: ${currentArea}`;
+        const areaNum = (linearStep % AREAS.length) + 1;
+        areaEl.textContent   = `Área ${areaNum} de 16 · ${Math.round(elapsed)}s`;
+      } else if(elapsed < 120){
+        /* Fase 2 — Advogado do Diabo */
+        statusEl.textContent = "Advogado do Diabo — Contraditório Obrigatório";
+        areaEl.textContent   = `Revisando pareceres dos especialistas · ${Math.round(elapsed)}s`;
+      } else {
+        /* Fase 3 — Juiz IA delibera */
+        statusEl.textContent = "Juiz IA — Deliberando veredito final";
+        areaEl.textContent   = `Ponderando ${AREAS.length} pareceres + contraditório · ${Math.round(elapsed)}s`;
+      }
+    }
+
+    /* ── Faz o poll de status do job ─────────────────────────── */
     let pollRes;
     try{
       pollRes = await _fetchWithTimeout(
-        API+`/api/job/${jobId}`,
+        API + `/api/job/${jobId}`,
         { headers:{"Authorization":`Bearer ${token}`} },
         15000
       );
     }catch(netErr){
-      // Falha de rede no poll — não desiste, tenta no próximo ciclo
-      pushLog(`⚠ Poll ${poll+1}: falha de rede (${netErr.message}), tentando novamente...`,"log-skip");
+      /* Falha de rede transitória — não desiste, tenta no próximo ciclo */
+      pushLog(`⚠ Poll ${poll+1}: falha de rede (${netErr.message}), tentando novamente...`, "log-skip");
       continue;
     }
 
-    if(pollRes.status === 202){
-      // Ainda processando — avança animação e continua polling
-      const elapsed = (poll+1) * POLL_INTERVAL_MS / 1000;
-      if(elapsed < 45)       areaIdx = Math.min(poll * 2,      AREAS.length - 1);
-      else if(elapsed < 90)  areaIdx = Math.min(AREAS.length - 1, poll);
-      else { // fase do Juiz IA
-        if(areaIdx < AREAS.length){
-          // Marca todos como concluídos no log
-          for(let i = _agentDone; i < 16; i++){
-            pushLog(`[${AREAS[i]}]: ✓`,"log-done");
-            _agentDone++; updateProgress();
-          }
-          areaIdx = AREAS.length; // não loga mais áreas
-        }
-        pushLog(`[JUIZ IA]: Deliberando...`,"log-judge");
-      }
-      continue;
-    }
+    /* 202 = ainda processando, continua no loop */
+    if(pollRes.status === 202) continue;
 
+    /* Erro de servidor */
     if(!pollRes.ok){
       const e = await pollRes.json().catch(()=>({}));
-      throw new Error(e.detail||`Erro no job: ${pollRes.status}`);
+      throw new Error(e.detail || `Erro no job: ${pollRes.status}`);
     }
 
-    // ── JOB CONCLUÍDO ─────────────────────────────────────────────
+    /* ── JOB CONCLUÍDO ─────────────────────────────────────────── */
     const d = await pollRes.json();
 
-    // Completa os logs de agentes com dados reais
+    /* Completa os logs com dados reais vindos do backend */
     const agents = d.agents || [];
     _agentDone = 0; updateProgress();
     for(const ag of agents){
-      pushLog(`[${(ag.area||"").toUpperCase()}]: ✓ ${ag.duration_ms||0}ms`,"log-done");
+      pushLog(`[${(ag.area||"").toUpperCase()}]: ✓ ${ag.duration_ms||0}ms`, "log-done");
       _agentDone++; updateProgress();
     }
-    pushLog(`[ADVOGADO DO DIABO]: Contraditório executado`,"log-judge");
-    pushLog(`⬡ Jusaii Score calculado: ${(d.jusaii_score||0).toFixed(0)}/100`,"log-score");
-    pushLog(`[JUIZ IA]: Deliberação concluída`,"log-judge");
-    pushLog(`⚖ Veredito final gerado.`,"log-verdict");
+    pushLog(`[ADVOGADO DO DIABO]: Contraditório executado`, "log-judge");
+    pushLog(`⬡ Jusaii Score calculado: ${(d.jusaii_score||0).toFixed(0)}/100`, "log-score");
+    pushLog(`[JUIZ IA]: Deliberação concluída`, "log-judge");
+    pushLog(`⚖ Veredito final gerado.`, "log-verdict");
 
     tribunal = d.tribunal || tribunal;
     if(tribunal){
@@ -1636,18 +1657,18 @@ async function analisarPremiumSSE(prompt){
 
     updateUI();
     renderPremiumResult(
-      d.veredito || "",
+      d.veredito         || "",
       agents,
       d.analysis_id,
-      d.veto_triggered || false,
-      d.jusaii_score   || 0,
+      d.veto_triggered   || false,
+      d.jusaii_score     || 0,
       tribunal,
       out
     );
-    return; // sucesso — sai do loop
+    return; /* sucesso — sai do loop de polling */
   }
 
-  // Esgotou todos os polls sem resposta
+  /* Esgotou todos os polls sem resposta do backend */
   throw new Error("Análise expirou após 6 minutos. Tente novamente.");
 }
 
@@ -1655,32 +1676,29 @@ async function analisarPremiumSSE(prompt){
    RENDER PREMIUM
 ────────────────────────────────────────────── */
 function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribunal, out){
-  out.innerHTML="";
+  out.innerHTML = "";
 
-  // Score ring
-  if(!isVeto && score>0){
+  if(!isVeto && score > 0){
     const scoreCard = buildScoreCard(score, tribunal, results.length);
     out.appendChild(scoreCard);
-    // Animate arc after append
     setTimeout(()=>{
       const arc = scoreCard.querySelector(".score-arc");
-      const pct = Math.min(score/100,1);
-      arc.style.strokeDashoffset = 314*(1-pct);
-    },100);
+      const pct = Math.min(score/100, 1);
+      arc.style.strokeDashoffset = 314 * (1 - pct);
+    }, 100);
   }
 
-  // Verdict card
   const pdfBtn = analysisId
     ? `<button class="btn-pdf" onclick="downloadPDF(${analysisId})"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>PDF</button>`
     : "";
   const vCard = document.createElement("div");
-  vCard.className = `verdict-card ${isVeto?"veto":"favorable"}`;
+  vCard.className = `verdict-card ${isVeto ? "veto" : "favorable"}`;
   vCard.innerHTML = `
     <div class="verdict-header">
       <div class="verdict-title-group">
-        <span class="verdict-icon">${isVeto?"🚨":"⚖"}</span>
+        <span class="verdict-icon">${isVeto ? "🚨" : "⚖"}</span>
         <div>
-          <div class="verdict-title">${isVeto?"Veredito de Veto":"Veredito do Juiz IA"}</div>
+          <div class="verdict-title">${isVeto ? "Veredito de Veto" : "Veredito do Juiz IA"}</div>
           <div class="verdict-subtitle">Quantum Jurist — Deliberação Ponderada</div>
         </div>
       </div>
@@ -1690,12 +1708,11 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
     <div class="verdict-text">${esc(verdict)}</div>`;
   out.appendChild(vCard);
 
-  // Agent cards
-  const agentsDone = results.filter(r=>r.type==="agent_done");
+  const agentsDone = results.filter(r => r.type === "agent_done");
   if(agentsDone.length){
     const section = document.createElement("div");
-    section.className="agents-section";
-    section.innerHTML=`
+    section.className = "agents-section";
+    section.innerHTML = `
       <div class="agents-header">
         <span class="section-title">Pareceres dos Especialistas</span>
         <span class="agents-count" style="font-family:var(--font-mono)">${agentsDone.length} / 16</span>
@@ -1703,22 +1720,18 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
       <div class="agents-grid" id="agents-grid"></div>`;
     out.appendChild(section);
     const grid = section.querySelector("#agents-grid");
-    agentsDone.forEach((r,i)=>{
-      const card = buildAgentCard(r,i);
-      grid.appendChild(card);
-    });
+    agentsDone.forEach((r,i)=>{ grid.appendChild(buildAgentCard(r,i)); });
   }
 
-  // ── Analysis action buttons (PDF + Share) — safe closure approach ──
   const actions = document.createElement("div");
   actions.className = "analysis-actions fade-up";
 
   if(analysisId){
-    const pdfBtn = document.createElement("button");
-    pdfBtn.className = "btn-dl-pdf";
-    pdfBtn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Baixar PDF`;
-    pdfBtn.onclick = () => downloadPDF(analysisId);
-    actions.appendChild(pdfBtn);
+    const pdfBtn2 = document.createElement("button");
+    pdfBtn2.className = "btn-dl-pdf";
+    pdfBtn2.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Baixar PDF`;
+    pdfBtn2.onclick   = () => downloadPDF(analysisId);
+    actions.appendChild(pdfBtn2);
   }
 
   if(!isVeto && score > 0){
@@ -1735,19 +1748,14 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
 
 function buildScoreCard(score, tribunal, agentCount){
   const div = document.createElement("div");
-  div.className="score-panel";
-
+  div.className = "score-panel";
   let label="Alto Risco Jurídico", chipClass="chip-red";
   if(score>=75){ label="Alta Probabilidade de Êxito"; chipClass="chip-green"; }
   else if(score>=50){ label="Viável com Ressalvas"; chipClass="chip-amber"; }
-
-  // Arc color
-  let arcColor="#2563eb";
+  let arcColor="#ef4444";
   if(score>=75) arcColor="#10b981";
   else if(score>=50) arcColor="#f59e0b";
-  else arcColor="#ef4444";
-
-  div.innerHTML=`
+  div.innerHTML = `
     <div class="score-ring-wrap">
       <svg class="score-svg" viewBox="0 0 120 120">
         <circle class="score-track" cx="60" cy="60" r="50"/>
@@ -1762,7 +1770,7 @@ function buildScoreCard(score, tribunal, agentCount){
       <div class="score-meta-title">Jusaii Score</div>
       <div class="score-chips">
         <span class="chip ${chipClass}">${label}</span>
-        ${tribunal?`<span class="chip chip-blue">${tribunal}</span>`:""}
+        ${tribunal ? `<span class="chip chip-blue">${tribunal}</span>` : ""}
         <span class="chip chip-muted">${agentCount} especialistas</span>
       </div>
       <div class="score-desc">Score calculado com base na confiança ponderada dos 16 agentes, contraditório do Advogado do Diabo e completude da análise.</div>
@@ -1772,34 +1780,30 @@ function buildScoreCard(score, tribunal, agentCount){
 
 function buildAgentCard(r, i){
   const card = document.createElement("div");
-  card.className="agent-card";
+  card.className = "agent-card";
   card.style.setProperty("--i", i);
-
-  const risk = r.risk_level||"MÉDIO";
-  const conf = r.confidence||0;
-
-  card.innerHTML=`
+  const risk = r.risk_level || "MÉDIO";
+  const conf = r.confidence || 0;
+  card.innerHTML = `
     <div class="agent-summary" onclick="toggleAgent(this)">
       <span class="agent-num">${String(i+1).padStart(2,"0")}</span>
       <span class="agent-name">${esc(r.area||"")}</span>
-      ${conf>0?`<span class="agent-conf"><span class="conf-val">${conf}%</span></span>`:""}
+      ${conf>0 ? `<span class="agent-conf"><span class="conf-val">${conf}%</span></span>` : ""}
       <span class="risk-pill risk-${risk}">${risk}</span>
       <span class="agent-chevron">▾</span>
     </div>
     <div class="agent-body">
-      ${r.specialty?`<div class="agent-specialty">${esc(r.specialty)}</div>`:""}
-      ${r.top_risk?`<div class="agent-risk-detail">⚠ ${esc(r.top_risk)}</div>`:""}
+      ${r.specialty    ? `<div class="agent-specialty">${esc(r.specialty)}</div>`          : ""}
+      ${r.top_risk     ? `<div class="agent-risk-detail">⚠ ${esc(r.top_risk)}</div>`      : ""}
       <div class="agent-analysis">${esc(r.analysis||"")}</div>
-      ${r.duration_ms?`<div class="agent-duration">${r.duration_ms}ms</div>`:""}
+      ${r.duration_ms  ? `<div class="agent-duration">${r.duration_ms}ms</div>`            : ""}
     </div>`;
-
-  if(i===0) card.classList.add("open");
+  if(i === 0) card.classList.add("open");
   return card;
 }
 
 function toggleAgent(summary){
-  const card = summary.closest(".agent-card");
-  card.classList.toggle("open");
+  summary.closest(".agent-card").classList.toggle("open");
 }
 
 /* ──────────────────────────────────────────────
@@ -1808,15 +1812,13 @@ function toggleAgent(summary){
 async function downloadPDF(id){
   if(!token){ alert("Faça login para baixar o PDF."); return; }
   try{
-    const res=await fetch(API+`/api/report/pdf/${id}`,{
-      headers:{Authorization:`Bearer ${token}`},
-      signal:AbortSignal.timeout(30000)
-    });
+    const res = await fetch(API+`/api/report/pdf/${id}`,
+      { headers:{Authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(30000) });
     if(!res.ok){ alert("Erro ao baixar PDF."); return; }
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download=`jusaii_${id}.pdf`;
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = `jusaii_${id}.pdf`;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
   }catch{ alert("Erro ao baixar PDF."); }
@@ -1828,30 +1830,33 @@ async function downloadPDF(id){
 async function verHistorico(){
   if(!token) return;
   const out = document.getElementById("output");
-  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Carregando histórico...</div></div>`;
+  out.innerHTML = `<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Carregando histórico...</div></div>`;
   try{
-    const res=await fetch(API+"/api/analyses",{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(20000)});
-    const data=await res.json();
-    if(!Array.isArray(data)||!data.length){
-      out.innerHTML=`<div class="loader-card"><div class="loader-text" style="color:rgba(255,255,255,1.00);">Nenhum relatório encontrado.</div></div>`;
+    const res  = await fetch(API+"/api/analyses",
+      { headers:{Authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(20000) });
+    const data = await res.json();
+    if(!Array.isArray(data) || !data.length){
+      out.innerHTML = `<div class="loader-card"><div class="loader-text" style="color:rgba(255,255,255,1.00);">Nenhum relatório encontrado.</div></div>`;
       return;
     }
-    out.innerHTML=`<div class="section-title" style="margin-bottom:20px;display:block;">📋 Seus Relatórios</div>`;
+    out.innerHTML = `<div class="section-title" style="margin-bottom:20px;display:block;">📋 Seus Relatórios</div>`;
     data.forEach(r=>{
-      const card=document.createElement("div");
-      card.className="agent-card fade-up";
-      card.style.marginBottom="10px";
-      card.innerHTML=`
+      const card = document.createElement("div");
+      card.className = "agent-card fade-up";
+      card.style.marginBottom = "10px";
+      card.innerHTML = `
         <div class="agent-summary" style="cursor:default;">
           <span class="agent-name" style="flex:1">${esc(r.prompt)}</span>
-          ${r.jusaii_score>0?`<span class="chip chip-blue" style="flex-shrink:0">${r.jusaii_score} pts</span>`:""}
-          ${r.tribunal?`<span class="chip chip-muted" style="flex-shrink:0">${esc(r.tribunal)}</span>`:""}
+          ${r.jusaii_score>0 ? `<span class="chip chip-blue" style="flex-shrink:0">${r.jusaii_score} pts</span>` : ""}
+          ${r.tribunal      ? `<span class="chip chip-muted" style="flex-shrink:0">${esc(r.tribunal)}</span>`    : ""}
           <span class="agent-conf" style="flex-shrink:0">${r.created_at||""}</span>
           <button class="btn-pdf" onclick="downloadPDF(${r.id})" style="flex-shrink:0;margin-left:8px;">📄 PDF</button>
         </div>`;
       out.appendChild(card);
     });
-  }catch{ out.innerHTML=`<div class="loader-card"><div class="loader-text" style="color:#fca5a5;">Erro ao carregar histórico.</div></div>`; }
+  }catch{
+    out.innerHTML = `<div class="loader-card"><div class="loader-text" style="color:#fca5a5;">Erro ao carregar histórico.</div></div>`;
+  }
 }
 
 /* ──────────────────────────────────────────────
@@ -1860,41 +1865,31 @@ async function verHistorico(){
 async function comprar(){
   if(!token){ alert("Faça login primeiro."); showLogin(); return; }
   try{
-    const res=await fetch(API+"/api/create-checkout-session",{
-      method:"POST", headers:{Authorization:`Bearer ${token}`},
-      signal:AbortSignal.timeout(20000)
-    });
-    const d=await res.json();
-    if(res.ok&&d.url) window.location.href=d.url;
-    else alert(d.detail||"Erro ao iniciar pagamento.");
+    const res = await fetch(API+"/api/create-checkout-session",
+      { method:"POST", headers:{Authorization:`Bearer ${token}`}, signal:AbortSignal.timeout(20000) });
+    const d   = await res.json();
+    if(res.ok && d.url) window.location.href = d.url;
+    else alert(d.detail || "Erro ao iniciar pagamento.");
   }catch{ alert("Erro de conexão."); }
 }
 
 /* ──────────────────────────────────────────────
    ADMIN PANEL
 ────────────────────────────────────────────── */
-let _allUsers = [];
+let _allUsers    = [];
 let _adminSecret = null;
 
 function openAdmin(){
   document.getElementById("admin-overlay").classList.add("open");
-  document.body.style.overflow="hidden";
+  document.body.style.overflow = "hidden";
   const secret = _adminSecret || localStorage.getItem("admin_secret") || "";
-  if(!secret){
-    // Show inline auth form instead of prompt()
-    showAdminAuthBanner();
-    return;
-  }
+  if(!secret){ showAdminAuthBanner(); return; }
   loadAdminStats();
-  if(document.getElementById("tab-users").classList.contains("visible")){
-    loadUsers();
-  }
+  if(document.getElementById("tab-users").classList.contains("visible")) loadUsers();
 }
 
 function showAdminAuthBanner(){
-  // Inject a one-time auth form into the stats section
-  const statsEl = document.getElementById("tab-stats");
-  statsEl.innerHTML = `
+  document.getElementById("tab-stats").innerHTML = `
     <div style="padding:32px 0;text-align:center;">
       <div style="font-size:28px;margin-bottom:12px;">🔐</div>
       <div style="font-size:14px;color:var(--ice);margin-bottom:6px;font-weight:600;">Autenticação Necessária</div>
@@ -1902,31 +1897,25 @@ function showAdminAuthBanner(){
       <input class="admin-input" id="secret-input" type="password" placeholder="ADMIN_SECRET…"
         style="max-width:300px;margin:0 auto 12px;display:block;"
         onkeydown="if(event.key==='Enter') submitAdminSecret()">
-      <button class="admin-btn admin-btn-purple" onclick="submitAdminSecret()" style="margin:0 auto;display:block;padding:10px 28px;">
-        Entrar
-      </button>
+      <button class="admin-btn admin-btn-purple" onclick="submitAdminSecret()" style="margin:0 auto;display:block;padding:10px 28px;">Entrar</button>
       <div class="admin-msg" id="secret-err" style="max-width:300px;margin:12px auto 0;"></div>
     </div>`;
-  // Also blank other sections stats
   document.getElementById("tab-users").innerHTML = `<div class="users-loader" style="color:var(--mist);">Faça login no painel para ver os usuários.</div>`;
 }
 
 async function submitAdminSecret(){
   const s = (document.getElementById("secret-input")||{}).value || "";
   if(!s) return;
-  // Test it
-  const testRes = await fetch(API+"/api/admin/stats",{
-    headers:{"Content-Type":"application/json","Authorization":`Bearer ${s}`},
-    signal:AbortSignal.timeout(10000)
-  }).catch(()=>null);
-  if(!testRes || testRes.status === 403){
+  const testRes = await fetch(API+"/api/admin/stats",
+    { headers:{"Content-Type":"application/json","Authorization":`Bearer ${s}`},
+      signal:AbortSignal.timeout(10000) }).catch(()=>null);
+  if(!testRes || testRes.status===403){
     const errEl = document.getElementById("secret-err");
     if(errEl){ errEl.textContent="❌ Senha incorreta."; errEl.className="admin-msg error"; errEl.style.display="block"; }
     return;
   }
   _adminSecret = s;
   localStorage.setItem("admin_secret", s);
-  // Restore stats section and load data
   document.getElementById("tab-stats").innerHTML = `
     <div class="stats-grid" id="admin-stats-grid">
       <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-lbl">Usuários</div></div>
@@ -1944,9 +1933,10 @@ async function submitAdminSecret(){
     <div id="users-list"><div class="users-loader">Carregando usuários…</div></div>`;
   loadAdminStats();
 }
+
 function closeAdmin(){
   document.getElementById("admin-overlay").classList.remove("open");
-  document.body.style.overflow="";
+  document.body.style.overflow = "";
 }
 function handleAdminOverlayClick(e){
   if(e.target===document.getElementById("admin-overlay")) closeAdmin();
@@ -1956,7 +1946,7 @@ function switchAdminTab(tab, btn){
   document.querySelectorAll(".admin-section").forEach(s=>s.classList.remove("visible"));
   btn.classList.add("active");
   document.getElementById("tab-"+tab).classList.add("visible");
-  if(tab==="users"&&!_allUsers.length) loadUsers();
+  if(tab==="users" && !_allUsers.length) loadUsers();
   if(tab==="stats") loadAdminStats();
 }
 
@@ -1967,67 +1957,63 @@ function _adminHeaders(){
 
 async function loadAdminStats(){
   try{
-    const res=await fetch(API+"/api/admin/stats",{headers:_adminHeaders(),signal:AbortSignal.timeout(15000)});
-    if(res.status===403){
-      _adminSecret=null; localStorage.removeItem("admin_secret");
-      showAdminAuthBanner(); return;
-    }
-    const d=await res.json();
-    document.getElementById("s-users").textContent=d.total_users??0;
-    document.getElementById("s-analyses").textContent=d.analyses_today??0;
-    document.getElementById("s-total").textContent=d.total_analyses??0;
-    document.getElementById("s-jobs").textContent=d.active_jobs??0;
-    document.getElementById("s-agents").textContent=d.max_concurrent_jobs??0;
-    document.getElementById("s-providers").textContent=(d.providers||[]).length || "—";
-    // Features
+    const res = await fetch(API+"/api/admin/stats",
+      { headers:_adminHeaders(), signal:AbortSignal.timeout(15000) });
+    if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
+    const d = await res.json();
+    document.getElementById("s-users").textContent     = d.total_users       ?? 0;
+    document.getElementById("s-analyses").textContent  = d.analyses_today    ?? 0;
+    document.getElementById("s-total").textContent     = d.total_analyses    ?? 0;
+    document.getElementById("s-jobs").textContent      = d.active_jobs       ?? 0;
+    document.getElementById("s-agents").textContent    = d.max_concurrent_jobs ?? 0;
+    document.getElementById("s-providers").textContent = (d.providers||[]).length || "—";
     const fg = document.getElementById("features-grid");
-    fg.innerHTML="";
-    const feats = d.features||{};
+    fg.innerHTML = "";
+    const feats = d.features || {};
     Object.entries(feats).forEach(([k,v])=>{
-      const el=document.createElement("div");
-      el.className="feat-item";
-      const label=k.replace(/_/g," ");
-      el.innerHTML=`<span>${label}</span><span class="admin-badge ${v?"badge-on":"badge-off"}">${v?"ON":"OFF"}</span>`;
+      const el = document.createElement("div");
+      el.className = "feat-item";
+      el.innerHTML = `<span>${k.replace(/_/g," ")}</span><span class="admin-badge ${v?"badge-on":"badge-off"}">${v?"ON":"OFF"}</span>`;
       fg.appendChild(el);
     });
-    // Circuit breaker status
-    if(d.circuit_breaker!==undefined){
-      const el=document.createElement("div");
-      el.className="feat-item";
-      el.innerHTML=`<span>circuit breaker</span><span class="admin-badge ${d.circuit_breaker?"badge-on":"badge-off"}">${d.circuit_breaker?"ON":"OFF"}</span>`;
+    if(d.circuit_breaker !== undefined){
+      const el = document.createElement("div");
+      el.className = "feat-item";
+      el.innerHTML = `<span>circuit breaker</span><span class="admin-badge ${d.circuit_breaker?"badge-on":"badge-off"}">${d.circuit_breaker?"ON":"OFF"}</span>`;
       fg.appendChild(el);
     }
   }catch(e){ console.error(e); }
 }
 
 async function loadUsers(){
-  const list=document.getElementById("users-list");
-  list.innerHTML=`<div class="users-loader">⏳ Carregando...</div>`;
+  const list = document.getElementById("users-list");
+  list.innerHTML = `<div class="users-loader">⏳ Carregando...</div>`;
   try{
-    const res=await fetch(API+"/api/admin/users",{headers:_adminHeaders(),signal:AbortSignal.timeout(20000)});
+    const res = await fetch(API+"/api/admin/users",
+      { headers:_adminHeaders(), signal:AbortSignal.timeout(20000) });
     if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
-    _allUsers=await res.json();
+    _allUsers = await res.json();
     renderUsers(_allUsers);
   }catch(e){
-    list.innerHTML=`<div class="users-loader" style="color:#f87171;">Erro ao carregar usuários</div>`;
+    list.innerHTML = `<div class="users-loader" style="color:#f87171;">Erro ao carregar usuários</div>`;
   }
 }
 
 function filterUsers(){
-  const q=document.getElementById("user-search").value.toLowerCase().trim();
+  const q = document.getElementById("user-search").value.toLowerCase().trim();
   if(!q){ renderUsers(_allUsers); return; }
   renderUsers(_allUsers.filter(u=>u.email.toLowerCase().includes(q)||String(u.id).includes(q)));
 }
 
 function renderUsers(users){
-  const list=document.getElementById("users-list");
+  const list = document.getElementById("users-list");
   if(!users.length){ list.innerHTML=`<div class="users-loader">Nenhum usuário encontrado.</div>`; return; }
-  list.innerHTML="";
+  list.innerHTML = "";
   users.forEach(u=>{
-    const row=document.createElement("div");
-    row.className="user-row";
-    row.id=`user-row-${u.id}`;
-    row.innerHTML=`
+    const row = document.createElement("div");
+    row.className = "user-row";
+    row.id = `user-row-${u.id}`;
+    row.innerHTML = `
       <div class="user-row-head" onclick="toggleUserRow(${u.id})">
         <div class="user-email">${esc(u.email)}</div>
         <div class="user-meta">💎 ${u.premium_credits} &nbsp;|&nbsp; 🆓 ${u.credits}</div>
@@ -2052,54 +2038,57 @@ function renderUsers(users){
 }
 
 function toggleUserRow(id){
-  const row=document.getElementById(`user-row-${id}`);
-  row.classList.toggle("expanded");
+  document.getElementById(`user-row-${id}`).classList.toggle("expanded");
 }
 
 function showUserMsg(id, msg, isError=false){
-  const el=document.getElementById(`msg-${id}`);
-  el.textContent=msg;
-  el.className="admin-msg"+(isError?" error":"");
-  el.style.display="block";
-  setTimeout(()=>{el.style.display="none";},4000);
+  const el = document.getElementById(`msg-${id}`);
+  el.textContent = msg;
+  el.className   = "admin-msg" + (isError ? " error" : "");
+  el.style.display = "block";
+  setTimeout(()=>{ el.style.display="none"; }, 4000);
 }
 
 async function adminSetCredits(op, uid){
-  const inputId = op==="add"?`amt-add-${uid}`:`amt-rem-${uid}`;
-  const amount=parseInt(document.getElementById(inputId).value)||1;
-  const url=op==="add"?"/api/admin/add-credits":"/api/admin/remove-credits";
+  const inputId = op==="add" ? `amt-add-${uid}` : `amt-rem-${uid}`;
+  const amount  = parseInt(document.getElementById(inputId).value) || 1;
+  const url     = op==="add" ? "/api/admin/add-credits" : "/api/admin/remove-credits";
   try{
-    const res=await fetch(API+url,{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid,amount}),signal:AbortSignal.timeout(15000)});
+    const res = await fetch(API+url,
+      { method:"POST", headers:_adminHeaders(), body:JSON.stringify({user_id:uid,amount}),
+        signal:AbortSignal.timeout(15000) });
     if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
-    const d=await res.json();
+    const d = await res.json();
     if(res.ok){
-      showUserMsg(uid,`✓ ${d.message} · Saldo: ${d.new_balance}`);
-      const u=_allUsers.find(x=>x.id===uid);
-      if(u){ u.premium_credits=d.new_balance; }
-    }else showUserMsg(uid,d.detail||"Erro",true);
-  }catch{ showUserMsg(uid,"Erro de conexão",true); }
+      showUserMsg(uid, `✓ ${d.message} · Saldo: ${d.new_balance}`);
+      const u = _allUsers.find(x=>x.id===uid);
+      if(u) u.premium_credits = d.new_balance;
+    } else showUserMsg(uid, d.detail||"Erro", true);
+  }catch{ showUserMsg(uid, "Erro de conexão", true); }
 }
 
 async function adminResetFree(uid){
   try{
-    const res=await fetch(API+"/api/admin/reset-free-credits",{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid}),signal:AbortSignal.timeout(15000)});
+    const res = await fetch(API+"/api/admin/reset-free-credits",
+      { method:"POST", headers:_adminHeaders(), body:JSON.stringify({user_id:uid}),
+        signal:AbortSignal.timeout(15000) });
     if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
-    const d=await res.json();
-    if(res.ok) showUserMsg(uid,"✓ "+d.message);
-    else showUserMsg(uid,d.detail||"Erro",true);
-  }catch{ showUserMsg(uid,"Erro de conexão",true); }
+    const d = await res.json();
+    if(res.ok) showUserMsg(uid, "✓ "+d.message);
+    else showUserMsg(uid, d.detail||"Erro", true);
+  }catch{ showUserMsg(uid, "Erro de conexão", true); }
 }
 
 async function adminDeleteUser(uid, email){
   if(!confirm(`Deletar permanentemente ${email} e todas as suas análises?\n\nEssa ação é irreversível.`)) return;
   try{
-    const res=await fetch(API+"/api/admin/delete-user",{method:"POST",headers:_adminHeaders(),body:JSON.stringify({user_id:uid}),signal:AbortSignal.timeout(15000)});
+    const res = await fetch(API+"/api/admin/delete-user",
+      { method:"POST", headers:_adminHeaders(), body:JSON.stringify({user_id:uid}),
+        signal:AbortSignal.timeout(15000) });
     if(res.status===403){ _adminSecret=null; localStorage.removeItem("admin_secret"); showAdminAuthBanner(); return; }
-    const d=await res.json();
-    if(res.ok){
-      _allUsers=_allUsers.filter(u=>u.id!==uid);
-      renderUsers(_allUsers);
-    }else alert(d.detail||"Erro ao deletar");
+    const d = await res.json();
+    if(res.ok){ _allUsers=_allUsers.filter(u=>u.id!==uid); renderUsers(_allUsers); }
+    else alert(d.detail||"Erro ao deletar");
   }catch{ alert("Erro de conexão"); }
 }
 
@@ -2109,73 +2098,53 @@ async function adminDeleteUser(uid, email){
 let _shareData = {};
 
 function openShareCard(score, verdict, tribunal){
-  _shareData={score,verdict,tribunal};
-  const num=Math.round(score);
-
+  _shareData = {score, verdict, tribunal};
+  const num = Math.round(score);
   let color="#10b981", label="Alta Probabilidade de Êxito", chipBg="rgba(16,185,129,0.15)", chipColor="#34d399";
   if(score<50){ color="#ef4444"; label="Alto Risco Jurídico"; chipBg="rgba(239,68,68,0.12)"; chipColor="#f87171"; }
   else if(score<75){ color="#f59e0b"; label="Viável com Ressalvas"; chipBg="rgba(245,158,11,0.12)"; chipColor="#fbbf24"; }
-
-  document.getElementById("sc-score-num").textContent=num;
-  document.getElementById("sc-score-num").style.color=color;
-  document.getElementById("sc-score-label").textContent=label;
-  const chip=document.getElementById("sc-score-chip");
-  chip.textContent=num+" / 100";
-  chip.style.background=chipBg;chip.style.color=chipColor;
-  chip.style.border=`1px solid ${chipColor}33`;
-
-  const tChip=document.getElementById("sc-tribunal-chip");
+  document.getElementById("sc-score-num").textContent = num;
+  document.getElementById("sc-score-num").style.color = color;
+  document.getElementById("sc-score-label").textContent = label;
+  const chip = document.getElementById("sc-score-chip");
+  chip.textContent = num+" / 100"; chip.style.background=chipBg; chip.style.color=chipColor;
+  chip.style.border = `1px solid ${chipColor}33`;
+  const tChip = document.getElementById("sc-tribunal-chip");
   if(tribunal){ tChip.textContent=tribunal; tChip.style.display="inline-block";
-    tChip.style.background="rgba(37,99,235,0.12)";tChip.style.color="#60a5fa";
+    tChip.style.background="rgba(37,99,235,0.12)"; tChip.style.color="#60a5fa";
     tChip.style.border="1px solid rgba(37,99,235,0.25)";
-  }else tChip.style.display="none";
-
-  document.getElementById("sc-excerpt").textContent=verdict.slice(0,180)+(verdict.length>180?"…":"");
-  document.getElementById("sc-date").textContent=new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
-
+  } else tChip.style.display="none";
+  document.getElementById("sc-excerpt").textContent = verdict.slice(0,180)+(verdict.length>180?"…":"");
+  document.getElementById("sc-date").textContent = new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"});
   document.getElementById("share-modal").classList.add("open");
-  document.body.style.overflow="hidden";
+  document.body.style.overflow = "hidden";
 }
 
 function closeShareModal(){
   document.getElementById("share-modal").classList.remove("open");
-  document.body.style.overflow="";
+  document.body.style.overflow = "";
 }
-
 function handleShareModalClick(e){
   if(e.target===document.getElementById("share-modal")) closeShareModal();
 }
 
 function copyShareText(){
-  const s=_shareData;
-  const label=s.score>=75?"Alta Probabilidade de Êxito":s.score>=50?"Viável com Ressalvas":"Alto Risco Jurídico";
-  const text=`⚖ Jusaii — Quantum Legal Intelligence\n\nScore: ${Math.round(s.score)}/100 · ${label}${s.tribunal?" · "+s.tribunal:""}\n\n"${s.verdict.slice(0,200)}${s.verdict.length>200?"…":""}"\n\njusaii.com.br`;
+  const s = _shareData;
+  const label = s.score>=75 ? "Alta Probabilidade de Êxito" : s.score>=50 ? "Viável com Ressalvas" : "Alto Risco Jurídico";
+  const text = `⚖ Jusaii — Quantum Legal Intelligence\n\nScore: ${Math.round(s.score)}/100 · ${label}${s.tribunal?" · "+s.tribunal:""}\n\n"${s.verdict.slice(0,200)}${s.verdict.length>200?"…":""}"\n\njusaii.com.br`;
   navigator.clipboard.writeText(text).then(()=>alert("✓ Texto copiado!")).catch(()=>alert("Erro ao copiar"));
 }
 
 async function downloadShareImg(){
   const el = document.getElementById("share-card-el");
-  if(typeof html2canvas === "undefined"){
-    alert("Erro: html2canvas não carregou. Verifique sua conexão e recarregue a página.");
-    return;
-  }
+  if(typeof html2canvas === "undefined"){ alert("Erro: html2canvas não carregou."); return; }
   try{
-    const canvas = await html2canvas(el, {
-      backgroundColor: "#040918",
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
+    const canvas = await html2canvas(el, {backgroundColor:"#040918",scale:2,useCORS:true,logging:false});
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.download = `jusaii_score_${Math.round(_shareData.score||0)}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }catch(e){
-    console.error(e);
-    alert("Erro ao gerar imagem. Tente usar 'Copiar Texto'.");
-  }
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }catch(e){ console.error(e); alert("Erro ao gerar imagem. Tente usar 'Copiar Texto'."); }
 }
 
 /* ──────────────────────────────────────────────
@@ -2184,21 +2153,21 @@ async function downloadShareImg(){
 function showLogin(){
   closeModals();
   document.getElementById("modal-login").classList.add("active");
-  setTimeout(()=>document.getElementById("login-email").focus(),150);
+  setTimeout(()=>document.getElementById("login-email").focus(), 150);
 }
 function showRegister(){
   closeModals();
   document.getElementById("modal-register").classList.add("active");
-  setTimeout(()=>document.getElementById("reg-email").focus(),150);
+  setTimeout(()=>document.getElementById("reg-email").focus(), 150);
 }
 function closeModals(){
   document.querySelectorAll(".modal-overlay").forEach(m=>m.classList.remove("active"));
 }
 document.querySelectorAll(".modal-overlay").forEach(m=>{
-  m.addEventListener("click",e=>{ if(e.target===m) closeModals(); });
+  m.addEventListener("click", e=>{ if(e.target===m) closeModals(); });
 });
-document.getElementById("login-pw").addEventListener("keydown",e=>{ if(e.key==="Enter") login(); });
-document.getElementById("reg-pw").addEventListener("keydown",e=>{ if(e.key==="Enter") register(); });
+document.getElementById("login-pw").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+document.getElementById("reg-pw").addEventListener("keydown",   e=>{ if(e.key==="Enter") register(); });
 
 /* ──────────────────────────────────────────────
    UTILS
@@ -2206,14 +2175,13 @@ document.getElementById("reg-pw").addEventListener("keydown",e=>{ if(e.key==="En
 function esc(s){
   if(!s) return "";
   return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
     .replace(/\n/g,"<br>");
 }
 function showModalErr(el, msg){
-  el.textContent=msg;
-  el.style.display="block";
+  el.textContent   = msg;
+  el.style.display = "block";
+  el.style.color   = "#fca5a5";
 }
 
 /* INIT */
