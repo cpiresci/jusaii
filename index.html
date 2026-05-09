@@ -49,29 +49,17 @@ body{
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px;}
 
-/* ══════════════════════════════════════════════
-   CANVAS BACKGROUND
-══════════════════════════════════════════════ */
-#bg-canvas{
-  position:fixed;inset:0;z-index:0;
-  pointer-events:none;
-}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
 .noise-overlay{
   position:fixed;inset:0;z-index:1;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   pointer-events:none;opacity:.5;
 }
-.gradient-orb{
-  position:fixed;border-radius:50%;filter:blur(120px);
-  pointer-events:none;z-index:0;
-}
+.gradient-orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
 .orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,0.15),transparent 70%);top:-200px;left:-100px;}
 .orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(217,119,6,0.08),transparent 70%);bottom:-100px;right:-100px;}
 .orb-3{width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,0.1),transparent 70%);top:40%;left:60%;}
 
-/* ══════════════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════════════ */
 #app{
   position:relative;z-index:10;
   min-height:100vh;
@@ -79,9 +67,6 @@ body{
   padding:0 20px 80px;
 }
 
-/* ══════════════════════════════════════════════
-   HEADER
-══════════════════════════════════════════════ */
 header{
   width:100%;max-width:1100px;
   display:flex;justify-content:space-between;align-items:center;
@@ -102,13 +87,12 @@ header::after{
   background:linear-gradient(135deg,#fff 0%,#93c5fd 50%,var(--blue) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
-  position:relative;
 }
 .logo-sub{
   font-size:12px;font-weight:700;
   letter-spacing:.2em;
   color:rgba(255,255,255,0.9);
-  text-transform:uppercase;font-weight:700;
+  text-transform:uppercase;
   padding-left:3px;
 }
 .header-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end;}
@@ -120,11 +104,11 @@ header::after{
   border-radius:100px;
   backdrop-filter:blur(10px);
 }
-.credit-label{font-size:12px;font-weight:700;letter-spacing:.12em;color:rgba(245,158,11,0.95);text-transform:uppercase;font-weight:700;}
+.credit-label{font-size:12px;font-weight:700;letter-spacing:.12em;color:rgba(245,158,11,0.95);text-transform:uppercase;}
 .credit-count{font-family:var(--font-serif);font-size:28px;font-weight:700;font-style:italic;color:var(--gold-bright);line-height:1;}
 .user-email{font-size:12px;color:rgba(255,255,255,0.9);letter-spacing:.02em;font-weight:600;}
 .btn-auth{
-  font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:9px 20px;border-radius:100px;border:none;cursor:pointer;
   transition:all .2s ease;
 }
@@ -135,14 +119,8 @@ header::after{
 .btn-auth-logout{background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
 .btn-auth-logout:hover{background:rgba(239,68,68,0.2);}
 
-/* ══════════════════════════════════════════════
-   MAIN AREA
-══════════════════════════════════════════════ */
 main{width:100%;max-width:1100px;margin-top:56px;display:flex;flex-direction:column;gap:28px;}
 
-/* ══════════════════════════════════════════════
-   INPUT PANEL
-══════════════════════════════════════════════ */
 .input-panel{
   position:relative;
   background:var(--glass);
@@ -158,11 +136,7 @@ main{width:100%;max-width:1100px;margin-top:56px;display:flex;flex-direction:col
   background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(37,99,235,0.08),transparent);
   pointer-events:none;
 }
-.corner-mark{
-  position:absolute;width:20px;height:20px;
-  border-color:rgba(120,185,255,1.00);border-style:solid;
-  border-width:0;
-}
+.corner-mark{position:absolute;width:20px;height:20px;border-color:rgba(120,185,255,1.00);border-style:solid;border-width:0;}
 .corner-mark.tl{top:12px;left:12px;border-top-width:1px;border-left-width:1px;border-top-left-radius:4px;}
 .corner-mark.tr{top:12px;right:12px;border-top-width:1px;border-right-width:1px;border-top-right-radius:4px;}
 .corner-mark.bl{bottom:12px;left:12px;border-bottom-width:1px;border-left-width:1px;border-bottom-left-radius:4px;}
@@ -193,21 +167,17 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .status-dot.loading{background:var(--blue-bright);box-shadow:0 0 8px var(--blue-bright);}
 .status-dot.error{background:var(--red);box-shadow:0 0 8px var(--red);animation:none;}
 @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.85);}}
-.status-text{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.88);}
+.status-text{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.88);}
 .btn-cluster{display:flex;gap:10px;flex-wrap:wrap;}
 .btn-action{
   position:relative;overflow:hidden;
   font-family:var(--font-sans);
-  font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
+  font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   padding:12px 22px;border-radius:100px;border:none;cursor:pointer;
   transition:all .25s ease;
   display:flex;align-items:center;gap:7px;
 }
-.btn-action::before{
-  content:'';position:absolute;inset:0;
-  background:rgba(255,255,255,0);
-  transition:background .2s;
-}
+.btn-action::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .2s;}
 .btn-action:hover::before{background:rgba(255,255,255,0.06);}
 .btn-action:disabled{opacity:.55;cursor:not-allowed;}
 .btn-free{background:rgba(59,130,246,0.12);color:var(--blue-bright);border:1px solid rgba(59,130,246,0.25);}
@@ -217,9 +187,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .btn-buy{background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.08));color:#34d399;border:1px solid rgba(16,185,129,0.2);}
 .btn-buy:hover{border-color:rgba(52,211,153,0.85);box-shadow:0 0 20px rgba(16,185,129,0.1);}
 
-/* ══════════════════════════════════════════════
-   TRIBUNAL BADGE
-══════════════════════════════════════════════ */
 .tribunal-bar{
   display:flex;align-items:center;gap:12px;
   padding:12px 24px;
@@ -234,17 +201,24 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .tribunal-icon{font-size:16px;}
 .tribunal-name{color:var(--gold-bright);font-weight:800;}
 
-/* ══════════════════════════════════════════════
-   SINGULARITY LOG
-══════════════════════════════════════════════ */
 .log-panel{
   background:rgba(4,9,24,0.9);
   border:1px solid var(--border);
   border-radius:20px;
   overflow:hidden;
   display:none;
+  position:relative;
 }
 .log-panel.active{display:block;animation:fadeUp .35s ease-out;}
+.log-panel::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(59,130,246,0.4),transparent);
+  animation:scanLine 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes scanLine{0%{top:56px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(100% - 2px);opacity:0;}}
 .log-header{
   display:flex;align-items:center;gap:12px;
   padding:14px 20px;
@@ -257,7 +231,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   box-shadow:0 0 8px var(--blue-bright);
   animation:pulseDot 1.5s ease-in-out infinite;
 }
-.log-title{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:rgba(100,170,255,0.95);}
+.log-title{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(100,170,255,0.95);}
 .log-progress-text{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:rgba(255,255,255,0.9);}
 .progress-track{height:2px;background:rgba(59,130,246,0.1);position:relative;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-bright));width:0%;transition:width .5s ease;position:relative;}
@@ -278,19 +252,11 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 }
 @keyframes logIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
 .log-ts{color:rgba(255,255,255,0.95);flex-shrink:0;font-size:12px;}
-.log-msg{flex:1;}
-.log-thinking .log-msg{color:rgba(255,255,255,0.95);}
-.log-done .log-msg{color:rgba(255,255,255,0.95);}
-.log-skip .log-msg{color:rgba(255,255,255,0.95);}
-.log-veto .log-msg{color:rgba(255,255,255,0.95);font-weight:500;}
-.log-judge .log-msg{color:rgba(255,255,255,0.95);}
-.log-score .log-msg{color:rgba(255,255,255,0.95);}
-.log-warmup .log-msg{color:rgba(255,255,255,0.95);font-style:italic;}
-.log-verdict .log-msg{color:rgba(255,255,255,0.95);}
+.log-msg{flex:1;color:rgba(255,255,255,0.95);}
+.log-veto .log-msg{color:#fca5a5;font-weight:500;}
+.log-score .log-msg{color:#fcd34d;}
+.log-done .log-msg{color:#86efac;}
 
-/* ══════════════════════════════════════════════
-   SCORE RING
-══════════════════════════════════════════════ */
 .score-panel{
   display:flex;align-items:center;gap:36px;
   padding:32px 40px;
@@ -308,10 +274,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   stroke-dasharray:314;stroke-dashoffset:314;
   transition:stroke-dashoffset 1.8s cubic-bezier(.25,.46,.45,.94);
 }
-.score-center{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .score-num{
   font-family:var(--font-serif);
   font-size:36px;font-weight:700;font-style:italic;
@@ -320,18 +283,11 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
-.score-label-ring{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.85);margin-top:2px;}
+.score-label-ring{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-top:2px;}
 .score-meta{flex:1;}
-.score-meta-title{
-  font-family:var(--font-serif);
-  font-size:22px;font-weight:600;
-  color:var(--ice);margin-bottom:8px;
-}
+.score-meta-title{font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--ice);margin-bottom:8px;}
 .score-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-.chip{
-  font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
-  padding:5px 12px;border-radius:100px;
-}
+.chip{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:100px;}
 .chip-green{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.2);}
 .chip-amber{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);}
 .chip-red{background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);}
@@ -339,9 +295,6 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .chip-muted{background:rgba(226,232,240,0.05);color:rgba(255,255,255,0.85);border:1px solid rgba(226,232,240,0.08);}
 .score-desc{font-size:14px;line-height:1.8;color:rgba(255,255,255,0.95);}
 
-/* ══════════════════════════════════════════════
-   VERDICT CARD
-══════════════════════════════════════════════ */
 .verdict-card{
   position:relative;overflow:hidden;
   border-radius:24px;
@@ -349,85 +302,32 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   backdrop-filter:blur(20px);
   animation:verdictReveal .6s cubic-bezier(.16,1,.3,1);
 }
-@keyframes verdictReveal{
-  from{opacity:0;transform:translateY(20px) scale(.98);}
-  to{opacity:1;transform:translateY(0) scale(1);}
-}
-.verdict-card.favorable{
-  background:linear-gradient(145deg,rgba(37,99,235,0.14),rgba(7,13,31,0.9));
-  border:1px solid rgba(59,130,246,0.25);
-}
-.verdict-card.favorable::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,transparent,var(--blue),transparent);
-}
-.verdict-card.veto{
-  background:linear-gradient(145deg,rgba(239,68,68,0.14),rgba(7,13,31,0.9));
-  border:1px solid rgba(239,68,68,0.25);
-}
-.verdict-card.veto::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,transparent,var(--red),transparent);
-}
-.verdict-header{
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:16px;margin-bottom:28px;
-}
+@keyframes verdictReveal{from{opacity:0;transform:translateY(20px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.verdict-card.favorable{background:linear-gradient(145deg,rgba(37,99,235,0.14),rgba(7,13,31,0.9));border:1px solid rgba(59,130,246,0.25);}
+.verdict-card.favorable::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.verdict-card.veto{background:linear-gradient(145deg,rgba(239,68,68,0.14),rgba(7,13,31,0.9));border:1px solid rgba(239,68,68,0.25);}
+.verdict-card.veto::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.verdict-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;}
 .verdict-title-group{display:flex;align-items:center;gap:14px;}
 .verdict-icon{font-size:28px;line-height:1;}
-.verdict-title{
-  font-family:var(--font-serif);
-  font-size:26px;font-weight:700;font-style:italic;
-  color:rgba(255,255,255,0.98);letter-spacing:-.5px;
-}
-.verdict-subtitle{
-  font-size:12px;font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;font-weight:700;color:rgba(255,255,255,0.98);
-  margin-top:2px;
-}
+.verdict-title{font-family:var(--font-serif);font-size:26px;font-weight:700;font-style:italic;color:rgba(255,255,255,0.98);letter-spacing:-.5px;}
+.verdict-subtitle{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.98);margin-top:2px;}
 .btn-pdf{
-  font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
   padding:10px 20px;border-radius:100px;border:none;cursor:pointer;
-  background:rgba(16,185,129,0.12);
-  color:#34d399;
+  background:rgba(16,185,129,0.12);color:#34d399;
   border:1px solid rgba(16,185,129,0.25);
-  transition:all .2s;
-  display:flex;align-items:center;gap:7px;
+  transition:all .2s;display:flex;align-items:center;gap:7px;
 }
 .btn-pdf:hover{background:rgba(16,185,129,0.2);border-color:rgba(52,211,153,0.95);}
-.verdict-divider{
-  height:1px;
-  background:linear-gradient(90deg,transparent,rgba(226,232,240,0.1) 20%,rgba(226,232,240,0.1) 80%,transparent);
-  margin:24px 0;
-}
-.verdict-text{
-  font-family:var(--font-serif);
-  font-size:16px;line-height:2;
-  color:rgba(255,255,255,0.98);
-  white-space:pre-wrap;
-}
+.verdict-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(226,232,240,0.1) 20%,rgba(226,232,240,0.1) 80%,transparent);margin:24px 0;}
+.verdict-text{font-family:var(--font-serif);font-size:16px;line-height:2;color:rgba(255,255,255,0.98);white-space:pre-wrap;}
 
-/* ══════════════════════════════════════════════
-   AGENT GRID
-══════════════════════════════════════════════ */
 .agents-section{animation:fadeUp .5s ease-out .1s both;}
-.agents-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:20px;
-}
-.section-title{
-  font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;font-weight:700;
-  color:rgba(255,255,255,0.9);
-}
-.agents-count{
-  font-family:var(--font-mono);
-  font-size:13px;color:rgba(100,170,255,0.95);
-}
-.agents-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:12px;
-}
+.agents-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,0.9);}
+.agents-count{font-family:var(--font-mono);font-size:13px;color:rgba(100,170,255,0.95);}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
 .agent-card{
   background:rgba(10,18,40,0.7);
   border:1px solid var(--border);
@@ -436,346 +336,109 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   transition:border-color .2s,transform .2s;
   animation:fadeUp .4s ease-out both;
 }
-.agent-card:nth-child(n){animation-delay:calc(var(--i,0) * .04s);}
 .agent-card:hover{border-color:rgba(120,185,255,1.00);transform:translateY(-2px);}
 .agent-summary{
   display:flex;align-items:center;gap:12px;
   padding:14px 16px;
-  cursor:pointer;
-  user-select:none;
+  cursor:pointer;user-select:none;
   transition:background .15s;
 }
 .agent-summary:hover{background:rgba(59,130,246,0.04);}
-.agent-num{
-  font-family:var(--font-mono);
-  font-size:12px;font-weight:500;
-  color:rgba(100,170,255,0.90);
-  flex-shrink:0;width:22px;
-}
-.agent-name{
-  flex:1;
-  font-size:12px;font-weight:700;
-  color:rgba(255,255,255,1.0);
-  letter-spacing:.01em;font-weight:700;
-}
-.agent-conf{
-  font-family:var(--font-mono);
-  font-size:12px;color:rgba(255,255,255,0.9);
-  flex-shrink:0;
-}
+.agent-num{font-family:var(--font-mono);font-size:12px;font-weight:500;color:rgba(100,170,255,0.90);flex-shrink:0;width:22px;}
+.agent-name{flex:1;font-size:12px;font-weight:700;color:rgba(255,255,255,1.0);letter-spacing:.01em;}
+.agent-conf{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.9);flex-shrink:0;}
 .conf-val{color:var(--gold-bright);font-weight:500;}
-.risk-pill{
-  font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
-  padding:3px 9px;border-radius:100px;flex-shrink:0;
-}
+.risk-pill{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:100px;flex-shrink:0;}
 .risk-CRÍTICO{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
 .risk-ALTO{background:rgba(249,115,22,0.15);color:#fdba74;border:1px solid rgba(249,115,22,0.3);}
 .risk-MÉDIO{background:rgba(245,158,11,0.12);color:#fcd34d;border:1px solid rgba(245,158,11,0.25);}
 .risk-BAIXO{background:rgba(16,185,129,0.12);color:#86efac;border:1px solid rgba(16,185,129,0.25);}
 .agent-chevron{color:rgba(255,255,255,0.95);font-size:12px;transition:transform .2s;flex-shrink:0;}
 .agent-card.open .agent-chevron{transform:rotate(180deg);}
-.agent-body{
-  display:none;padding:0 16px 16px;
-  border-top:1px solid var(--border);
-}
+.agent-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border);}
 .agent-card.open .agent-body{display:block;animation:fadeUp .2s ease-out;}
-.agent-specialty{
-  font-size:12px;font-style:italic;font-family:var(--font-serif);
-  color:rgba(255,255,255,1.00);
-  margin:12px 0 10px;
-}
+.agent-specialty{font-size:12px;font-style:italic;font-family:var(--font-serif);color:rgba(255,255,255,1.00);margin:12px 0 10px;}
 .agent-risk-detail{
   font-size:12px;font-family:var(--font-mono);
   color:rgba(255,110,110,1.00);
-  margin-bottom:10px;
-  padding:6px 10px;
+  margin-bottom:10px;padding:6px 10px;
   background:rgba(239,68,68,0.05);
   border-left:2px solid rgba(239,68,68,0.3);
   border-radius:0 6px 6px 0;
 }
-.agent-analysis{
-  font-family:var(--font-serif);
-  font-size:14px;line-height:1.85;
-  color:rgba(255,255,255,0.95);
-  white-space:pre-wrap;
-}
-.agent-duration{
-  margin-top:12px;
-  font-family:var(--font-mono);
-  font-size:12px;color:rgba(255,255,255,0.93);
-  text-align:right;
-}
+.agent-analysis{font-family:var(--font-serif);font-size:14px;line-height:1.85;color:rgba(255,255,255,0.95);white-space:pre-wrap;}
+.agent-duration{margin-top:12px;font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.93);text-align:right;}
 
-/* ══════════════════════════════════════════════
-   FREE RESULT
-══════════════════════════════════════════════ */
-.free-card{
-  padding:36px 40px;
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:24px;
-  backdrop-filter:blur(20px);
-  animation:fadeUp .45s ease-out;
-}
-.free-label{
-  font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;font-weight:700;
-  color:rgba(100,170,255,0.95);margin-bottom:20px;
-}
-.free-verdict{
-  font-family:var(--font-serif);
-  font-size:17px;line-height:1.9;
-  color:rgba(226,232,240,0.85);
-  white-space:pre-wrap;
-  margin-bottom:24px;
-}
-.free-divider{
-  height:1px;
-  background:var(--border);
-  margin:24px 0;
-}
-.free-analysis-label{
-  font-size:13px;font-weight:700;letter-spacing:.12em;
-  color:rgba(100,170,255,0.95);text-transform:uppercase;font-weight:700;
-  margin-bottom:12px;
-}
-.free-analysis-text{
-  font-family:var(--font-serif);
-  font-size:14px;line-height:1.85;
-  color:rgba(255,255,255,0.95);
-  white-space:pre-wrap;
-}
-.upgrade-callout{
-  margin-top:28px;padding:28px 32px;
-  background:rgba(245,158,11,0.04);
-  border:1px solid var(--border-gold);
-  border-radius:16px;
-}
-.upgrade-title{
-  font-family:var(--font-serif);
-  font-size:20px;font-weight:600;font-style:italic;
-  color:var(--gold-bright);margin-bottom:6px;
-}
+.free-card{padding:36px 40px;background:var(--glass);border:1px solid var(--border);border-radius:24px;backdrop-filter:blur(20px);animation:fadeUp .45s ease-out;}
+.free-label{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(100,170,255,0.95);margin-bottom:20px;}
+.free-verdict{font-family:var(--font-serif);font-size:17px;line-height:1.9;color:rgba(226,232,240,0.85);white-space:pre-wrap;margin-bottom:24px;}
+.free-divider{height:1px;background:var(--border);margin:24px 0;}
+.free-analysis-label{font-size:13px;font-weight:700;letter-spacing:.12em;color:rgba(100,170,255,0.95);text-transform:uppercase;margin-bottom:12px;}
+.free-analysis-text{font-family:var(--font-serif);font-size:14px;line-height:1.85;color:rgba(255,255,255,0.95);white-space:pre-wrap;}
+.upgrade-callout{margin-top:28px;padding:28px 32px;background:rgba(245,158,11,0.04);border:1px solid var(--border-gold);border-radius:16px;}
+.upgrade-title{font-family:var(--font-serif);font-size:20px;font-weight:600;font-style:italic;color:var(--gold-bright);margin-bottom:6px;}
 .upgrade-desc{font-size:12px;color:rgba(255,255,255,0.88);margin-bottom:16px;line-height:1.75;}
 .upgrade-buttons{display:flex;gap:10px;flex-wrap:wrap;}
 
-/* ══════════════════════════════════════════════
-   LOADING STATE
-══════════════════════════════════════════════ */
-.loader-card{
-  padding:60px 40px;
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:24px;
-  text-align:center;
-  animation:fadeUp .35s ease-out;
-}
-.loader-ring{
-  width:56px;height:56px;
-  border:2px solid rgba(59,130,246,0.1);
-  border-top:2px solid var(--blue-bright);
-  border-radius:50%;
-  animation:spin .9s linear infinite;
-  margin:0 auto 20px;
-}
+.loader-card{padding:60px 40px;background:var(--glass);border:1px solid var(--border);border-radius:24px;text-align:center;animation:fadeUp .35s ease-out;}
+.loader-ring{width:56px;height:56px;border:2px solid rgba(59,130,246,0.1);border-top:2px solid var(--blue-bright);border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 20px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.loader-text{
-  font-family:var(--font-serif);
-  font-size:18px;font-style:italic;
-  color:rgba(255,255,255,0.95);
-}
-.loader-sub{
-  font-family:var(--font-mono);
-  font-size:12px;
-  color:rgba(100,170,255,0.80);
-  margin-top:10px;
-  letter-spacing:.06em;
-  min-height:18px;
-}
+.loader-text{font-family:var(--font-serif);font-size:18px;font-style:italic;color:rgba(255,255,255,0.95);}
+.loader-sub{font-family:var(--font-mono);font-size:12px;color:rgba(100,170,255,0.80);margin-top:10px;letter-spacing:.06em;min-height:18px;}
 
-/* ══════════════════════════════════════════════
-   MODALS
-══════════════════════════════════════════════ */
-.modal-overlay{
-  position:fixed;inset:0;z-index:100;
-  background:rgba(2,5,16,0.85);
-  backdrop-filter:blur(8px);
-  display:none;align-items:center;justify-content:center;
-  padding:20px;
-}
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(2,5,16,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.active{display:flex;animation:fadeIn .2s ease-out;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.modal-box{
-  background:rgba(10,18,40,0.98);
-  border:1px solid var(--border);
-  border-radius:24px;
-  padding:44px 40px;
-  width:100%;max-width:400px;
-  animation:modalIn .3s cubic-bezier(.16,1,.3,1);
-  position:relative;
-}
+.modal-box{background:rgba(10,18,40,0.98);border:1px solid var(--border);border-radius:24px;padding:44px 40px;width:100%;max-width:400px;animation:modalIn .3s cubic-bezier(.16,1,.3,1);position:relative;}
 @keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.95);}to{opacity:1;transform:none;}}
-.modal-close{
-  position:absolute;top:16px;right:16px;
-  width:32px;height:32px;border-radius:50%;
-  background:var(--ghost);border:none;cursor:pointer;
-  color:rgba(255,255,255,0.85);font-size:14px;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
-}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:var(--ghost);border:none;cursor:pointer;color:rgba(255,255,255,0.85);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .modal-close:hover{background:rgba(226,232,240,0.1);color:var(--ice);}
-.modal-title{
-  font-family:var(--font-serif);
-  font-size:32px;font-weight:700;font-style:italic;
-  margin-bottom:28px;letter-spacing:-.5px;
-}
-.modal-input{
-  width:100%;padding:13px 16px;
-  background:rgba(226,232,240,0.04);
-  border:1px solid var(--border);
-  border-radius:12px;
-  color:var(--ice);font-family:var(--font-sans);font-size:14px;
-  outline:none;
-  transition:border-color .2s;
-  margin-bottom:12px;
-}
+.modal-title{font-family:var(--font-serif);font-size:32px;font-weight:700;font-style:italic;margin-bottom:28px;letter-spacing:-.5px;}
+.modal-input{width:100%;padding:13px 16px;background:rgba(226,232,240,0.04);border:1px solid var(--border);border-radius:12px;color:var(--ice);font-family:var(--font-sans);font-size:14px;outline:none;transition:border-color .2s;margin-bottom:12px;}
 .modal-input:focus{border-color:rgba(100,170,255,0.85);}
 .modal-input::placeholder{color:rgba(255,255,255,0.80);}
-.modal-submit{
-  width:100%;padding:14px;margin-top:4px;
-  background:var(--blue);color:#fff;
-  border:none;border-radius:12px;cursor:pointer;
-  font-family:var(--font-sans);font-size:12px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;font-weight:700;
-  transition:all .2s;
-}
+.modal-submit{width:100%;padding:14px;margin-top:4px;background:var(--blue);color:#fff;border:none;border-radius:12px;cursor:pointer;font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s;}
 .modal-submit:hover{background:var(--blue-bright);box-shadow:0 0 28px var(--blue-glow);}
-.modal-cancel{
-  width:100%;padding:12px;margin-top:10px;
-  background:transparent;color:rgba(255,255,255,1.00);
-  border:none;border-radius:12px;cursor:pointer;
-  font-size:12px;font-weight:600;transition:color .15s;
-}
-.modal-cancel:hover{color:rgba(255,255,255,1.0);}
-.modal-error{
-  font-size:12px;color:#fca5a5;
-  padding:10px 14px;
-  background:rgba(239,68,68,0.08);
-  border:1px solid rgba(239,68,68,0.2);
-  border-radius:8px;margin-top:10px;display:none;
-}
+.modal-cancel{width:100%;padding:12px;margin-top:10px;background:transparent;color:rgba(255,255,255,1.00);border:none;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600;transition:color .15s;}
+.modal-error{font-size:12px;color:#fca5a5;padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;margin-top:10px;display:none;}
 
-/* ══════════════════════════════════════════════
-   ADMIN PANEL
-══════════════════════════════════════════════ */
-.admin-fab{
-  position:fixed;bottom:28px;right:28px;z-index:50;
-  display:none;flex-direction:column;gap:8px;
-}
+.admin-fab{position:fixed;bottom:28px;right:28px;z-index:50;display:none;flex-direction:column;gap:8px;}
 .admin-fab.visible{display:flex;}
-.fab-btn{
-  padding:10px 18px;border-radius:100px;border:none;cursor:pointer;
-  font-size:13px;font-weight:700;letter-spacing:.06em;
-  transition:all .2s;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
-}
+.fab-btn{padding:10px 18px;border-radius:100px;border:none;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:.06em;transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
 .fab-admin{background:rgba(139,92,246,0.85);color:#fff;}
 .fab-admin:hover{background:rgba(139,92,246,1);transform:scale(1.04);}
 .fab-hist{background:rgba(30,41,59,0.9);color:var(--ice);}
 .fab-hist:hover{background:rgba(51,65,85,0.9);}
 
-.admin-overlay{
-  position:fixed;inset:0;z-index:100;
-  background:rgba(2,5,16,0.85);backdrop-filter:blur(8px);
-  display:none;align-items:flex-start;justify-content:flex-end;
-}
+.admin-overlay{position:fixed;inset:0;z-index:100;background:rgba(2,5,16,0.85);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:flex-end;}
 .admin-overlay.open{display:flex;}
-.admin-drawer{
-  width:min(640px,100vw);height:100vh;
-  background:var(--abyss);
-  border-left:1px solid rgba(139,92,246,0.2);
-  display:flex;flex-direction:column;
-  animation:slideInRight .28s cubic-bezier(.22,1,.36,1);
-  overflow:hidden;
-}
+.admin-drawer{width:min(640px,100vw);height:100vh;background:var(--abyss);border-left:1px solid rgba(139,92,246,0.2);display:flex;flex-direction:column;animation:slideInRight .28s cubic-bezier(.22,1,.36,1);overflow:hidden;}
 @keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.admin-head{
-  padding:28px 28px 0;
-  border-bottom:1px solid rgba(139,92,246,0.12);
-  flex-shrink:0;
-}
-.admin-head-row{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:20px;
-}
-.admin-title{
-  font-family:var(--font-serif);font-size:26px;font-weight:700;
-  font-style:italic;color:#a78bfa;
-}
-.admin-close{
-  width:36px;height:36px;border-radius:50%;border:1px solid rgba(139,92,246,0.25);
-  background:transparent;color:var(--mist);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  transition:all .15s;
-}
+.admin-head{padding:28px 28px 0;border-bottom:1px solid rgba(139,92,246,0.12);flex-shrink:0;}
+.admin-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.admin-title{font-family:var(--font-serif);font-size:26px;font-weight:700;font-style:italic;color:#a78bfa;}
+.admin-close{width:36px;height:36px;border-radius:50%;border:1px solid rgba(139,92,246,0.25);background:transparent;color:var(--mist);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;}
 .admin-close:hover{background:rgba(139,92,246,0.15);color:#fff;}
 .admin-tabs{display:flex;gap:0;margin-bottom:-1px;}
-.admin-tab{
-  padding:10px 18px;font-size:12px;font-weight:600;letter-spacing:.06em;
-  border:none;background:transparent;cursor:pointer;color:var(--mist);
-  border-bottom:2px solid transparent;transition:all .15s;
-}
+.admin-tab{padding:10px 18px;font-size:12px;font-weight:600;letter-spacing:.06em;border:none;background:transparent;cursor:pointer;color:var(--mist);border-bottom:2px solid transparent;transition:all .15s;}
 .admin-tab.active{color:#a78bfa;border-bottom-color:#a78bfa;}
 .admin-tab:hover:not(.active){color:var(--ice);}
-.admin-body{
-  flex:1;overflow-y:auto;padding:24px 28px;
-  scrollbar-width:thin;scrollbar-color:rgba(167,139,250,0.85) transparent;
-}
+.admin-body{flex:1;overflow-y:auto;padding:24px 28px;scrollbar-width:thin;scrollbar-color:rgba(167,139,250,0.85) transparent;}
 .admin-section{display:none;}
 .admin-section.visible{display:block;}
-
-.stats-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-  margin-bottom:24px;
-}
-.stat-card{
-  background:var(--deep);border:1px solid rgba(139,92,246,0.12);
-  border-radius:12px;padding:16px 14px;
-}
-.stat-num{text-shadow:0 0 20px rgba(167,139,250,0.4);
-  font-family:var(--font-mono);font-size:26px;font-weight:500;
-  color:#c4b5fd;line-height:1;
-}
-.stat-lbl{
-  font-size:13px;letter-spacing:.08em;color:rgba(255,255,255,0.9);font-weight:600;
-  text-transform:uppercase;font-weight:700;margin-top:6px;
-}
-.admin-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 9px;border-radius:100px;font-size:12px;font-weight:700;
-  letter-spacing:.05em;
-}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--deep);border:1px solid rgba(139,92,246,0.12);border-radius:12px;padding:16px 14px;}
+.stat-num{font-family:var(--font-mono);font-size:26px;font-weight:500;color:#c4b5fd;line-height:1;}
+.stat-lbl{font-size:13px;letter-spacing:.08em;color:rgba(255,255,255,0.9);font-weight:600;text-transform:uppercase;margin-top:6px;}
+.admin-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.05em;}
 .badge-on{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);color:#34d399;}
 .badge-off{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;}
 .features-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
-.feat-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;border-radius:8px;
-  background:var(--deep);border:1px solid rgba(139,92,246,0.08);
-  font-size:13px;color:var(--mist);
-}
-
+.feat-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--deep);border:1px solid rgba(139,92,246,0.08);font-size:13px;color:var(--mist);}
 .admin-search{display:flex;gap:8px;margin-bottom:16px;}
-.admin-input{
-  flex:1;background:var(--deep);border:1px solid rgba(139,92,246,0.2);
-  border-radius:8px;padding:9px 14px;color:var(--ice);font-size:13px;
-  font-family:var(--font-sans);outline:none;transition:border-color .15s;
-}
+.admin-input{flex:1;background:var(--deep);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:9px 14px;color:var(--ice);font-size:13px;font-family:var(--font-sans);outline:none;transition:border-color .15s;}
 .admin-input:focus{border-color:rgba(167,139,250,1.00);}
-.admin-btn{
-  padding:9px 16px;border-radius:8px;border:none;cursor:pointer;
-  font-size:12px;font-weight:700;letter-spacing:.05em;
-  transition:all .15s;
-}
+.admin-btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.05em;transition:all .15s;}
 .admin-btn-purple{background:rgba(139,92,246,0.2);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);}
 .admin-btn-purple:hover{background:rgba(139,92,246,0.35);}
 .admin-btn-red{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
@@ -784,11 +447,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .admin-btn-green:hover{background:rgba(16,185,129,0.2);}
 .admin-btn-amber{background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);}
 .admin-btn-amber:hover{background:rgba(245,158,11,0.2);}
-.user-row{
-  background:var(--deep);border:1px solid rgba(139,92,246,0.1);
-  border-radius:10px;padding:12px 14px;margin-bottom:8px;
-  cursor:pointer;transition:border-color .15s;
-}
+.user-row{background:var(--deep);border:1px solid rgba(139,92,246,0.1);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
 .user-row:hover{border-color:rgba(167,139,250,0.85);}
 .user-row.expanded{border-color:rgba(167,139,250,0.90);}
 .user-row-head{display:flex;align-items:center;gap:10px;}
@@ -797,38 +456,16 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .user-detail{display:none;padding-top:12px;margin-top:12px;border-top:1px solid rgba(139,92,246,0.1);}
 .user-row.expanded .user-detail{display:block;}
 .user-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
-.admin-input-sm{
-  width:72px;background:var(--deep);border:1px solid rgba(139,92,246,0.2);
-  border-radius:6px;padding:6px 10px;color:var(--ice);font-size:12px;
-  font-family:var(--font-mono);outline:none;text-align:center;
-}
-.admin-msg{
-  padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;
-  background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:#34d399;
-  display:none;
-}
+.admin-input-sm{width:72px;background:var(--deep);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:6px 10px;color:var(--ice);font-size:12px;font-family:var(--font-mono);outline:none;text-align:center;}
+.admin-msg{padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:#34d399;display:none;}
 .admin-msg.error{background:rgba(239,68,68,0.08);border-color:rgba(255,110,110,0.60);color:#f87171;}
 .users-loader{text-align:center;padding:40px 0;color:rgba(255,255,255,0.85);font-size:14px;}
 
-.share-card-modal{
-  position:fixed;inset:0;z-index:200;
-  display:none;align-items:center;justify-content:center;
-  background:rgba(2,5,16,0.9);backdrop-filter:blur(10px);
-}
+.share-card-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(2,5,16,0.9);backdrop-filter:blur(10px);}
 .share-card-modal.open{display:flex;}
 .share-card-wrap{position:relative;padding:20px;max-width:480px;width:100%;}
-.share-card-close{
-  position:absolute;top:0;right:0;
-  width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);
-  background:rgba(10,18,40,0.9);color:var(--mist);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:14px;
-}
-.share-card{
-  background:linear-gradient(135deg,#040918 0%,#070d1f 60%,#0a1228 100%);
-  border:1px solid rgba(245,158,11,0.25);border-radius:20px;
-  padding:32px 28px;font-family:var(--font-sans);
-  box-shadow:0 30px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(245,158,11,0.1);
-}
+.share-card-close{position:absolute;top:0;right:0;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(10,18,40,0.9);color:var(--mist);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.share-card{background:linear-gradient(135deg,#040918 0%,#070d1f 60%,#0a1228 100%);border:1px solid rgba(245,158,11,0.25);border-radius:20px;padding:32px 28px;font-family:var(--font-sans);box-shadow:0 30px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(245,158,11,0.1);}
 .sc-logo{font-family:var(--font-serif);font-size:30px;font-weight:700;font-style:italic;color:#d97706;margin-bottom:4px;}
 .sc-sub{font-size:12px;letter-spacing:.15em;color:rgba(245,158,11,0.95);text-transform:uppercase;font-weight:700;margin-bottom:20px;}
 .sc-score-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
@@ -836,12 +473,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .sc-score-meta{display:flex;flex-direction:column;gap:6px;}
 .sc-label{font-size:13px;font-weight:600;color:var(--ice);}
 .sc-chip{display:inline-block;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.05em;}
-.sc-excerpt{
-  font-size:12px;color:rgba(255,255,255,0.95);line-height:1.8;
-  border-top:1px solid rgba(245,158,11,0.12);
-  padding-top:16px;margin-top:0;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-}
+.sc-excerpt{font-size:12px;color:rgba(255,255,255,0.95);line-height:1.8;border-top:1px solid rgba(245,158,11,0.12);padding-top:16px;margin-top:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .sc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;}
 .sc-footer-tag{font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,0.90);text-transform:uppercase;font-weight:700;}
 .sc-date{font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.80);}
@@ -852,35 +484,14 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 .share-btn-img{background:rgba(37,99,235,0.15);color:#3b82f6;border:1px solid rgba(37,99,235,0.25);}
 .share-btn-img:hover{background:rgba(37,99,235,0.25);}
 
-.analysis-actions{
-  display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;
-  padding-top:20px;border-top:1px solid var(--border);
-}
-.btn-dl-pdf{
-  display:flex;align-items:center;gap:7px;
-  padding:10px 20px;border-radius:100px;border:1px solid rgba(37,99,235,0.3);
-  background:rgba(37,99,235,0.08);color:#3b82f6;
-  font-size:12px;font-weight:700;letter-spacing:.06em;
-  cursor:pointer;transition:all .2s;
-}
+.analysis-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--border);}
+.btn-dl-pdf{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:100px;border:1px solid rgba(37,99,235,0.3);background:rgba(37,99,235,0.08);color:#3b82f6;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;}
 .btn-dl-pdf:hover{background:rgba(37,99,235,0.18);border-color:rgba(96,165,250,0.95);}
-.btn-share-card{
-  display:flex;align-items:center;gap:7px;
-  padding:10px 20px;border-radius:100px;border:1px solid rgba(245,158,11,0.3);
-  background:rgba(245,158,11,0.06);color:#d97706;
-  font-size:12px;font-weight:700;letter-spacing:.06em;
-  cursor:pointer;transition:all .2s;
-}
+.btn-share-card{display:flex;align-items:center;gap:7px;padding:10px 20px;border-radius:100px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.06);color:#d97706;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;}
 .btn-share-card:hover{background:rgba(245,158,11,0.14);border-color:rgba(245,200,50,0.95);}
 
-/* ══════════════════════════════════════════════
-   UTILITIES
-══════════════════════════════════════════════ */
 .hidden{display:none!important;}
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(18px);}
-  to{opacity:1;transform:translateY(0);}
-}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 .fade-up{animation:fadeUp .45s ease-out both;}
 
 @media(max-width:680px){
@@ -893,34 +504,16 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   .btn-action{flex:1;justify-content:center;}
   textarea#txt{padding:28px 24px 20px;}
 }
-
-.log-panel::after{
-  content:'';
-  position:absolute;top:0;left:0;right:0;
-  height:2px;
-  background:linear-gradient(90deg,transparent,rgba(59,130,246,0.4),transparent);
-  animation:scanLine 3s ease-in-out infinite;
-  pointer-events:none;
-}
-.log-panel{position:relative;}
-@keyframes scanLine{
-  0%{top:56px;opacity:0;}
-  10%{opacity:1;}
-  90%{opacity:1;}
-  100%{top:calc(100% - 2px);opacity:0;}
-}
 </style>
 </head>
 <body>
 
-<!-- BACKGROUNDS -->
 <canvas id="bg-canvas"></canvas>
 <div class="noise-overlay"></div>
 <div class="gradient-orb orb-1"></div>
 <div class="gradient-orb orb-2"></div>
 <div class="gradient-orb orb-3"></div>
 
-<!-- APP -->
 <div id="app">
   <header>
     <div class="logo-block">
@@ -1096,9 +689,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-/* ──────────────────────────────────────────────
-   CANVAS STARS
-────────────────────────────────────────────── */
+/* ── CANVAS STARS ── */
 (function(){
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
@@ -1134,9 +725,7 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   draw();
 })();
 
-/* ──────────────────────────────────────────────
-   CONSTANTS & STATE
-────────────────────────────────────────────── */
+/* ── CONSTANTS & STATE ── */
 const API = "https://jusaii-app.onrender.com";
 let token    = localStorage.getItem("token");
 let userId   = null;
@@ -1144,22 +733,18 @@ let _agentDone  = 0;
 let _agentTotal = 0;
 let _isProcessing = false;
 
-/* ──────────────────────────────────────────────
-   UI UTILITIES
-────────────────────────────────────────────── */
+/* ── UI UTILITIES ── */
 function setStatus(msg, state="idle"){
   const dot = document.getElementById("st-dot");
   const txt = document.getElementById("st-msg");
   txt.textContent = msg;
   dot.className = "status-dot" + (state==="loading"?" loading":state==="error"?" error":"");
 }
-
 function setLoading(on){
   document.getElementById("btn-free").disabled    = on;
   document.getElementById("btn-premium").disabled = on;
   setStatus(on ? "Processando..." : "Swarm Online", on ? "loading" : "idle");
 }
-
 function updateUI(){
   if(token){
     document.getElementById("auth-buttons").classList.add("hidden");
@@ -1183,13 +768,10 @@ function updateUI(){
     document.getElementById("admin-fab").classList.remove("visible");
   }
 }
-
 document.getElementById("txt").addEventListener("focus", ()=>document.getElementById("input-panel").classList.add("focused"));
 document.getElementById("txt").addEventListener("blur",  ()=>document.getElementById("input-panel").classList.remove("focused"));
 
-/* ──────────────────────────────────────────────
-   LOG
-────────────────────────────────────────────── */
+/* ── LOG ── */
 function resetLog(){
   document.getElementById("log-feed").innerHTML    = "";
   document.getElementById("log-panel").classList.remove("active");
@@ -1199,7 +781,6 @@ function resetLog(){
   _agentDone = 0;
   _agentTotal = 0;
 }
-
 function pushLog(msg, cls="log-thinking"){
   const panel = document.getElementById("log-panel");
   panel.classList.add("active");
@@ -1211,7 +792,6 @@ function pushLog(msg, cls="log-thinking"){
   feed.appendChild(line);
   feed.scrollTop = feed.scrollHeight;
 }
-
 function updateProgress(){
   const pct = _agentTotal > 0 ? (_agentDone / _agentTotal) * 100 : 0;
   document.getElementById("log-progress").style.width = pct + "%";
@@ -1219,26 +799,22 @@ function updateProgress(){
     _agentTotal > 0 ? `${_agentDone} / ${_agentTotal} concluídos` : "";
 }
 
-/* ──────────────────────────────────────────────
-   AUTH
-────────────────────────────────────────────── */
+/* ── AUTH HELPERS ── */
 async function _fetchWithTimeout(url, opts, ms){
   const ctrl = new AbortController();
   const tid  = setTimeout(()=>ctrl.abort(), ms);
   try{ return await fetch(url, {...opts, signal:ctrl.signal}); }
   finally{ clearTimeout(tid); }
 }
-
 const MAX_WAKE_ATTEMPTS  = 3;
 const WAKE_BASE_DELAY_MS = 2000;
-
 async function _wakeServer(errEl){
   for(let i=1; i<=MAX_WAKE_ATTEMPTS; i++){
     errEl.textContent = `⏳ Acordando servidor... tentativa ${i}/${MAX_WAKE_ATTEMPTS}`;
     try{
       const r = await _fetchWithTimeout(API+"/ping", {method:"GET"}, 35000);
       if(r.ok) return true;
-    }catch(e){ /* timeout/rede — tenta novamente */ }
+    }catch(e){}
     if(i < MAX_WAKE_ATTEMPTS){
       const delay = WAKE_BASE_DELAY_MS * Math.pow(2, i-1);
       await new Promise(r=>setTimeout(r, delay));
@@ -1246,10 +822,8 @@ async function _wakeServer(errEl){
   }
   return false;
 }
-
 const MAX_LOGIN_RETRIES   = 3;
 const LOGIN_BASE_DELAY_MS = 1500;
-
 async function _retryLoginRequest(email, pw){
   let lastError = null;
   for(let attempt=1; attempt<=MAX_LOGIN_RETRIES; attempt++){
@@ -1268,7 +842,6 @@ async function _retryLoginRequest(email, pw){
   }
   throw lastError;
 }
-
 async function login(){
   const email = document.getElementById("login-email").value.trim();
   const pw    = document.getElementById("login-pw").value;
@@ -1290,10 +863,9 @@ async function login(){
       updateUI();
     } else showModalErr(errEl, d.detail || "Credenciais inválidas");
   }catch(e){
-    showModalErr(errEl, "Falha de conexão após "+MAX_LOGIN_RETRIES+" tentativas: "+e.message+". Verifique sua internet e tente novamente.");
+    showModalErr(errEl, "Falha de conexão após "+MAX_LOGIN_RETRIES+" tentativas: "+e.message);
   }
 }
-
 async function register(){
   const email = document.getElementById("reg-email").value.trim();
   const pw    = document.getElementById("reg-pw").value;
@@ -1317,16 +889,13 @@ async function register(){
     } else showModalErr(errEl, d.detail || "Erro ao criar conta");
   }catch(e){ showModalErr(errEl,"Falha: "+e.message+". Tente novamente."); }
 }
-
 function logout(){
   localStorage.removeItem("token"); token = null; userId = null;
   document.getElementById("output").innerHTML = "";
   resetLog(); updateUI();
 }
 
-/* ──────────────────────────────────────────────
-   WARM-UP
-────────────────────────────────────────────── */
+/* ── WARM-UP ── */
 async function warmUp(){
   try{
     setStatus("Verificando servidor...","loading");
@@ -1338,15 +907,12 @@ async function warmUp(){
   }
 }
 
-/* ──────────────────────────────────────────────
-   ANALISAR
-────────────────────────────────────────────── */
+/* ── ANALISAR ── */
 async function analisar(tipo){
   if(_isProcessing){
     console.warn("[Jusaii] Swarm já em execução — clique duplo ignorado.");
     return;
   }
-
   const prompt = document.getElementById("txt").value.trim();
   if(!prompt || prompt.length < 20){
     alert("Descreva o caso com pelo menos 20 caracteres.");
@@ -1357,12 +923,10 @@ async function analisar(tipo){
     showLogin();
     return;
   }
-
   _isProcessing = true;
   document.getElementById("output").innerHTML = "";
   resetLog();
   setLoading(true);
-
   try{
     await warmUp();
     if(tipo === "free") await analisarFree(prompt);
@@ -1384,14 +948,11 @@ async function analisar(tipo){
   }
 }
 
-/* ──────────────────────────────────────────────
-   FREE
-────────────────────────────────────────────── */
+/* ── FREE ── */
 async function analisarFree(prompt){
   setStatus("Consultando especialista...","loading");
   const out = document.getElementById("output");
   out.innerHTML = `<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Consultando Direito do Consumidor...</div></div>`;
-
   const res = await fetch(API+"/api/analyze",{
     method:"POST", headers:{"Content-Type":"application/json"},
     body:JSON.stringify({prompt}),
@@ -1399,13 +960,10 @@ async function analisarFree(prompt){
   });
   if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.detail||`Erro ${res.status}`); }
   const d = await res.json();
-
   if(d.tribunal_detectado){
-    const tb = document.getElementById("tribunal-bar");
     document.getElementById("tribunal-name").textContent = d.tribunal_detectado;
-    tb.classList.remove("hidden");
+    document.getElementById("tribunal-bar").classList.remove("hidden");
   }
-
   out.innerHTML = `
     <div class="free-card">
       <div class="free-label">⚖ Veredito — Juiz IA</div>
@@ -1421,66 +979,64 @@ async function analisarFree(prompt){
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             Usar Crédito Premium
           </button>
-          <button class="btn-action btn-buy" onclick="comprar()">
-            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-            Comprar — R$ 19,90
-          </button>
+          <button class="btn-action btn-buy" onclick="comprar()">Comprar — R$ 19,90</button>
         </div>
       </div>
     </div>`;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   PREMIUM — POLLING RESILIENTE v6.1
-   ══════════════════════════════════════════════════════════════════════
-   FIX #A  POLL_TIMEOUT_MS 15 000 → 45 000
-           O endpoint /api/job/{id} agora usa JWT-only (sem DB), mas
-           45 s absorve qualquer pico de latência do Render sob carga.
-
-   FIX #B  MAX_POLLS 120 → 200  (200 × 3 s = 10 min de janela máxima)
-           Jobs com 16 agentes + providers lentos podem levar 4-5 min.
-
-   FIX #C  consecutiveErrors + backoff exponencial
-           Erros isolados são recuperados silenciosamente.
-           5 erros seguidos lançam exceção e encerram o ciclo.
-           Backoff (2 s / 4 s / 8 s / 16 s) alivia o servidor sob falha.
-
-   FIX #D  404 tratado explicitamente
-           Ocorre quando o Render reinicia a instância e limpa _jobs.
-
-   FIX #E  Limiares de fase realistas: 90 s / 150 s
-           Compatíveis com a duração real de jobs com concurrência = 3.
+   PREMIUM — SSE REAL (conecta ao endpoint /api/analyze/premium/stream)
+   
+   FIX PRINCIPAL: versão anterior usava polling GET /api/job/{id} com
+   animação falsa. Esta versão conecta ao stream SSE real que envia
+   eventos agent_done com todos os dados de cada especialista.
    ══════════════════════════════════════════════════════════════════════ */
 async function analisarPremiumSSE(prompt){
   const out = document.getElementById("output");
 
-  const AREAS = [
-    "DIREITO CIVIL","DIREITO PENAL","DIREITO TRABALHISTA",
-    "DIREITO DE FAMÍLIA","DIREITO DO CONSUMIDOR","DIREITO TRIBUTÁRIO",
-    "DIREITO EMPRESARIAL","DIREITO IMOBILIÁRIO","DIREITO DIGITAL",
-    "DIREITO PREVIDENCIÁRIO","DIREITO AMBIENTAL","DIREITO CONSTITUCIONAL",
-    "DIREITO À SAÚDE","DIREITO INTERNACIONAL","DIREITO ELEITORAL","DIREITO AGRÁRIO",
-  ];
-
   out.innerHTML = `
     <div class="loader-card">
       <div class="loader-ring"></div>
-      <div class="loader-text" id="loader-status-text">Iniciando Swarm...</div>
-      <div class="loader-sub"  id="loader-area-text">Preparando 16 especialistas Quantum Jurist…</div>
+      <div class="loader-text" id="loader-status-text">Iniciando Swarm Premium...</div>
+      <div class="loader-sub"  id="loader-area-text">Conectando ao servidor…</div>
     </div>`;
 
-  /* ── PASSO 1: POST — dispara o job e recebe job_id imediatamente ── */
-  const startRes = await _fetchWithTimeout(
-    API+"/api/analyze/premium",
-    { method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
-      body:JSON.stringify({prompt}) },
-    30000,
-  );
+  /* Coleção dos dados que serão renderizados no final */
+  let agents     = [];
+  let verdict    = "";
+  let score      = 0;
+  let tribunal   = "";
+  let analysisId = null;
+  let isVeto     = false;
 
-  if(!startRes.ok){
-    const e = await startRes.json().catch(()=>({}));
-    if(startRes.status === 402){
+  function updateLoaderText(status, sub){
+    const st = document.getElementById("loader-status-text");
+    const sb = document.getElementById("loader-area-text");
+    if(st) st.textContent = status;
+    if(sb) sb.textContent = sub;
+  }
+
+  /* POST com streaming — usa fetch + ReadableStream (EventSource não
+     suporta POST nem Authorization header) */
+  let res;
+  try{
+    res = await fetch(API + "/api/analyze/premium/stream", {
+      method:  "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ prompt }),
+    });
+  }catch(err){
+    throw new Error("Falha ao conectar com o servidor: " + err.message);
+  }
+
+  /* Trata erros HTTP antes de iniciar a leitura do stream */
+  if(!res.ok){
+    const e = await res.json().catch(()=>({}));
+    if(res.status === 402){
       out.innerHTML = `
         <div class="loader-card" style="border-color:rgba(245,200,50,0.65);">
           <div style="font-size:32px;margin-bottom:16px;">⚠</div>
@@ -1493,185 +1049,151 @@ async function analisarPremiumSSE(prompt){
         </div>`;
       return;
     }
-    throw new Error(e.detail || `Erro ${startRes.status}`);
+    if(res.status === 503){
+      throw new Error(e.detail || "Servidor ocupado com outras análises. Tente em instantes.");
+    }
+    throw new Error(e.detail || `Erro ${res.status}`);
   }
 
-  const startData = await startRes.json();
-  const jobId     = startData.job_id;
-  let   tribunal  = startData.tribunal_detectado || "";
+  /* ── Lê o stream SSE linha a linha ── */
+  const reader  = res.body.getReader();
+  const decoder = new TextDecoder();
+  let   buf     = "";
+
+  outer: while(true){
+    let chunk;
+    try{
+      chunk = await reader.read();
+    }catch(readErr){
+      /* Conexão encerrada pelo servidor ou rede */
+      break;
+    }
+    if(chunk.done) break;
+
+    buf += decoder.decode(chunk.value, { stream: true });
+
+    /* Processa todas as linhas completas acumuladas no buffer */
+    const lines = buf.split("\n");
+    buf = lines.pop(); /* guarda linha incompleta para o próximo chunk */
+
+    for(const line of lines){
+      /* Keepalive do servidor — ignora */
+      if(line.startsWith(":")) continue;
+
+      if(!line.startsWith("data: ")) continue;
+      const raw = line.slice(6).trim();
+
+      if(raw === "[DONE]") break outer;
+
+      let ev;
+      try{ ev = JSON.parse(raw); }catch{ continue; }
+
+      /* ── Dispatch por tipo de evento ── */
+      switch(ev.type){
+
+        case "start":
+          _agentTotal = ev.total || 16;
+          tribunal    = ev.tribunal || "";
+          if(tribunal){
+            document.getElementById("tribunal-name").textContent = tribunal;
+            document.getElementById("tribunal-bar").classList.remove("hidden");
+          }
+          pushLog(ev.message || `⚖ ${_agentTotal} especialistas iniciados. Tribunal: ${tribunal}`, "log-thinking");
+          updateLoaderText(
+            `Swarm iniciado — Tribunal: ${tribunal}`,
+            `${_agentTotal} especialistas Quantum Jurist em paralelo`
+          );
+          break;
+
+        case "agent_thinking":
+          pushLog(`[${(ev.area||"").toUpperCase()}]: Analisando...`, "log-thinking");
+          updateLoaderText(
+            `Consultando: ${ev.area || ""}`,
+            `Especialista em análise — ${_agentDone} de ${_agentTotal} concluídos`
+          );
+          break;
+
+        case "agent_done":
+          /* Armazena o agente completo — será usado em buildAgentCard */
+          agents.push(ev);
+          _agentDone++;
+          updateProgress();
+          pushLog(
+            `[${(ev.area||"").toUpperCase()}]: ✓ ${ev.duration_ms||0}ms — Confiança: ${ev.confidence||0}%`,
+            "log-done"
+          );
+          updateLoaderText(
+            `Concluído: ${ev.area || ""}`,
+            `${_agentDone} / ${_agentTotal} especialistas`
+          );
+          break;
+
+        case "agent_skip":
+          _agentDone++;
+          updateProgress();
+          pushLog(`[${(ev.area||"").toUpperCase()}]: ⏭ Suspensa — veto ativo`, "log-skip");
+          break;
+
+        case "veto":
+          isVeto = true;
+          pushLog(`[${(ev.area||"").toUpperCase()}]: 🚨 VETO — ${ev.veto_reason||""}`, "log-veto");
+          updateLoaderText("🚨 VETO detectado", ev.veto_reason || "Irregularidade crítica detectada");
+          break;
+
+        case "devil_thinking":
+          pushLog("[ADVOGADO DO DIABO]: Executando Contraditório Obrigatório...", "log-judge");
+          updateLoaderText("Advogado do Diabo", "Contraditório Obrigatório em execução...");
+          break;
+
+        case "devil_done":
+          pushLog(`[CONTRADITÓRIO]: ✓ ${ev.duration_ms||0}ms`, "log-judge");
+          break;
+
+        case "score":
+          score    = ev.jusaii_score || 0;
+          tribunal = ev.tribunal || tribunal;
+          pushLog(`⬡ Jusaii Score calculado: ${Math.round(score)}/100`, "log-score");
+          updateLoaderText("Juiz IA — Deliberando veredito final", `Score: ${Math.round(score)}/100`);
+          break;
+
+        case "judge_thinking":
+          pushLog("[JUIZ IA]: Deliberando com o Contraditório...", "log-judge");
+          updateLoaderText("Juiz IA — Deliberando veredito final", "Ponderando todos os pareceres...");
+          break;
+
+        case "verdict":
+          verdict = ev.verdict || "";
+          isVeto  = ev.veto_triggered || isVeto;
+          score   = ev.jusaii_score   || score;
+          pushLog("⚖ Veredito final gerado.", "log-verdict");
+          break;
+
+        case "saved":
+          analysisId = ev.analysis_id || null;
+          score      = ev.jusaii_score || score;
+          tribunal   = ev.tribunal || tribunal;
+          break;
+
+        case "error":
+          throw new Error(ev.message || "Erro interno no servidor. Crédito reembolsado.");
+      }
+    }
+  }
+
+  if(!verdict){
+    throw new Error("Análise incompleta — o servidor encerrou a conexão antes do veredito. Tente novamente.");
+  }
 
   if(tribunal){
     document.getElementById("tribunal-name").textContent = tribunal;
     document.getElementById("tribunal-bar").classList.remove("hidden");
   }
 
-  _agentTotal = 16;
-  _agentDone  = 0;
-  updateProgress();
-  pushLog(`⚖ 16 especialistas Quantum Jurist iniciados. Tribunal: ${tribunal}`, "log-thinking");
-
-  /* ── PASSO 2: POLLING ── */
-  const POLL_INTERVAL_MS       = 3000;
-  const POLL_TIMEOUT_MS        = 45000;  // FIX #A — era 15 000
-  const MAX_POLLS              = 200;    // FIX #B — era 120
-  const MAX_CONSECUTIVE_ERRORS = 10;    // v6.2 — era 5; tolerância para pico do judge
-  const POLLS_PER_AREA         = 2;
-
-  let lastLoggedAreaIdx = -1;
-  let consecutiveErrors = 0;            // FIX #C
-
-  for(let poll = 0; poll < MAX_POLLS; poll++){
-
-    /* ── Animação circular de área (loop infinito) ── */
-    const linearStep     = Math.floor(poll / POLLS_PER_AREA);
-    const currentAreaIdx = linearStep % AREAS.length;
-    const currentArea    = AREAS[currentAreaIdx];
-    const elapsed        = (poll + 1) * POLL_INTERVAL_MS / 1000;
-
-    /* v6.2 — intervalo dinâmico: 5 s na fase do judge para aliviar o servidor */
-    const dynamicInterval = elapsed > 150 ? 5000 : POLL_INTERVAL_MS;
-    await new Promise(r => setTimeout(r, dynamicInterval));
-
-    if(currentAreaIdx !== lastLoggedAreaIdx){
-      pushLog(`[${currentArea}]: Analisando...`, "log-thinking");
-      lastLoggedAreaIdx = currentAreaIdx;
-    }
-
-    /* ── FIX #E: limiares de fase compatíveis com duração real do job ── */
-    const statusEl = document.getElementById("loader-status-text");
-    const areaEl   = document.getElementById("loader-area-text");
-    if(statusEl && areaEl){
-      if(elapsed < 90){
-        /* Fase 1 — consulta dos 16 especialistas (~0-90 s) */
-        statusEl.textContent = `Consultando: ${currentArea}`;
-        areaEl.textContent   = `Área ${(linearStep % AREAS.length)+1} de 16 · ${Math.round(elapsed)}s`;
-      } else if(elapsed < 150){
-        /* Fase 2 — Advogado do Diabo (~90-150 s) */
-        statusEl.textContent = "Advogado do Diabo — Contraditório Obrigatório";
-        areaEl.textContent   = `Revisando pareceres dos especialistas · ${Math.round(elapsed)}s`;
-      } else {
-        /* Fase 3 — Juiz IA (150 s+) */
-        statusEl.textContent = "Juiz IA — Deliberando veredito final";
-        areaEl.textContent   = `Ponderando ${AREAS.length} pareceres + contraditório · ${Math.round(elapsed)}s`;
-      }
-    }
-
-    /* ── FIX #A + #C: poll com timeout estendido e backoff exponencial ── */
-    let pollRes;
-    try{
-      pollRes = await _fetchWithTimeout(
-        API + `/api/job/${jobId}`,
-        { headers:{"Authorization":`Bearer ${token}`} },
-        POLL_TIMEOUT_MS,  // FIX #A
-      );
-      consecutiveErrors = 0; // FIX #C — reset ao receber resposta válida
-    }catch(netErr){
-      consecutiveErrors++; // FIX #C
-
-      pushLog(
-        `⚠ Poll ${poll+1}: falha de rede (${netErr.message}) — ` +
-        `tentativa ${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}`,
-        "log-skip",
-      );
-
-      /* v6.2 — antes de desistir, tenta uma recuperação final com 60 s */
-      if(consecutiveErrors >= MAX_CONSECUTIVE_ERRORS){
-        pushLog("🔄 Tentativa de recuperação final (60s)...", "log-warmup");
-        try{
-          const recovery = await _fetchWithTimeout(
-            API + `/api/job/${jobId}`,
-            { headers:{"Authorization":`Bearer ${token}`} },
-            60000,
-          );
-          if(recovery.ok){
-            consecutiveErrors = 0;
-            pollRes = recovery;
-            /* cai para o processamento normal abaixo */
-          } else if(recovery.status === 202){
-            consecutiveErrors = 0;
-            continue;
-          } else if(recovery.status === 404){
-            throw new Error(
-              "O servidor foi reiniciado e o job expirou. " +
-              "Seu crédito foi preservado. Inicie uma nova análise.",
-            );
-          } else {
-            throw new Error(`Recuperação falhou (HTTP ${recovery.status}).`);
-          }
-        }catch(recoveryErr){
-          if(recoveryErr.message.includes("expirou") || recoveryErr.message.includes("Recuperação")){
-            throw recoveryErr;
-          }
-          throw new Error(
-            `Conexão perdida após ${MAX_CONSECUTIVE_ERRORS} falhas + 1 tentativa de recuperação. ` +
-            `O job pode ter concluído — tente novamente em instantes para verificar seu histórico.`,
-          );
-        }
-      }
-
-      /* FIX #C — backoff exponencial: 2 s, 4 s, 8 s, 16 s */
-      const backoffMs = Math.min(2000 * Math.pow(2, consecutiveErrors - 1), 16000);
-      pushLog(`⏳ Reconectando em ${(backoffMs/1000).toFixed(0)}s...`, "log-warmup");
-      await new Promise(r => setTimeout(r, backoffMs));
-      continue;
-    }
-
-    /* 202 = ainda processando, continua no loop */
-    if(pollRes.status === 202) continue;
-
-    /* FIX #D — 404 = servidor reiniciou, job perdido */
-    if(pollRes.status === 404){
-      throw new Error(
-        "O servidor foi reiniciado e o job expirou. " +
-        "Seu crédito foi preservado. Inicie uma nova análise.",
-      );
-    }
-
-    /* Qualquer outro erro HTTP */
-    if(!pollRes.ok){
-      const e = await pollRes.json().catch(()=>({}));
-      throw new Error(e.detail || `Erro no job: ${pollRes.status}`);
-    }
-
-    /* ── JOB CONCLUÍDO (200 OK) ── */
-    const d = await pollRes.json();
-
-    const agents = d.agents || [];
-    _agentDone = 0; updateProgress();
-    for(const ag of agents){
-      pushLog(`[${(ag.area||"").toUpperCase()}]: ✓ ${ag.duration_ms||0}ms`, "log-done");
-      _agentDone++; updateProgress();
-    }
-    pushLog(`[ADVOGADO DO DIABO]: Contraditório executado`, "log-judge");
-    pushLog(`⬡ Jusaii Score calculado: ${(d.jusaii_score||0).toFixed(0)}/100`, "log-score");
-    pushLog(`[JUIZ IA]: Deliberação concluída`, "log-judge");
-    pushLog(`⚖ Veredito final gerado.`, "log-verdict");
-
-    tribunal = d.tribunal || tribunal;
-    if(tribunal){
-      document.getElementById("tribunal-name").textContent = tribunal;
-      document.getElementById("tribunal-bar").classList.remove("hidden");
-    }
-
-    updateUI();
-    renderPremiumResult(
-      d.veredito       || "",
-      agents,
-      d.analysis_id,
-      d.veto_triggered || false,
-      d.jusaii_score   || 0,
-      tribunal,
-      out,
-    );
-    return; /* sucesso — sai do loop */
-  }
-
-  throw new Error("Análise expirou após 10 minutos. Verifique sua conexão e tente novamente.");
+  updateUI();
+  renderPremiumResult(verdict, agents, analysisId, isVeto, score, tribunal, out);
 }
 
-/* ──────────────────────────────────────────────
-   RENDER PREMIUM
-────────────────────────────────────────────── */
+/* ── RENDER PREMIUM ── */
 function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribunal, out){
   out.innerHTML = "";
 
@@ -1711,7 +1233,7 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
     section.innerHTML = `
       <div class="agents-header">
         <span class="section-title">Pareceres dos Especialistas</span>
-        <span class="agents-count" style="font-family:var(--font-mono)">${results.length} / 16</span>
+        <span class="agents-count">${results.length} / 16</span>
       </div>
       <div class="agents-grid" id="agents-grid"></div>`;
     out.appendChild(section);
@@ -1721,7 +1243,6 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
 
   const actions = document.createElement("div");
   actions.className = "analysis-actions fade-up";
-
   if(analysisId){
     const pdfBtn2 = document.createElement("button");
     pdfBtn2.className = "btn-dl-pdf";
@@ -1729,16 +1250,13 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
     pdfBtn2.onclick   = () => downloadPDF(analysisId);
     actions.appendChild(pdfBtn2);
   }
-
   if(!isVeto && score > 0){
     const shareBtn = document.createElement("button");
     shareBtn.className = "btn-share-card";
     shareBtn.innerHTML = `<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg> Compartilhar Card`;
-    const _v = verdict || "", _s = score, _t = tribunal || "";
-    shareBtn.onclick = () => openShareCard(_s, _v, _t);
+    shareBtn.onclick = () => openShareCard(score, verdict, tribunal);
     actions.appendChild(shareBtn);
   }
-
   out.appendChild(actions);
 }
 
@@ -1769,7 +1287,7 @@ function buildScoreCard(score, tribunal, agentCount){
         ${tribunal ? `<span class="chip chip-blue">${tribunal}</span>` : ""}
         <span class="chip chip-muted">${agentCount} especialistas</span>
       </div>
-      <div class="score-desc">Score calculado com base na confiança ponderada dos 16 agentes, contraditório do Advogado do Diabo e completude da análise.</div>
+      <div class="score-desc">Score calculado com base na confiança ponderada dos ${agentCount} agentes, contraditório do Advogado do Diabo e completude da análise.</div>
     </div>`;
   return div;
 }
@@ -1778,6 +1296,7 @@ function buildAgentCard(r, i){
   const card = document.createElement("div");
   card.className = "agent-card";
   card.style.setProperty("--i", i);
+  /* risk_level vem direto do evento SSE agent_done (adicionado no v6.1) */
   const risk = r.risk_level || "MÉDIO";
   const conf = r.confidence || 0;
   card.innerHTML = `
@@ -1802,9 +1321,7 @@ function toggleAgent(summary){
   summary.closest(".agent-card").classList.toggle("open");
 }
 
-/* ──────────────────────────────────────────────
-   PDF
-────────────────────────────────────────────── */
+/* ── PDF ── */
 async function downloadPDF(id){
   if(!token){ alert("Faça login para baixar o PDF."); return; }
   try{
@@ -1820,9 +1337,7 @@ async function downloadPDF(id){
   }catch{ alert("Erro ao baixar PDF."); }
 }
 
-/* ──────────────────────────────────────────────
-   HISTÓRICO
-────────────────────────────────────────────── */
+/* ── HISTÓRICO ── */
 async function verHistorico(){
   if(!token) return;
   const out = document.getElementById("output");
@@ -1855,9 +1370,7 @@ async function verHistorico(){
   }
 }
 
-/* ──────────────────────────────────────────────
-   PAGAMENTO
-────────────────────────────────────────────── */
+/* ── PAGAMENTO ── */
 async function comprar(){
   if(!token){ alert("Faça login primeiro."); showLogin(); return; }
   try{
@@ -1869,9 +1382,7 @@ async function comprar(){
   }catch{ alert("Erro de conexão."); }
 }
 
-/* ──────────────────────────────────────────────
-   ADMIN PANEL
-────────────────────────────────────────────── */
+/* ── ADMIN PANEL ── */
 let _allUsers    = [];
 let _adminSecret = null;
 
@@ -1883,7 +1394,6 @@ function openAdmin(){
   loadAdminStats();
   if(document.getElementById("tab-users").classList.contains("visible")) loadUsers();
 }
-
 function showAdminAuthBanner(){
   document.getElementById("tab-stats").innerHTML = `
     <div style="padding:32px 0;text-align:center;">
@@ -1898,7 +1408,6 @@ function showAdminAuthBanner(){
     </div>`;
   document.getElementById("tab-users").innerHTML = `<div class="users-loader" style="color:var(--mist);">Faça login no painel para ver os usuários.</div>`;
 }
-
 async function submitAdminSecret(){
   const s = (document.getElementById("secret-input")||{}).value || "";
   if(!s) return;
@@ -1929,7 +1438,6 @@ async function submitAdminSecret(){
     <div id="users-list"><div class="users-loader">Carregando usuários…</div></div>`;
   loadAdminStats();
 }
-
 function closeAdmin(){
   document.getElementById("admin-overlay").classList.remove("open");
   document.body.style.overflow = "";
@@ -1945,12 +1453,10 @@ function switchAdminTab(tab, btn){
   if(tab==="users" && !_allUsers.length) loadUsers();
   if(tab==="stats") loadAdminStats();
 }
-
 function _adminHeaders(){
   const secret = _adminSecret || localStorage.getItem("admin_secret") || "";
   return {"Content-Type":"application/json","Authorization":`Bearer ${secret}`};
 }
-
 async function loadAdminStats(){
   try{
     const res = await fetch(API+"/api/admin/stats",
@@ -1972,15 +1478,8 @@ async function loadAdminStats(){
       el.innerHTML = `<span>${k.replace(/_/g," ")}</span><span class="admin-badge ${v?"badge-on":"badge-off"}">${v?"ON":"OFF"}</span>`;
       fg.appendChild(el);
     });
-    if(d.circuit_breaker !== undefined){
-      const el = document.createElement("div");
-      el.className = "feat-item";
-      el.innerHTML = `<span>circuit breaker</span><span class="admin-badge ${d.circuit_breaker?"badge-on":"badge-off"}">${d.circuit_breaker?"ON":"OFF"}</span>`;
-      fg.appendChild(el);
-    }
   }catch(e){ console.error(e); }
 }
-
 async function loadUsers(){
   const list = document.getElementById("users-list");
   list.innerHTML = `<div class="users-loader">⏳ Carregando...</div>`;
@@ -1994,13 +1493,11 @@ async function loadUsers(){
     list.innerHTML = `<div class="users-loader" style="color:#f87171;">Erro ao carregar usuários</div>`;
   }
 }
-
 function filterUsers(){
   const q = document.getElementById("user-search").value.toLowerCase().trim();
   if(!q){ renderUsers(_allUsers); return; }
   renderUsers(_allUsers.filter(u=>u.email.toLowerCase().includes(q)||String(u.id).includes(q)));
 }
-
 function renderUsers(users){
   const list = document.getElementById("users-list");
   if(!users.length){ list.innerHTML=`<div class="users-loader">Nenhum usuário encontrado.</div>`; return; }
@@ -2032,11 +1529,9 @@ function renderUsers(users){
     list.appendChild(row);
   });
 }
-
 function toggleUserRow(id){
   document.getElementById(`user-row-${id}`).classList.toggle("expanded");
 }
-
 function showUserMsg(id, msg, isError=false){
   const el = document.getElementById(`msg-${id}`);
   el.textContent = msg;
@@ -2044,7 +1539,6 @@ function showUserMsg(id, msg, isError=false){
   el.style.display = "block";
   setTimeout(()=>{ el.style.display="none"; }, 4000);
 }
-
 async function adminSetCredits(op, uid){
   const inputId = op==="add" ? `amt-add-${uid}` : `amt-rem-${uid}`;
   const amount  = parseInt(document.getElementById(inputId).value) || 1;
@@ -2062,7 +1556,6 @@ async function adminSetCredits(op, uid){
     } else showUserMsg(uid, d.detail||"Erro", true);
   }catch{ showUserMsg(uid, "Erro de conexão", true); }
 }
-
 async function adminResetFree(uid){
   try{
     const res = await fetch(API+"/api/admin/reset-free-credits",
@@ -2074,7 +1567,6 @@ async function adminResetFree(uid){
     else showUserMsg(uid, d.detail||"Erro", true);
   }catch{ showUserMsg(uid, "Erro de conexão", true); }
 }
-
 async function adminDeleteUser(uid, email){
   if(!confirm(`Deletar permanentemente ${email} e todas as suas análises?\n\nEssa ação é irreversível.`)) return;
   try{
@@ -2088,11 +1580,8 @@ async function adminDeleteUser(uid, email){
   }catch{ alert("Erro de conexão"); }
 }
 
-/* ──────────────────────────────────────────────
-   SHARE CARD
-────────────────────────────────────────────── */
+/* ── SHARE CARD ── */
 let _shareData = {};
-
 function openShareCard(score, verdict, tribunal){
   _shareData = {score, verdict, tribunal};
   const num = Math.round(score);
@@ -2115,7 +1604,6 @@ function openShareCard(score, verdict, tribunal){
   document.getElementById("share-modal").classList.add("open");
   document.body.style.overflow = "hidden";
 }
-
 function closeShareModal(){
   document.getElementById("share-modal").classList.remove("open");
   document.body.style.overflow = "";
@@ -2123,14 +1611,12 @@ function closeShareModal(){
 function handleShareModalClick(e){
   if(e.target===document.getElementById("share-modal")) closeShareModal();
 }
-
 function copyShareText(){
   const s = _shareData;
   const label = s.score>=75 ? "Alta Probabilidade de Êxito" : s.score>=50 ? "Viável com Ressalvas" : "Alto Risco Jurídico";
   const text = `⚖ Jusaii — Quantum Legal Intelligence\n\nScore: ${Math.round(s.score)}/100 · ${label}${s.tribunal?" · "+s.tribunal:""}\n\n"${s.verdict.slice(0,200)}${s.verdict.length>200?"…":""}"\n\njusaii.com.br`;
   navigator.clipboard.writeText(text).then(()=>alert("✓ Texto copiado!")).catch(()=>alert("Erro ao copiar"));
 }
-
 async function downloadShareImg(){
   const el = document.getElementById("share-card-el");
   if(typeof html2canvas === "undefined"){ alert("Erro: html2canvas não carregou."); return; }
@@ -2143,9 +1629,7 @@ async function downloadShareImg(){
   }catch(e){ console.error(e); alert("Erro ao gerar imagem. Tente usar 'Copiar Texto'."); }
 }
 
-/* ──────────────────────────────────────────────
-   MODAIS
-────────────────────────────────────────────── */
+/* ── MODAIS ── */
 function showLogin(){
   closeModals();
   document.getElementById("modal-login").classList.add("active");
@@ -2165,9 +1649,7 @@ document.querySelectorAll(".modal-overlay").forEach(m=>{
 document.getElementById("login-pw").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
 document.getElementById("reg-pw").addEventListener("keydown",   e=>{ if(e.key==="Enter") register(); });
 
-/* ──────────────────────────────────────────────
-   UTILS
-────────────────────────────────────────────── */
+/* ── UTILS ── */
 function esc(s){
   if(!s) return "";
   return String(s)
