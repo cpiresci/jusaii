@@ -1503,25 +1503,37 @@ async function analisarFree(prompt){
 }
 
 /* ──────────────────────────────────────────────
-   PREMIUM SSE
+   PREMIUM — POLLING (padrão Wuzo)
+   Substitui SSE por: POST → job_id → GET /job/{id}
+   Elimina idle-timeout do Render que derrubava a
+   conexão SSE durante as chamadas longas ao LLM.
 ────────────────────────────────────────────── */
 async function analisarPremiumSSE(prompt){
   const out = document.getElementById("output");
-  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Conectando ao Swarm...</div></div>`;
 
-  const results=[], verdicts={text:"",veto:false};
-  let analysisId=null, jusaiiScore=0, tribunal="", state="";
+  // ── Áreas para log animado durante o polling ─────────────────────
+  const AREAS = [
+    "DIREITO CIVIL","DIREITO PENAL","DIREITO TRABALHISTA",
+    "DIREITO DE FAMÍLIA","DIREITO DO CONSUMIDOR","DIREITO TRIBUTÁRIO",
+    "DIREITO EMPRESARIAL","DIREITO IMOBILIÁRIO","DIREITO DIGITAL",
+    "DIREITO PREVIDENCIÁRIO","DIREITO AMBIENTAL","DIREITO CONSTITUCIONAL",
+    "DIREITO À SAÚDE","DIREITO INTERNACIONAL","DIREITO ELEITORAL","DIREITO AGRÁRIO",
+  ];
 
-  const res = await fetch(API+"/api/analyze/premium/stream",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
-    body:JSON.stringify({prompt}),
-    signal:AbortSignal.timeout(310000)
-  });
+  out.innerHTML=`<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Iniciando Swarm...</div></div>`;
 
-  if(!res.ok){
-    const e=await res.json().catch(()=>({}));
-    if(res.status===402){
+  // ── PASSO 1: POST — dispara o job e recebe job_id imediatamente ──
+  const startRes = await _fetchWithTimeout(
+    API+"/api/analyze/premium",
+    { method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
+      body:JSON.stringify({prompt}) },
+    30000
+  );
+
+  if(!startRes.ok){
+    const e = await startRes.json().catch(()=>({}));
+    if(startRes.status===402){
       out.innerHTML=`
         <div class="loader-card" style="border-color:rgba(245,200,50,0.65);">
           <div style="font-size:32px;margin-bottom:16px;">⚠</div>
@@ -1530,75 +1542,113 @@ async function analisarPremiumSSE(prompt){
         </div>`;
       return;
     }
-    throw new Error(e.detail||`Erro ${res.status}`);
+    throw new Error(e.detail||`Erro ${startRes.status}`);
   }
 
-  out.innerHTML=""; // clear loader when stream starts
+  const startData  = await startRes.json();
+  const jobId      = startData.job_id;
+  let   tribunal   = startData.tribunal_detectado || "";
 
-  const reader=res.body.getReader();
-  const dec=new TextDecoder();
-  let buf="";
+  // Mostra tribunal detectado imediatamente
+  if(tribunal){
+    document.getElementById("tribunal-name").textContent = tribunal;
+    document.getElementById("tribunal-bar").classList.remove("hidden");
+  }
 
-  while(true){
-    const {done,value}=await reader.read();
-    if(done) break;
-    buf+=dec.decode(value,{stream:true});
-    const lines=buf.split("\n"); buf=lines.pop();
-    for(const line of lines){
-      if(!line.startsWith("data:")) continue;
-      const raw=line.slice(5).trim();
-      if(raw==="[DONE]") break;
-      let ev; try{ev=JSON.parse(raw);}catch{continue;}
+  // Inicia contadores de progresso e log
+  _agentTotal = 16; _agentDone = 0; updateProgress();
+  pushLog(`⚖ 16 especialistas Quantum Jurist iniciados. Tribunal: ${tribunal}`,"log-thinking");
 
-      if(ev.type==="start"){
-        _agentTotal=ev.total||16;
-        if(ev.tribunal){
-          tribunal=ev.tribunal;
-          document.getElementById("tribunal-name").textContent=tribunal;
-          document.getElementById("tribunal-bar").classList.remove("hidden");
-        }
-        pushLog(ev.message,"log-thinking");
-        updateProgress();
-      }
-      else if(ev.type==="agent_thinking") pushLog(ev.message,"log-thinking");
-      else if(ev.type==="agent_done"){
-        _agentDone++; updateProgress();
-        pushLog(ev.message,"log-done");
-        results.push(ev);
-      }
-      else if(ev.type==="agent_skip") pushLog(ev.message,"log-skip");
-      else if(ev.type==="veto"){
-        pushLog(ev.message,"log-veto");
-        results.push(ev);
-        const vCard=document.createElement("div");
-        vCard.className="verdict-card veto";
-        vCard.innerHTML=`<div class="verdict-header"><div class="verdict-title-group"><span class="verdict-icon">🚨</span><div><div class="verdict-title">Veto Emitido</div><div class="verdict-subtitle">${esc(ev.area||"")}</div></div></div></div><div class="verdict-text">${esc(ev.veto_reason||"")}</div>`;
-        out.prepend(vCard);
-      }
-      else if(ev.type==="devil_thinking") pushLog(ev.message,"log-judge");
-      else if(ev.type==="devil_done")     pushLog(ev.message,"log-done");
-      else if(ev.type==="judge_thinking") pushLog(ev.message,"log-judge");
-      else if(ev.type==="score"){
-        jusaiiScore=ev.jusaii_score||0;
-        pushLog(`⬡ Jusaii Score calculado: ${jusaiiScore.toFixed(0)}/100`,"log-score");
-      }
-      else if(ev.type==="verdict"){
-        verdicts.text=ev.verdict||"";
-        verdicts.veto=ev.veto_triggered||false;
-        if(ev.jusaii_score) jusaiiScore=ev.jusaii_score;
-        pushLog("⚖ Veredito final gerado.","log-verdict");
-      }
-      else if(ev.type==="saved"){
-        analysisId=ev.analysis_id;
-        if(ev.jusaii_score) jusaiiScore=ev.jusaii_score;
-        if(ev.tribunal) tribunal=ev.tribunal;
-        updateUI();
-      }
-      else if(ev.type==="error") throw new Error(ev.message);
+  // ── PASSO 2: POLLING — consulta /api/job/{id} até concluir ──────
+  // Mesmo padrão do Wuzo: cada poll é uma requisição curta que retorna
+  // imediatamente, sem manter conexão aberta — sem risco de idle timeout.
+  const POLL_INTERVAL_MS = 3000;  // 3 s entre polls
+  const MAX_POLLS        = 120;   // 120 × 3 s = 6 min máximo
+  let   areaIdx          = 0;
+  let   lastLoggedArea   = -1;
+
+  for(let poll = 0; poll < MAX_POLLS; poll++){
+    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
+
+    // Animação de log: avança uma área por poll enquanto aguarda
+    if(areaIdx < AREAS.length && areaIdx !== lastLoggedArea){
+      pushLog(`[${AREAS[areaIdx]}]: Analisando...`,"log-thinking");
+      lastLoggedArea = areaIdx;
     }
+
+    let pollRes;
+    try{
+      pollRes = await _fetchWithTimeout(
+        API+`/api/job/${jobId}`,
+        { headers:{"Authorization":`Bearer ${token}`} },
+        15000
+      );
+    }catch(netErr){
+      // Falha de rede no poll — não desiste, tenta no próximo ciclo
+      pushLog(`⚠ Poll ${poll+1}: falha de rede (${netErr.message}), tentando novamente...`,"log-skip");
+      continue;
+    }
+
+    if(pollRes.status === 202){
+      // Ainda processando — avança animação e continua polling
+      const elapsed = (poll+1) * POLL_INTERVAL_MS / 1000;
+      if(elapsed < 45)       areaIdx = Math.min(poll * 2,      AREAS.length - 1);
+      else if(elapsed < 90)  areaIdx = Math.min(AREAS.length - 1, poll);
+      else { // fase do Juiz IA
+        if(areaIdx < AREAS.length){
+          // Marca todos como concluídos no log
+          for(let i = _agentDone; i < 16; i++){
+            pushLog(`[${AREAS[i]}]: ✓`,"log-done");
+            _agentDone++; updateProgress();
+          }
+          areaIdx = AREAS.length; // não loga mais áreas
+        }
+        pushLog(`[JUIZ IA]: Deliberando...`,"log-judge");
+      }
+      continue;
+    }
+
+    if(!pollRes.ok){
+      const e = await pollRes.json().catch(()=>({}));
+      throw new Error(e.detail||`Erro no job: ${pollRes.status}`);
+    }
+
+    // ── JOB CONCLUÍDO ─────────────────────────────────────────────
+    const d = await pollRes.json();
+
+    // Completa os logs de agentes com dados reais
+    const agents = d.agents || [];
+    _agentDone = 0; updateProgress();
+    for(const ag of agents){
+      pushLog(`[${(ag.area||"").toUpperCase()}]: ✓ ${ag.duration_ms||0}ms`,"log-done");
+      _agentDone++; updateProgress();
+    }
+    pushLog(`[ADVOGADO DO DIABO]: Contraditório executado`,"log-judge");
+    pushLog(`⬡ Jusaii Score calculado: ${(d.jusaii_score||0).toFixed(0)}/100`,"log-score");
+    pushLog(`[JUIZ IA]: Deliberação concluída`,"log-judge");
+    pushLog(`⚖ Veredito final gerado.`,"log-verdict");
+
+    tribunal = d.tribunal || tribunal;
+    if(tribunal){
+      document.getElementById("tribunal-name").textContent = tribunal;
+      document.getElementById("tribunal-bar").classList.remove("hidden");
+    }
+
+    updateUI();
+    renderPremiumResult(
+      d.veredito || "",
+      agents,
+      d.analysis_id,
+      d.veto_triggered || false,
+      d.jusaii_score   || 0,
+      tribunal,
+      out
+    );
+    return; // sucesso — sai do loop
   }
 
-  if(verdicts.text) renderPremiumResult(verdicts.text,results,analysisId,verdicts.veto,jusaiiScore,tribunal,out);
+  // Esgotou todos os polls sem resposta
+  throw new Error("Análise expirou após 6 minutos. Tente novamente.");
 }
 
 /* ──────────────────────────────────────────────
