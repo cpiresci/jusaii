@@ -583,14 +583,13 @@ textarea#txt::placeholder{color:rgba(255,255,255,0.90);font-style:italic;}
   font-size:18px;font-style:italic;
   color:rgba(255,255,255,0.95);
 }
-/* Sub-label below main loader text — for area detail */
 .loader-sub{
   font-family:var(--font-mono);
   font-size:12px;
   color:rgba(100,170,255,0.80);
   margin-top:10px;
   letter-spacing:.06em;
-  min-height:18px; /* reserve space to avoid layout jump */
+  min-height:18px;
 }
 
 /* ══════════════════════════════════════════════
@@ -1143,16 +1142,6 @@ let token    = localStorage.getItem("token");
 let userId   = null;
 let _agentDone  = 0;
 let _agentTotal = 0;
-
-/*
- * ╔══════════════════════════════════════════════════════════╗
- * ║  BUG FIX #2 — Race Condition Guard                      ║
- * ║  Flag global que sinaliza se o Swarm já está rodando.    ║
- * ║  Impede que um segundo clique inicie outro ciclo         ║
- * ║  paralelo, corrompendo o estado da UI e desperdiçando    ║
- * ║  créditos premium.                                       ║
- * ╚══════════════════════════════════════════════════════════╝
- */
 let _isProcessing = false;
 
 /* ──────────────────────────────────────────────
@@ -1195,7 +1184,6 @@ function updateUI(){
   }
 }
 
-/* ── Input focus effect ─────────────────────── */
 document.getElementById("txt").addEventListener("focus", ()=>document.getElementById("input-panel").classList.add("focused"));
 document.getElementById("txt").addEventListener("blur",  ()=>document.getElementById("input-panel").classList.remove("focused"));
 
@@ -1352,19 +1340,8 @@ async function warmUp(){
 
 /* ──────────────────────────────────────────────
    ANALISAR
-   ─────────────────────────────────────────────
-   BUG FIX #2 — verificação do flag _isProcessing
-   no início da função. Se já estiver rodando,
-   retorna imediatamente sem iniciar um novo ciclo.
 ────────────────────────────────────────────── */
 async function analisar(tipo){
-  /*
-   * ┌─────────────────────────────────────────────────────────┐
-   * │  FIX #2 — RACE CONDITION GUARD                          │
-   * │  Verifica se já existe uma análise em andamento.        │
-   * │  Se sim, ignora o clique e avisa no console.            │
-   * └─────────────────────────────────────────────────────────┘
-   */
   if(_isProcessing){
     console.warn("[Jusaii] Swarm já em execução — clique duplo ignorado.");
     return;
@@ -1381,9 +1358,7 @@ async function analisar(tipo){
     return;
   }
 
-  /* Seta a trava ANTES de qualquer operação assíncrona */
   _isProcessing = true;
-
   document.getElementById("output").innerHTML = "";
   resetLog();
   setLoading(true);
@@ -1404,14 +1379,6 @@ async function analisar(tipo){
       </div>`;
     setStatus("Erro","error");
   }finally{
-    /*
-     * ┌─────────────────────────────────────────────────────────┐
-     * │  FIX #2 — LIBERA A TRAVA                               │
-     * │  O bloco finally garante que _isProcessing volte a     │
-     * │  false independentemente de sucesso ou erro, evitando  │
-     * │  que a UI fique travada permanentemente.                │
-     * └─────────────────────────────────────────────────────────┘
-     */
     _isProcessing = false;
     setLoading(false);
   }
@@ -1463,18 +1430,30 @@ async function analisarFree(prompt){
     </div>`;
 }
 
-/* ──────────────────────────────────────────────
-   PREMIUM — POLLING (padrão Wuzo)
-   ─────────────────────────────────────────────
-   CORREÇÕES APLICADAS:
-     FIX #1 — Animação circular sem esgotar áreas
-     FIX #2 — Protegida pela trava em analisar()
-     FIX #3 — Texto do loader atualizado dinamicamente
-────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   PREMIUM — POLLING RESILIENTE v6.1
+   ══════════════════════════════════════════════════════════════════════
+   FIX #A  POLL_TIMEOUT_MS 15 000 → 45 000
+           O endpoint /api/job/{id} agora usa JWT-only (sem DB), mas
+           45 s absorve qualquer pico de latência do Render sob carga.
+
+   FIX #B  MAX_POLLS 120 → 200  (200 × 3 s = 10 min de janela máxima)
+           Jobs com 16 agentes + providers lentos podem levar 4-5 min.
+
+   FIX #C  consecutiveErrors + backoff exponencial
+           Erros isolados são recuperados silenciosamente.
+           5 erros seguidos lançam exceção e encerram o ciclo.
+           Backoff (2 s / 4 s / 8 s / 16 s) alivia o servidor sob falha.
+
+   FIX #D  404 tratado explicitamente
+           Ocorre quando o Render reinicia a instância e limpa _jobs.
+
+   FIX #E  Limiares de fase realistas: 90 s / 150 s
+           Compatíveis com a duração real de jobs com concurrência = 3.
+   ══════════════════════════════════════════════════════════════════════ */
 async function analisarPremiumSSE(prompt){
   const out = document.getElementById("output");
 
-  /* Lista de todas as 16 áreas — espelha exatamente os agentes do backend */
   const AREAS = [
     "DIREITO CIVIL","DIREITO PENAL","DIREITO TRABALHISTA",
     "DIREITO DE FAMÍLIA","DIREITO DO CONSUMIDOR","DIREITO TRIBUTÁRIO",
@@ -1483,15 +1462,6 @@ async function analisarPremiumSSE(prompt){
     "DIREITO À SAÚDE","DIREITO INTERNACIONAL","DIREITO ELEITORAL","DIREITO AGRÁRIO",
   ];
 
-  /*
-   * ┌─────────────────────────────────────────────────────────┐
-   * │  FIX #3 — LOADER COM ID PARA ATUALIZAÇÃO DINÂMICA      │
-   * │  O elemento principal (#loader-status-text) e o sub-    │
-   * │  texto (#loader-area-text) recebem IDs únicos para que  │
-   * │  possamos atualizar o conteúdo a cada ciclo do poll,    │
-   * │  sem recriar o DOM inteiro.                             │
-   * └─────────────────────────────────────────────────────────┘
-   */
   out.innerHTML = `
     <div class="loader-card">
       <div class="loader-ring"></div>
@@ -1505,7 +1475,7 @@ async function analisarPremiumSSE(prompt){
     { method:"POST",
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`},
       body:JSON.stringify({prompt}) },
-    30000
+    30000,
   );
 
   if(!startRes.ok){
@@ -1515,7 +1485,11 @@ async function analisarPremiumSSE(prompt){
         <div class="loader-card" style="border-color:rgba(245,200,50,0.65);">
           <div style="font-size:32px;margin-bottom:16px;">⚠</div>
           <div class="loader-text" style="color:#fcd34d;">Sem créditos premium</div>
-          <div style="margin-top:16px;"><button class="btn-action btn-buy" onclick="comprar()" style="margin:0 auto;">Comprar — R$ 19,90</button></div>
+          <div style="margin-top:16px;">
+            <button class="btn-action btn-buy" onclick="comprar()" style="margin:0 auto;">
+              Comprar — R$ 19,90
+            </button>
+          </div>
         </div>`;
       return;
     }
@@ -1526,118 +1500,113 @@ async function analisarPremiumSSE(prompt){
   const jobId     = startData.job_id;
   let   tribunal  = startData.tribunal_detectado || "";
 
-  /* Mostra tribunal detectado imediatamente */
   if(tribunal){
     document.getElementById("tribunal-name").textContent = tribunal;
     document.getElementById("tribunal-bar").classList.remove("hidden");
   }
 
-  /* Inicia contadores */
   _agentTotal = 16;
   _agentDone  = 0;
   updateProgress();
   pushLog(`⚖ 16 especialistas Quantum Jurist iniciados. Tribunal: ${tribunal}`, "log-thinking");
 
-  /* ── PASSO 2: POLLING ─────────────────────────────────────────── */
+  /* ── PASSO 2: POLLING ── */
+  const POLL_INTERVAL_MS       = 3000;
+  const POLL_TIMEOUT_MS        = 45000;  // FIX #A — era 15 000
+  const MAX_POLLS              = 200;    // FIX #B — era 120
+  const MAX_CONSECUTIVE_ERRORS = 5;     // FIX #C — novo
+  const POLLS_PER_AREA         = 2;
 
-  const POLL_INTERVAL_MS = 3000;   // 3 s entre cada poll
-  const MAX_POLLS        = 120;    // 120 × 3 s = 6 min máximo
-
-  /*
-   * ┌─────────────────────────────────────────────────────────────────┐
-   * │  FIX #1 — CORREÇÃO DO LOOP DE ANIMAÇÃO                         │
-   * │                                                                 │
-   * │  PROBLEMA ORIGINAL:                                             │
-   * │    areaIdx = Math.min(poll * 2, AREAS.length - 1)              │
-   * │    Com poll=8 → 8×2=16 → índice trava em 15 para sempre.       │
-   * │    Em ~24 segundos a animação silenciava completamente.         │
-   * │                                                                 │
-   * │  SOLUÇÃO:                                                       │
-   * │    Usamos módulo (%) para criar um loop circular infinito:      │
-   * │      currentAreaIdx = Math.floor(poll / POLLS_PER_AREA)        │
-   * │                        % AREAS.length                          │
-   * │    Com POLLS_PER_AREA=2 cada área aparece por 6s, e após       │
-   * │    cobertura completa das 16 áreas (~96s) o ciclo recomeça     │
-   * │    do índice 0 — garantindo animação até o job terminar.       │
-   * │                                                                 │
-   * │  FASES DE FEEDBACK:                                             │
-   * │    0–60s  → "Consultando: [ÁREA]" (animação circular)          │
-   * │    60–120s → "Advogado do Diabo executando contraditório"       │
-   * │    120s+  → "Juiz IA deliberando veredito final"                │
-   * └─────────────────────────────────────────────────────────────────┘
-   */
-  const POLLS_PER_AREA     = 2;  // avança 1 área a cada 2 polls (6s por área)
-  let   lastLoggedAreaIdx  = -1; // evita logar a mesma área duas vezes seguidas
+  let lastLoggedAreaIdx = -1;
+  let consecutiveErrors = 0;            // FIX #C
 
   for(let poll = 0; poll < MAX_POLLS; poll++){
 
-    /* Aguarda o intervalo antes de fazer o próximo poll */
     await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
 
-    /* ── FIX #1: cálculo do índice de área com wrap circular ──── */
+    /* ── Animação circular de área (loop infinito) ── */
     const linearStep     = Math.floor(poll / POLLS_PER_AREA);
     const currentAreaIdx = linearStep % AREAS.length;
     const currentArea    = AREAS[currentAreaIdx];
-    const elapsed        = (poll + 1) * POLL_INTERVAL_MS / 1000; // segundos
+    const elapsed        = (poll + 1) * POLL_INTERVAL_MS / 1000;
 
-    /* Loga no Singularity Log apenas quando a área muda */
     if(currentAreaIdx !== lastLoggedAreaIdx){
       pushLog(`[${currentArea}]: Analisando...`, "log-thinking");
       lastLoggedAreaIdx = currentAreaIdx;
     }
 
-    /*
-     * ── FIX #3: atualiza os dois elementos de texto do loader ──
-     * loader-status-text → fase atual (área / contraditório / juiz)
-     * loader-area-text   → detalhe de progresso numérico
-     */
+    /* ── FIX #E: limiares de fase compatíveis com duração real do job ── */
     const statusEl = document.getElementById("loader-status-text");
     const areaEl   = document.getElementById("loader-area-text");
-
     if(statusEl && areaEl){
-      if(elapsed < 60){
-        /* Fase 1 — consulta dos 16 especialistas */
+      if(elapsed < 90){
+        /* Fase 1 — consulta dos 16 especialistas (~0-90 s) */
         statusEl.textContent = `Consultando: ${currentArea}`;
-        const areaNum = (linearStep % AREAS.length) + 1;
-        areaEl.textContent   = `Área ${areaNum} de 16 · ${Math.round(elapsed)}s`;
-      } else if(elapsed < 120){
-        /* Fase 2 — Advogado do Diabo */
+        areaEl.textContent   = `Área ${(linearStep % AREAS.length)+1} de 16 · ${Math.round(elapsed)}s`;
+      } else if(elapsed < 150){
+        /* Fase 2 — Advogado do Diabo (~90-150 s) */
         statusEl.textContent = "Advogado do Diabo — Contraditório Obrigatório";
         areaEl.textContent   = `Revisando pareceres dos especialistas · ${Math.round(elapsed)}s`;
       } else {
-        /* Fase 3 — Juiz IA delibera */
+        /* Fase 3 — Juiz IA (150 s+) */
         statusEl.textContent = "Juiz IA — Deliberando veredito final";
         areaEl.textContent   = `Ponderando ${AREAS.length} pareceres + contraditório · ${Math.round(elapsed)}s`;
       }
     }
 
-    /* ── Faz o poll de status do job ─────────────────────────── */
+    /* ── FIX #A + #C: poll com timeout estendido e backoff exponencial ── */
     let pollRes;
     try{
       pollRes = await _fetchWithTimeout(
         API + `/api/job/${jobId}`,
         { headers:{"Authorization":`Bearer ${token}`} },
-        15000
+        POLL_TIMEOUT_MS,  // FIX #A
       );
+      consecutiveErrors = 0; // FIX #C — reset ao receber resposta válida
     }catch(netErr){
-      /* Falha de rede transitória — não desiste, tenta no próximo ciclo */
-      pushLog(`⚠ Poll ${poll+1}: falha de rede (${netErr.message}), tentando novamente...`, "log-skip");
+      consecutiveErrors++; // FIX #C
+
+      pushLog(
+        `⚠ Poll ${poll+1}: falha de rede (${netErr.message}) — ` +
+        `tentativa ${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}`,
+        "log-skip",
+      );
+
+      /* FIX #C — falha definitiva após MAX_CONSECUTIVE_ERRORS seguidas */
+      if(consecutiveErrors >= MAX_CONSECUTIVE_ERRORS){
+        throw new Error(
+          `Conexão perdida após ${MAX_CONSECUTIVE_ERRORS} falhas consecutivas. ` +
+          `O servidor pode estar sobrecarregado. Aguarde alguns minutos e tente novamente.`,
+        );
+      }
+
+      /* FIX #C — backoff exponencial: 2 s, 4 s, 8 s, 16 s */
+      const backoffMs = Math.min(2000 * Math.pow(2, consecutiveErrors - 1), 16000);
+      pushLog(`⏳ Reconectando em ${(backoffMs/1000).toFixed(0)}s...`, "log-warmup");
+      await new Promise(r => setTimeout(r, backoffMs));
       continue;
     }
 
     /* 202 = ainda processando, continua no loop */
     if(pollRes.status === 202) continue;
 
-    /* Erro de servidor */
+    /* FIX #D — 404 = servidor reiniciou, job perdido */
+    if(pollRes.status === 404){
+      throw new Error(
+        "O servidor foi reiniciado e o job expirou. " +
+        "Seu crédito foi preservado. Inicie uma nova análise.",
+      );
+    }
+
+    /* Qualquer outro erro HTTP */
     if(!pollRes.ok){
       const e = await pollRes.json().catch(()=>({}));
       throw new Error(e.detail || `Erro no job: ${pollRes.status}`);
     }
 
-    /* ── JOB CONCLUÍDO ─────────────────────────────────────────── */
+    /* ── JOB CONCLUÍDO (200 OK) ── */
     const d = await pollRes.json();
 
-    /* Completa os logs com dados reais vindos do backend */
     const agents = d.agents || [];
     _agentDone = 0; updateProgress();
     for(const ag of agents){
@@ -1657,19 +1626,18 @@ async function analisarPremiumSSE(prompt){
 
     updateUI();
     renderPremiumResult(
-      d.veredito         || "",
+      d.veredito       || "",
       agents,
       d.analysis_id,
-      d.veto_triggered   || false,
-      d.jusaii_score     || 0,
+      d.veto_triggered || false,
+      d.jusaii_score   || 0,
       tribunal,
-      out
+      out,
     );
-    return; /* sucesso — sai do loop de polling */
+    return; /* sucesso — sai do loop */
   }
 
-  /* Esgotou todos os polls sem resposta do backend */
-  throw new Error("Análise expirou após 6 minutos. Tente novamente.");
+  throw new Error("Análise expirou após 10 minutos. Verifique sua conexão e tente novamente.");
 }
 
 /* ──────────────────────────────────────────────
@@ -1708,19 +1676,18 @@ function renderPremiumResult(verdict, results, analysisId, isVeto, score, tribun
     <div class="verdict-text">${esc(verdict)}</div>`;
   out.appendChild(vCard);
 
-  const agentsDone = results.filter(r => r.type === "agent_done");
-  if(agentsDone.length){
+  if(results.length){
     const section = document.createElement("div");
     section.className = "agents-section";
     section.innerHTML = `
       <div class="agents-header">
         <span class="section-title">Pareceres dos Especialistas</span>
-        <span class="agents-count" style="font-family:var(--font-mono)">${agentsDone.length} / 16</span>
+        <span class="agents-count" style="font-family:var(--font-mono)">${results.length} / 16</span>
       </div>
       <div class="agents-grid" id="agents-grid"></div>`;
     out.appendChild(section);
     const grid = section.querySelector("#agents-grid");
-    agentsDone.forEach((r,i)=>{ grid.appendChild(buildAgentCard(r,i)); });
+    results.forEach((r,i)=>{ grid.appendChild(buildAgentCard(r,i)); });
   }
 
   const actions = document.createElement("div");
@@ -1793,10 +1760,10 @@ function buildAgentCard(r, i){
       <span class="agent-chevron">▾</span>
     </div>
     <div class="agent-body">
-      ${r.specialty    ? `<div class="agent-specialty">${esc(r.specialty)}</div>`          : ""}
-      ${r.top_risk     ? `<div class="agent-risk-detail">⚠ ${esc(r.top_risk)}</div>`      : ""}
+      ${r.specialty   ? `<div class="agent-specialty">${esc(r.specialty)}</div>`     : ""}
+      ${r.top_risk    ? `<div class="agent-risk-detail">⚠ ${esc(r.top_risk)}</div>` : ""}
       <div class="agent-analysis">${esc(r.analysis||"")}</div>
-      ${r.duration_ms  ? `<div class="agent-duration">${r.duration_ms}ms</div>`            : ""}
+      ${r.duration_ms ? `<div class="agent-duration">${r.duration_ms}ms</div>`       : ""}
     </div>`;
   if(i === 0) card.classList.add("open");
   return card;
