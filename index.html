@@ -1282,15 +1282,22 @@ async function login(){
   errEl.style.display="none";
   if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
   try{
+    // Acorda o servidor se estiver dormindo (Render free tier pode levar 50s+)
+    errEl.style.display="block";
+    errEl.style.color="#a0aec0";
+    errEl.textContent="⏳ Conectando ao servidor...";
+    try{ await fetch(API+"/", {signal:AbortSignal.timeout(60000)}); }catch{}
+    errEl.style.display="none";
+
     const res = await fetch(API+"/api/auth/login",{
       method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({email,password:pw}),
-      signal:AbortSignal.timeout(20000)
+      signal:AbortSignal.timeout(30000)
     });
     const d = await res.json();
     if(res.ok){ token=d.token; localStorage.setItem("token",token); closeModals(); updateUI(); }
     else showModalErr(errEl, d.detail||"Credenciais inválidas");
-  }catch{ showModalErr(errEl,"Erro de conexão."); }
+  }catch(e){ showModalErr(errEl,"Erro de conexão. Aguarde e tente novamente."); }
 }
 
 async function register(){
@@ -1300,10 +1307,16 @@ async function register(){
   errEl.style.display="none";
   if(!email||!pw){ showModalErr(errEl,"Preencha email e senha."); return; }
   try{
+    errEl.style.display="block";
+    errEl.style.color="#a0aec0";
+    errEl.textContent="⏳ Conectando ao servidor...";
+    try{ await fetch(API+"/", {signal:AbortSignal.timeout(60000)}); }catch{}
+    errEl.style.display="none";
+
     const res = await fetch(API+"/api/auth/register",{
       method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({email,password:pw}),
-      signal:AbortSignal.timeout(20000)
+      signal:AbortSignal.timeout(30000)
     });
     const d = await res.json();
     if(res.ok){
@@ -1311,7 +1324,7 @@ async function register(){
       document.getElementById("login-email").value=email;
       pushLog("✓ Conta criada! Use suas credenciais para entrar.","log-done");
     } else showModalErr(errEl, d.detail||"Erro ao criar conta");
-  }catch{ showModalErr(errEl,"Erro de conexão."); }
+  }catch{ showModalErr(errEl,"Erro de conexão. Aguarde e tente novamente."); }
 }
 
 function logout(){
