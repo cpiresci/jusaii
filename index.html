@@ -949,10 +949,13 @@ async function analisar(tipo){
 }
 
 /* ── FREE ── */
+/* [FIX v6.9] Patch 1: loader usa texto genérico; Patch 2: label reflete
+   a área real do especialista retornada pelo backend em d.area_especialista */
 async function analisarFree(prompt){
   setStatus("Consultando especialista...","loading");
   const out = document.getElementById("output");
-  out.innerHTML = `<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Consultando Direito do Consumidor...</div></div>`;
+  /* PATCH 1 — texto do loader não mais fixo em "Direito do Consumidor" */
+  out.innerHTML = `<div class="loader-card"><div class="loader-ring"></div><div class="loader-text">Consultando especialista jurídico...</div></div>`;
   const res = await fetch(API+"/api/analyze",{
     method:"POST", headers:{"Content-Type":"application/json"},
     body:JSON.stringify({prompt}),
@@ -969,7 +972,8 @@ async function analisarFree(prompt){
       <div class="free-label">⚖ Veredito — Juiz IA</div>
       <div class="free-verdict">${esc(d.veredito||"")}</div>
       <div class="free-divider"></div>
-      <div class="free-analysis-label">📋 Parecer — Direito do Consumidor</div>
+      <!-- PATCH 2 — label dinâmica usando a área real do especialista selecionado -->
+      <div class="free-analysis-label">📋 Parecer — ${esc(d.area_especialista || 'Especialista Jurídico')}</div>
       <div class="free-analysis-text">${esc(d.free_analysis||"")}</div>
       <div class="upgrade-callout">
         <div class="upgrade-title">Desbloqueie a Análise Swarm Completa</div>
@@ -987,10 +991,6 @@ async function analisarFree(prompt){
 
 /* ══════════════════════════════════════════════════════════════════════
    PREMIUM — SSE REAL (conecta ao endpoint /api/analyze/premium/stream)
-   
-   FIX PRINCIPAL: versão anterior usava polling GET /api/job/{id} com
-   animação falsa. Esta versão conecta ao stream SSE real que envia
-   eventos agent_done com todos os dados de cada especialista.
    ══════════════════════════════════════════════════════════════════════ */
 async function analisarPremiumSSE(prompt){
   const out = document.getElementById("output");
@@ -1002,7 +1002,6 @@ async function analisarPremiumSSE(prompt){
       <div class="loader-sub"  id="loader-area-text">Conectando ao servidor…</div>
     </div>`;
 
-  /* Coleção dos dados que serão renderizados no final */
   let agents     = [];
   let verdict    = "";
   let score      = 0;
@@ -1017,8 +1016,6 @@ async function analisarPremiumSSE(prompt){
     if(sb) sb.textContent = sub;
   }
 
-  /* POST com streaming — usa fetch + ReadableStream (EventSource não
-     suporta POST nem Authorization header) */
   let res;
   try{
     res = await fetch(API + "/api/analyze/premium/stream", {
@@ -1033,7 +1030,6 @@ async function analisarPremiumSSE(prompt){
     throw new Error("Falha ao conectar com o servidor: " + err.message);
   }
 
-  /* Trata erros HTTP antes de iniciar a leitura do stream */
   if(!res.ok){
     const e = await res.json().catch(()=>({}));
     if(res.status === 402){
@@ -1055,7 +1051,6 @@ async function analisarPremiumSSE(prompt){
     throw new Error(e.detail || `Erro ${res.status}`);
   }
 
-  /* ── Lê o stream SSE linha a linha ── */
   const reader  = res.body.getReader();
   const decoder = new TextDecoder();
   let   buf     = "";
@@ -1065,32 +1060,25 @@ async function analisarPremiumSSE(prompt){
     try{
       chunk = await reader.read();
     }catch(readErr){
-      /* Conexão encerrada pelo servidor ou rede */
       break;
     }
     if(chunk.done) break;
 
     buf += decoder.decode(chunk.value, { stream: true });
 
-    /* Processa todas as linhas completas acumuladas no buffer */
     const lines = buf.split("\n");
-    buf = lines.pop(); /* guarda linha incompleta para o próximo chunk */
+    buf = lines.pop();
 
     for(const line of lines){
-      /* Keepalive do servidor — ignora */
       if(line.startsWith(":")) continue;
-
       if(!line.startsWith("data: ")) continue;
       const raw = line.slice(6).trim();
-
       if(raw === "[DONE]") break outer;
 
       let ev;
       try{ ev = JSON.parse(raw); }catch{ continue; }
 
-      /* ── Dispatch por tipo de evento ── */
       switch(ev.type){
-
         case "start":
           _agentTotal = ev.total || 16;
           tribunal    = ev.tribunal || "";
@@ -1114,7 +1102,6 @@ async function analisarPremiumSSE(prompt){
           break;
 
         case "agent_done":
-          /* Armazena o agente completo — será usado em buildAgentCard */
           agents.push(ev);
           _agentDone++;
           updateProgress();
@@ -1296,7 +1283,6 @@ function buildAgentCard(r, i){
   const card = document.createElement("div");
   card.className = "agent-card";
   card.style.setProperty("--i", i);
-  /* risk_level vem direto do evento SSE agent_done (adicionado no v6.1) */
   const risk = r.risk_level || "MÉDIO";
   const conf = r.confidence || 0;
   card.innerHTML = `
