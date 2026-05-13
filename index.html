@@ -158,8 +158,8 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .progress-bar-bg{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
 .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--brass-mid));border-radius:2px;transition:width .4s ease;}
 .progress-label{font-family:var(--font-mono);font-size:.68rem;color:var(--silver);min-width:36px;}
-.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:20px;}
-.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.3);padding:14px;transition:all .3s;position:relative;overflow:hidden;}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:20px;}
+.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.3);padding:14px;transition:all .3s;position:relative;overflow:visible;}
 .agent-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;}
 .agent-card.thinking::before{background:radial-gradient(circle at 30% 50%,rgba(202,138,4,.07),transparent 70%);opacity:1;}
 .agent-card.done::before{background:radial-gradient(circle at 30% 50%,rgba(16,185,129,.05),transparent 70%);opacity:1;}
@@ -175,6 +175,12 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 @keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 .agent-area{font-size:.8rem;font-weight:600;color:var(--platinum);margin-bottom:4px;}
 .agent-conf{font-family:var(--font-mono);font-size:.68rem;color:var(--brass-bright);}
+.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;max-height:220px;overflow-y:auto;}
+.agent-analysis.visible{display:block;}
+.agent-analysis strong,.agent-analysis b{color:var(--brass-bright);}
+.agent-specialty{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:6px;}
+.agent-risks{margin-top:8px;padding:6px 8px;border-radius:4px;background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.15);font-size:.75rem;color:rgba(255,120,120,.85);}
+.agent-risks-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-bright);margin-bottom:3px;}
 .thinking-dots{display:inline-flex;gap:3px;}
 .thinking-dots span{width:4px;height:4px;border-radius:50%;background:var(--brass-mid);animation:dot-bounce .8s infinite;}
 .thinking-dots span:nth-child(2){animation-delay:.15s;}
@@ -1128,15 +1134,17 @@ function buildAgentsGrid(){
       </div>
       <div class="agent-area">${a.area}${a.critical?' <span style="color:var(--crimson-bright);font-size:.65rem;">●</span>':''}</div>
       <div class="agent-conf" id="conf-${a.id}">—</div>
+      <div class="agent-analysis" id="analysis-${a.id}"></div>
     `;
     grid.appendChild(card);
   });
 }
 
-function updateAgentCard(agentId, state, conf, riskLevel){
+function updateAgentCard(agentId, state, conf, riskLevel, analysis, specialty, topRisk, topReversal){
   const card = document.getElementById(`agent-${agentId}`);
   const statusEl = document.getElementById(`status-${agentId}`);
   const confEl = document.getElementById(`conf-${agentId}`);
+  const analysisEl = document.getElementById(`analysis-${agentId}`);
   if(!card) return;
   card.className = `agent-card ${state}`;
   if(state==='thinking'){
@@ -1144,6 +1152,33 @@ function updateAgentCard(agentId, state, conf, riskLevel){
   } else if(state==='done'){
     statusEl.className='agent-status done'; statusEl.textContent=`CONF ${conf||0}%`;
     if(riskLevel) confEl.textContent = `Risco: ${riskLevel}`;
+    // ── Renderiza a análise completa no card ──────────────────────────
+    if(analysisEl && analysis){
+      let html = '';
+      if(specialty){
+        html += `<div class="agent-specialty">// ${specialty}</div>`;
+      }
+      // Formata o texto principal: bold, quebras de linha
+      const bodyHtml = analysis
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/__([\s\S]+?)__/g,'<strong>$1</strong>')
+        .replace(/\n/g,'<br>');
+      html += `<div>${bodyHtml}</div>`;
+      // Bloco de riscos
+      if(topRisk || topReversal){
+        html += `<div class="agent-risks">`;
+        if(topRisk){
+          html += `<div class="agent-risks-label">⚠ Principal Risco</div><div>${topRisk}</div>`;
+        }
+        if(topReversal){
+          html += `<div class="agent-risks-label" style="margin-top:6px;">🔄 Risco de Reversão</div><div>${topReversal}</div>`;
+        }
+        html += `</div>`;
+      }
+      analysisEl.innerHTML = html;
+      analysisEl.classList.add('visible');
+    }
   } else if(state==='veto'){
     statusEl.className='agent-status veto'; statusEl.textContent='VETO';
     card.className='agent-card veto';
@@ -1219,7 +1254,7 @@ function handleSSEEvent(ev){
     case 'agent_done':
       agentStates[ev.agent_id]='done';
       completedAgents++;
-      updateAgentCard(ev.agent_id,'done',ev.confidence,ev.risk_level);
+      updateAgentCard(ev.agent_id,'done',ev.confidence,ev.risk_level,ev.analysis,ev.specialty,ev.top_risk,ev.top_reversal);
       updateProgress(completedAgents, TOTAL_AGENTS);
       break;
     case 'veto':
@@ -1231,12 +1266,26 @@ function handleSSEEvent(ev){
       break;
     case 'devil_thinking':
       document.getElementById('devil-text').textContent = '⚔️ Analisando contraditório…';
+      document.getElementById('judge-text').textContent = 'Aguardando contraditório…';
       break;
-    case 'devil_done':
-      document.getElementById('devil-text').textContent = ev.analysis
-        ? ev.analysis.substring(0,300)+'…'
-        : 'Contraditório concluído.';
+    case 'devil_done':{
+      const devilEl = document.getElementById('devil-text');
+      if(ev.analysis){
+        const devilHtml = ev.analysis
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>')
+          .replace(/__([\s\S]+?)__/g,'<strong>$1</strong>')
+          .replace(/\n/g,'<br>');
+        devilEl.innerHTML = devilHtml;
+      } else {
+        devilEl.textContent = 'Contraditório concluído.';
+      }
+      if(ev.confidence){
+        const confBadge = `<div style="font-family:var(--font-mono);font-size:.6rem;color:var(--silver);margin-top:6px;">CONF ${ev.confidence}%</div>`;
+        devilEl.insertAdjacentHTML('beforeend', confBadge);
+      }
       break;
+    }
     case 'recovery':
       document.getElementById('judge-text').textContent = `🔄 Recuperando providers… ${ev.seconds}s`;
       break;
