@@ -1015,8 +1015,9 @@ async function runPremiumSSE(prompt){
     const reader = initR.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let sseFinished = false;
 
-    while(true){
+    while(!sseFinished){
       const {done, value} = await reader.read();
       if(done) break;
       buffer += decoder.decode(value, {stream:true});
@@ -1025,10 +1026,13 @@ async function runPremiumSSE(prompt){
       for(const line of lines){
         if(!line.startsWith('data:')) continue;
         const raw = line.slice(5).trim();
-        if(raw==='[DONE]') break;
+        if(raw==='[DONE]'){ sseFinished = true; break; }
         try { handleSSEEvent(JSON.parse(raw)); } catch(e){}
       }
     }
+    // Limpa estado do juiz ao encerrar o stream
+    const jt = document.getElementById('judge-text');
+    if(jt && jt.textContent.includes('deliberando')) jt.textContent = '✅ Veredito emitido.';
   } catch(e){
     toast(`Streaming: ${e.message}`,'error');
     document.getElementById('judge-text').textContent = `⚠️ ${e.message}\n\nVerifique o backend em ${API_BASE}`;
