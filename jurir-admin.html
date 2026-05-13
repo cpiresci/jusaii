@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JURIR — Painel Administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --void:#030308;
+  --abyss:#060610;
+  --deep:#0A0A18;
+  --surface:#0F0F20;
+  --glass:rgba(10,10,24,0.80);
+  --glass-light:rgba(15,15,32,0.92);
+  --crimson:#B91C1C;
+  --crimson-mid:#DC2626;
+  --crimson-bright:#EF4444;
+  --crimson-glow:rgba(185,28,28,0.30);
+  --crimson-pulse:rgba(220,38,38,0.15);
+  --brass:#A16207;
+  --brass-mid:#CA8A04;
+  --brass-bright:#EAB308;
+  --brass-pale:#FDE68A;
+  --brass-glow:rgba(202,138,4,0.22);
+  --platinum:#EDE9E0;
+  --ivory:#F5F0E8;
+  --silver:#B8B0A4;
+  --ash:rgba(232,228,220,0.55);
+  --ghost:rgba(255,255,255,0.06);
+  --emerald:#059669;
+  --emerald-bright:#10B981;
+  --emerald-glow:rgba(16,185,129,0.20);
+  --amber:#D97706;
+  --border:rgba(185,28,28,0.18);
+  --border-brass:rgba(202,138,4,0.22);
+  --border-light:rgba(255,255,255,0.07);
+  --font-display:'Cinzel Decorative',serif;
+  --font-serif:'Playfair Display',serif;
+  --font-sans:'Outfit',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r-sm:10px;--r-md:16px;--r-lg:22px;--r-xl:28px;--r-pill:100px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--void);color:var(--platinum);font-family:var(--font-sans);min-height:100vh;overflow-x:hidden;}
+::selection{background:var(--crimson);color:#fff;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--crimson);border-radius:2px;}
+
+/* BACKGROUND */
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(185,28,28,0.10),transparent 70%);top:-250px;left:-200px;}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(161,98,7,0.08),transparent 70%);bottom:-150px;right:-150px;}
+.lex-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.018;background-image:repeating-linear-gradient(0deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(90deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 80px);}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 40%,rgba(3,3,8,0.6) 100%);}
+
+/* LAYOUT */
+#app{position:relative;z-index:10;min-height:100vh;display:flex;}
+.sidebar{width:260px;min-height:100vh;background:var(--glass-light);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s;}
+.main-content{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.14em;color:var(--platinum);font-weight:900;}
+.sidebar-logo span{color:var(--crimson-bright);}
+.sidebar-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:var(--brass-bright);background:rgba(202,138,4,0.10);border:1px solid rgba(202,138,4,0.25);border-radius:var(--r-pill);padding:3px 10px;margin-top:8px;}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--brass-bright);box-shadow:0 0 6px var(--brass-bright);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sidebar-nav{flex:1;padding:20px 12px;display:flex;flex-direction:column;gap:4px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r-md);cursor:pointer;border:none;background:transparent;color:var(--silver);font-family:var(--font-sans);font-size:.83rem;font-weight:500;letter-spacing:.02em;transition:all .2s;width:100%;text-align:left;}
+.nav-item:hover{background:var(--ghost);color:var(--platinum);}
+.nav-item.active{background:var(--crimson-pulse);color:var(--platinum);border:1px solid var(--border);}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7;}
+.nav-item.active svg{opacity:1;}
+.nav-sep{height:1px;background:var(--border);margin:8px 0;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.connection-status{display:flex;align-items:center;gap:8px;font-size:.72rem;font-family:var(--font-mono);color:var(--silver);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#444;transition:background .3s;}
+.status-dot.connected{background:var(--emerald-bright);box-shadow:0 0 8px var(--emerald-bright);}
+.status-dot.error{background:var(--crimson-bright);box-shadow:0 0 8px var(--crimson-bright);}
+
+/* HEADER */
+.page-header{padding:24px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(3,3,8,0.6);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40;}
+.page-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:700;color:var(--platinum);}
+.page-sub{font-size:.75rem;color:var(--silver);font-family:var(--font-mono);margin-top:2px;}
+.header-actions{display:flex;align-items:center;gap:10px;}
+
+/* CONTENT */
+.page-body{padding:28px 32px;flex:1;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--glass-light);border:1px solid var(--border-light);border-radius:var(--r-lg);padding:24px;position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--border);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
+.stat-card.crimson::before{background:linear-gradient(90deg,var(--crimson),var(--crimson-mid));}
+.stat-card.brass::before{background:linear-gradient(90deg,var(--brass),var(--brass-mid));}
+.stat-card.emerald::before{background:linear-gradient(90deg,var(--emerald),var(--emerald-bright));}
+.stat-card.silver::before{background:linear-gradient(90deg,#555,#888);}
+.stat-icon{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:14px;}
+.stat-card.crimson .stat-icon{background:rgba(185,28,28,0.15);border:1px solid var(--border);}
+.stat-card.brass .stat-icon{background:rgba(202,138,4,0.12);border:1px solid var(--border-brass);}
+.stat-card.emerald .stat-icon{background:rgba(16,185,129,0.10);border:1px solid rgba(16,185,129,0.2);}
+.stat-card.silver .stat-icon{background:rgba(255,255,255,0.05);border:1px solid var(--border-light);}
+.stat-value{font-family:var(--font-display);font-size:2rem;font-weight:900;margin-bottom:4px;line-height:1;}
+.stat-card.crimson .stat-value{background:linear-gradient(135deg,var(--crimson-bright),var(--crimson-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-card.brass .stat-value{background:linear-gradient(135deg,var(--brass-bright),var(--brass-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-card.emerald .stat-value{background:linear-gradient(135deg,var(--emerald-bright),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-card.silver .stat-value{color:var(--platinum);}
+.stat-label{font-size:.74rem;color:var(--silver);letter-spacing:.06em;text-transform:uppercase;font-weight:500;}
+
+/* PANEL */
+.panel{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:24px;}
+.panel-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.panel-title{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;color:var(--platinum);display:flex;align-items:center;gap:10px;}
+.panel-title-icon{width:32px;height:32px;border-radius:8px;background:var(--crimson-pulse);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.panel-body{padding:0;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--silver);padding:12px 20px;text-align:left;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
+.data-table td{padding:14px 20px;font-size:.84rem;color:var(--platinum);border-bottom:1px solid rgba(255,255,255,0.04);}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,0.02);}
+.data-table tr{cursor:pointer;transition:background .15s;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-family:var(--font-mono);font-weight:600;padding:3px 10px;border-radius:var(--r-pill);}
+.badge-credits{background:rgba(202,138,4,0.15);color:var(--brass-bright);border:1px solid var(--border-brass);}
+.badge-id{background:rgba(255,255,255,0.06);color:var(--silver);border:1px solid var(--border-light);}
+.badge-analyses{background:rgba(16,185,129,0.12);color:var(--emerald-bright);border:1px solid rgba(16,185,129,0.2);}
+.badge-free{background:rgba(185,28,28,0.12);color:var(--crimson-bright);border:1px solid var(--border);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-sans);font-weight:600;letter-spacing:.03em;border-radius:var(--r-pill);border:none;cursor:pointer;transition:all .22s;font-size:.8rem;white-space:nowrap;}
+.btn-sm{padding:7px 16px;font-size:.76rem;}
+.btn-md{padding:10px 22px;}
+.btn-crimson{background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#fff;box-shadow:0 3px 14px var(--crimson-glow);}
+.btn-crimson:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--crimson-glow);}
+.btn-brass{background:linear-gradient(135deg,var(--brass),var(--brass-mid));color:#000;box-shadow:0 3px 14px var(--brass-glow);}
+.btn-brass:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--brass-glow);}
+.btn-ghost{background:transparent;border:1px solid var(--border-light);color:var(--silver);}
+.btn-ghost:hover{border-color:var(--border);color:var(--platinum);background:var(--ghost);}
+.btn-emerald{background:linear-gradient(135deg,var(--emerald),var(--emerald-bright));color:#fff;box-shadow:0 3px 14px var(--emerald-glow);}
+.btn-emerald:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--emerald-glow);}
+.btn-danger{background:rgba(185,28,28,0.15);border:1px solid var(--border);color:var(--crimson-bright);}
+.btn-danger:hover{background:rgba(185,28,28,0.25);border-color:var(--crimson-mid);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+
+/* SEARCH */
+.search-bar{position:relative;}
+.search-input{background:rgba(0,0,0,.35);border:1px solid var(--border-light);border-radius:var(--r-pill);color:var(--platinum);font-family:var(--font-sans);font-size:.82rem;padding:9px 16px 9px 38px;outline:none;width:260px;transition:border-color .2s;}
+.search-input::placeholder{color:rgba(185,185,185,.35);}
+.search-input:focus{border-color:rgba(185,28,28,.4);box-shadow:0 0 0 3px rgba(185,28,28,.07);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(3,3,8,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--deep);border:1px solid var(--border);border-radius:var(--r-xl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px);}to{opacity:1;transform:none;}}
+.modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:var(--font-serif);font-size:1.15rem;font-weight:700;color:var(--platinum);}
+.modal-close{background:var(--ghost);border:1px solid var(--border-light);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--silver);font-size:1rem;transition:all .2s;}
+.modal-close:hover{background:rgba(185,28,28,.15);color:var(--crimson-bright);border-color:var(--border);}
+.modal-body{padding:24px 28px;}
+.modal-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+/* FORM */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:.74rem;font-family:var(--font-mono);letter-spacing:.08em;color:var(--silver);text-transform:uppercase;margin-bottom:7px;}
+.form-input{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border-light);border-radius:var(--r-md);color:var(--platinum);font-family:var(--font-sans);font-size:.88rem;padding:11px 14px;outline:none;transition:border-color .2s;}
+.form-input::placeholder{color:rgba(185,185,185,.3);}
+.form-input:focus{border-color:rgba(185,28,28,.45);box-shadow:0 0 0 3px rgba(185,28,28,.07);}
+.form-hint{font-size:.7rem;color:var(--silver);margin-top:5px;opacity:.7;}
+
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.feature-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-sm);background:rgba(0,0,0,.25);border:1px solid var(--border-light);}
+.feature-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.feature-dot.on{background:var(--emerald-bright);box-shadow:0 0 8px var(--emerald-bright);}
+.feature-dot.off{background:#444;}
+.feature-name{font-size:.78rem;color:var(--ash);font-family:var(--font-mono);}
+
+/* PROVIDERS */
+.providers-list{display:flex;flex-wrap:wrap;gap:8px;}
+.provider-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-pill);font-size:.74rem;font-family:var(--font-mono);font-weight:600;background:rgba(16,185,129,.12);color:var(--emerald-bright);border:1px solid rgba(16,185,129,.25);}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--deep);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;font-size:.82rem;display:flex;align-items:center;gap:10px;min-width:280px;animation:toastIn .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
+.toast.success{border-color:rgba(16,185,129,.35);color:var(--emerald-bright);}
+.toast.error{border-color:rgba(185,28,28,.4);color:var(--crimson-bright);}
+.toast.info{border-color:var(--border-brass);color:var(--brass-bright);}
+
+/* USER DETAIL */
+.user-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.detail-card{background:rgba(0,0,0,.3);border:1px solid var(--border-light);border-radius:var(--r-md);padding:16px;}
+.detail-label{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:6px;}
+.detail-value{font-size:.95rem;color:var(--platinum);font-weight:600;}
+.credit-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.analyses-mini{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+.analysis-mini-item{background:rgba(0,0,0,.25);border:1px solid var(--border-light);border-radius:var(--r-sm);padding:10px 14px;font-size:.78rem;}
+.analysis-mini-prompt{color:var(--ash);margin-bottom:4px;}
+.analysis-mini-meta{display:flex;gap:10px;flex-wrap:wrap;}
+.mini-meta-tag{font-family:var(--font-mono);font-size:.62rem;color:var(--silver);}
+
+/* CONNECT SCREEN */
+#connect-screen{position:fixed;inset:0;z-index:300;background:var(--void);display:flex;align-items:center;justify-content:center;padding:24px;}
+.connect-card{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);padding:40px;width:100%;max-width:440px;animation:modalIn .3s ease;}
+.connect-logo{font-family:var(--font-display);font-size:1.2rem;font-weight:900;color:var(--platinum);text-align:center;margin-bottom:6px;}
+.connect-logo span{color:var(--crimson-bright);}
+.connect-sub{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;color:var(--silver);text-align:center;margin-bottom:32px;}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--silver);font-family:var(--font-mono);font-size:.8rem;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--crimson-bright);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px;color:var(--silver);}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.4;}
+.empty-text{font-size:.85rem;opacity:.6;}
+
+/* DANGER ZONE */
+.danger-zone{background:rgba(185,28,28,0.06);border:1px solid rgba(185,28,28,0.25);border-radius:var(--r-lg);padding:20px;margin-top:20px;}
+.danger-zone-title{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;color:var(--crimson-bright);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.danger-zone-actions{display:flex;flex-wrap:wrap;gap:8px;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:none;}
+  .main-content{margin-left:0;}
+  .page-body{padding:20px 16px;}
+  .page-header{padding:16px 20px;}
+  .user-detail-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUNDS -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="lex-grid"></div>
+<div class="vignette"></div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- CONNECT SCREEN -->
+<div id="connect-screen">
+  <div class="connect-card">
+    <div class="connect-logo">JUR<span>IR</span></div>
+    <div class="connect-sub">⚙ PAINEL ADMINISTRATIVO</div>
+    <div class="form-group">
+      <label class="form-label">URL da API</label>
+      <input class="form-input" id="api-url" type="url" placeholder="https://seu-backend.onrender.com" value="">
+      <div class="form-hint">Ex: https://jurir.onrender.com</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ADMIN_SECRET</label>
+      <input class="form-input" id="api-secret" type="password" placeholder="Chave secreta do admin">
+      <div class="form-hint">Definida na variável de ambiente ADMIN_SECRET</div>
+    </div>
+    <button class="btn btn-crimson btn-md" style="width:100%;justify-content:center;" onclick="connect()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Conectar ao Painel
+    </button>
+    <div id="connect-error" style="display:none;margin-top:14px;padding:10px 14px;border-radius:var(--r-md);background:rgba(185,28,28,.12);border:1px solid rgba(185,28,28,.3);color:var(--crimson-bright);font-size:.78rem;font-family:var(--font-mono);"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">JUR<span>IR</span></div>
+      <div class="sidebar-badge">
+        <span class="badge-dot"></span> ADMIN CONSOLE
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('dashboard')" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" onclick="showSection('users')" data-section="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Usuários
+      </button>
+      <button class="nav-item" onclick="showSection('credits')" data-section="credits">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Créditos
+      </button>
+      <div class="nav-sep"></div>
+      <button class="nav-item" onclick="showSection('features')" data-section="features">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Features & Providers
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="connection-status">
+        <div class="status-dot connected" id="sidebar-dot"></div>
+        <span id="sidebar-url-display">Conectado</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%;justify-content:center;" onclick="disconnect()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Desconectar
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="page-header">
+      <div>
+        <div class="page-title" id="page-title">Dashboard</div>
+        <div class="page-sub" id="page-sub">Visão geral do sistema</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Atualizar
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="section-dashboard">
+        <div class="stats-grid" id="stats-grid">
+          <div class="loading"><div class="spinner"></div> Carregando...</div>
+        </div>
+        <div class="panel" id="providers-panel" style="display:none">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-title-icon">⚡</div>
+              Providers Ativos
+            </div>
+          </div>
+          <div class="panel-body" style="padding:20px 24px;">
+            <div class="providers-list" id="providers-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── USERS ── -->
+      <div class="section" id="section-users">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-title-icon">👥</div>
+              Lista de Usuários
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <div class="search-bar">
+                <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="search-input" id="user-search" type="text" placeholder="Buscar por email ou ID..." oninput="filterUsers()">
+              </div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="users-table-wrap">
+              <div class="loading"><div class="spinner"></div> Carregando usuários...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CREDITS ── -->
+      <div class="section" id="section-credits">
+        <div class="panel" style="margin-bottom:24px;">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-title-icon">💰</div>
+              Gerenciar Créditos por Email
+            </div>
+          </div>
+          <div class="panel-body" style="padding:24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:640px;">
+              <div>
+                <div class="form-group">
+                  <label class="form-label">Email do Usuário</label>
+                  <input class="form-input" id="credit-email" type="email" placeholder="usuario@email.com" oninput="lookupUserByEmail()">
+                </div>
+                <div id="credit-user-found" style="display:none;padding:10px 14px;border-radius:var(--r-md);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);font-size:.78rem;margin-bottom:14px;">
+                  <span style="color:var(--emerald-bright);font-family:var(--font-mono);">✓ Usuário encontrado</span>
+                  <div style="margin-top:4px;color:var(--ash);">ID: <span id="credit-found-id" style="color:var(--brass-bright);"></span> · Créditos Premium: <span id="credit-found-credits" style="color:var(--brass-bright);"></span></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Quantidade</label>
+                  <input class="form-input" id="credit-amount" type="number" min="0" placeholder="Ex: 10">
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;justify-content:flex-end;padding-bottom:18px;">
+                <button class="btn btn-emerald btn-md" onclick="doAddCredits()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Adicionar Créditos
+                </button>
+                <button class="btn btn-brass btn-md" onclick="doSetCredits()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Definir Saldo Exato
+                </button>
+                <button class="btn btn-danger btn-md" onclick="doRemoveCredits()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Remover Créditos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FEATURES ── -->
+      <div class="section" id="section-features">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-title-icon">🔬</div>
+              Features do Sistema
+            </div>
+          </div>
+          <div class="panel-body" style="padding:24px;">
+            <div class="features-grid" id="features-grid">
+              <div class="loading"><div class="spinner"></div> Carregando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- USER DETAIL MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-user-title">Detalhe do Usuário</div>
+      <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="user-detail-grid" id="modal-detail-grid"></div>
+      <div style="margin-bottom:14px;">
+        <div style="font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:10px;">Ações de Crédito</div>
+        <div class="credit-actions" id="modal-credit-actions"></div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:10px;">Últimas Análises</div>
+        <div class="analyses-mini" id="modal-analyses"></div>
+      </div>
+      <div class="danger-zone" id="modal-danger">
+        <div class="danger-zone-title">⚠ Zona de Perigo</div>
+        <div class="danger-zone-actions" id="modal-danger-actions"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK CREDIT MODAL -->
+<div class="modal-overlay" id="quick-credit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="qc-title">Ajustar Créditos</div>
+      <button class="modal-close" onclick="closeModal('quick-credit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Quantidade</label>
+        <input class="form-input" id="qc-amount" type="number" min="0" placeholder="Ex: 5">
+      </div>
+      <div style="font-size:.78rem;color:var(--ash);" id="qc-hint"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('quick-credit-modal')">Cancelar</button>
+      <button class="btn btn-crimson btn-sm" id="qc-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--crimson-bright);">⚠ Confirmar Exclusão</div>
+      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:.88rem;color:var(--ash);line-height:1.6;" id="delete-confirm-text"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('delete-modal')">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="delete-confirm-btn">Excluir Permanentemente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────
+let API_URL = '';
+let ADMIN_SECRET = '';
+let allUsers = [];
+let currentUserId = null;
+let statsData = null;
+
+// ─── CONNECT ─────────────────────────────────────────────────────────
+async function connect() {
+  const url = document.getElementById('api-url').value.trim().replace(/\/$/, '');
+  const secret = document.getElementById('api-secret').value.trim();
+  const errEl = document.getElementById('connect-error');
+  errEl.style.display = 'none';
+
+  if (!url || !secret) {
+    errEl.textContent = 'Preencha a URL da API e o ADMIN_SECRET.';
+    errEl.style.display = 'block';
+    return;
+  }
+  try {
+    const res = await fetch(`${url}/api/admin/stats`, {
+      headers: { 'Authorization': `Bearer ${secret}` }
+    });
+    if (res.status === 403 || res.status === 401) {
+      errEl.textContent = 'Acesso negado. Verifique o ADMIN_SECRET.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    API_URL = url;
+    ADMIN_SECRET = secret;
+    document.getElementById('connect-screen').style.display = 'none';
+    document.getElementById('sidebar-url-display').textContent = new URL(url).hostname;
+    statsData = data;
+    renderDashboard(data);
+    loadUsers();
+    showToast('Conectado com sucesso!', 'success');
+  } catch (e) {
+    errEl.textContent = `Erro ao conectar: ${e.message}. Verifique a URL e tente novamente.`;
+    errEl.style.display = 'block';
+  }
+}
+
+function disconnect() {
+  API_URL = '';
+  ADMIN_SECRET = '';
+  allUsers = [];
+  statsData = null;
+  document.getElementById('connect-screen').style.display = 'flex';
+}
+
+// ─── API ─────────────────────────────────────────────────────────────
+async function apiCall(method, path, body = null) {
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${ADMIN_SECRET}`, 'Content-Type': 'application/json' },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API_URL}${path}`, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`section-${name}`).classList.add('active');
+  document.querySelector(`[data-section="${name}"]`).classList.add('active');
+  const titles = { dashboard: ['Dashboard', 'Visão geral do sistema'], users: ['Usuários', 'Gerenciar todos os usuários'], credits: ['Créditos', 'Adicionar, remover ou definir créditos'], features: ['Features & Providers', 'Estado atual do sistema'] };
+  const [t, s] = titles[name] || ['Admin', ''];
+  document.getElementById('page-title').textContent = t;
+  document.getElementById('page-sub').textContent = s;
+}
+
+function refreshCurrent() {
+  const active = document.querySelector('.nav-item.active')?.dataset.section;
+  if (active === 'dashboard') loadStats();
+  else if (active === 'users') loadUsers();
+  else if (active === 'features') loadStats();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const data = await apiCall('GET', '/api/admin/stats');
+    statsData = data;
+    renderDashboard(data);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function renderDashboard(d) {
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = `
+    <div class="stat-card crimson">
+      <div class="stat-icon crimson">👤</div>
+      <div class="stat-value">${d.total_users ?? 0}</div>
+      <div class="stat-label">Total de Usuários</div>
+    </div>
+    <div class="stat-card brass">
+      <div class="stat-icon brass">⚖️</div>
+      <div class="stat-value">${d.total_analyses ?? 0}</div>
+      <div class="stat-label">Análises Premium</div>
+    </div>
+    <div class="stat-card emerald">
+      <div class="stat-icon emerald">📊</div>
+      <div class="stat-value">${d.analyses_today ?? 0}</div>
+      <div class="stat-label">Análises Hoje</div>
+    </div>
+    <div class="stat-card silver">
+      <div class="stat-icon silver">⚙️</div>
+      <div class="stat-value">${d.active_jobs ?? 0}</div>
+      <div class="stat-label">Jobs Ativos</div>
+    </div>
+    <div class="stat-card brass">
+      <div class="stat-icon brass">🔗</div>
+      <div class="stat-value">${d.sse_active ?? 0}</div>
+      <div class="stat-label">SSE Conexões</div>
+    </div>
+    <div class="stat-card silver">
+      <div class="stat-icon silver">🔒</div>
+      <div class="stat-value">${d.max_concurrent_jobs ?? 0}</div>
+      <div class="stat-label">Max Jobs</div>
+    </div>
+  `;
+
+  if (d.providers && d.providers.length) {
+    document.getElementById('providers-panel').style.display = 'block';
+    document.getElementById('providers-list').innerHTML = d.providers.map(p =>
+      `<div class="provider-chip">✓ ${p}</div>`
+    ).join('');
+  }
+
+  if (d.features) renderFeatures(d.features);
+}
+
+function renderFeatures(features) {
+  const grid = document.getElementById('features-grid');
+  const keys = Object.keys(features);
+  if (!keys.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔬</div><div class="empty-text">Nenhuma feature mapeada.</div></div>'; return; }
+  grid.innerHTML = keys.map(k => `
+    <div class="feature-item">
+      <div class="feature-dot ${features[k] ? 'on' : 'off'}"></div>
+      <div class="feature-name">${k.replace(/_/g, ' ')}</div>
+    </div>`).join('');
+}
+
+// ─── USERS ───────────────────────────────────────────────────────────
+async function loadUsers() {
+  document.getElementById('users-table-wrap').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando usuários...</div>';
+  try {
+    allUsers = await apiCall('GET', '/api/admin/users');
+    renderUsersTable(allUsers);
+  } catch (e) {
+    document.getElementById('users-table-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">${e.message}</div></div>`;
+  }
+}
+
+function renderUsersTable(users) {
+  const wrap = document.getElementById('users-table-wrap');
+  if (!users.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Nenhum usuário encontrado.</div></div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Créditos Free</th>
+          <th>Créditos Premium</th>
+          <th>Análises</th>
+          <th>Cadastro</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${users.map(u => `
+          <tr onclick="openUserDetail(${u.id})">
+            <td><span class="badge badge-id">#${u.id}</span></td>
+            <td style="color:var(--platinum);font-weight:500;">${u.email}</td>
+            <td><span class="badge badge-free">${u.credits ?? 0}</span></td>
+            <td><span class="badge badge-credits">⭐ ${u.premium_credits ?? 0}</span></td>
+            <td><span class="badge badge-analyses">${u.analyses_count ?? 0}</span></td>
+            <td style="color:var(--silver);font-size:.76rem;font-family:var(--font-mono);">${u.created_at || '—'}</td>
+            <td onclick="event.stopPropagation()">
+              <button class="btn btn-ghost btn-sm" onclick="openUserDetail(${u.id})" title="Ver detalhes">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  const filtered = allUsers.filter(u =>
+    u.email.toLowerCase().includes(q) ||
+    String(u.id).includes(q)
+  );
+  renderUsersTable(filtered);
+}
+
+// ─── USER DETAIL ─────────────────────────────────────────────────────
+async function openUserDetail(userId) {
+  currentUserId = userId;
+  openModal('user-modal');
+  document.getElementById('modal-detail-grid').innerHTML = '<div class="loading" style="grid-column:1/-1;"><div class="spinner"></div> Carregando...</div>';
+  document.getElementById('modal-analyses').innerHTML = '';
+  document.getElementById('modal-credit-actions').innerHTML = '';
+  document.getElementById('modal-danger-actions').innerHTML = '';
+
+  try {
+    const data = await apiCall('GET', `/api/admin/user/${userId}`);
+    const u = data.user;
+    document.getElementById('modal-user-title').textContent = u.email;
+
+    document.getElementById('modal-detail-grid').innerHTML = `
+      <div class="detail-card">
+        <div class="detail-label">ID</div>
+        <div class="detail-value" style="font-family:var(--font-mono);color:var(--brass-bright);">#${u.id}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Email</div>
+        <div class="detail-value">${u.email}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Créditos Gratuitos</div>
+        <div class="detail-value" style="color:var(--crimson-bright);">${u.credits ?? 0}</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-label">Créditos Premium</div>
+        <div class="detail-value" style="color:var(--brass-bright);">⭐ ${u.premium_credits ?? 0}</div>
+      </div>
+      <div class="detail-card" style="grid-column:1/-1;">
+        <div class="detail-label">Membro desde</div>
+        <div class="detail-value" style="font-family:var(--font-mono);font-size:.85rem;">${u.created_at || '—'}</div>
+      </div>
+    `;
+
+    document.getElementById('modal-credit-actions').innerHTML = `
+      <button class="btn btn-emerald btn-sm" onclick="quickCredit(${u.id}, 'add', '${u.email}')">+ Adicionar</button>
+      <button class="btn btn-brass btn-sm" onclick="quickCredit(${u.id}, 'set', '${u.email}')">≡ Definir</button>
+      <button class="btn btn-danger btn-sm" onclick="quickCredit(${u.id}, 'remove', '${u.email}')">− Remover</button>
+    `;
+
+    const analyses = data.analyses || [];
+    if (analyses.length) {
+      document.getElementById('modal-analyses').innerHTML = analyses.map(a => `
+        <div class="analysis-mini-item">
+          <div class="analysis-mini-prompt">${a.prompt || '—'}</div>
+          <div class="analysis-mini-meta">
+            <span class="mini-meta-tag">📅 ${a.created_at}</span>
+            ${a.is_premium ? '<span class="mini-meta-tag" style="color:var(--brass-bright);">⭐ Premium</span>' : ''}
+            ${a.jurir_score ? `<span class="mini-meta-tag" style="color:var(--emerald-bright);">Score: ${a.jurir_score}</span>` : ''}
+            ${a.tribunal ? `<span class="mini-meta-tag">🏛 ${a.tribunal}</span>` : ''}
+          </div>
+        </div>`).join('');
+    } else {
+      document.getElementById('modal-analyses').innerHTML = '<div style="color:var(--silver);font-size:.8rem;padding:8px;">Nenhuma análise encontrada.</div>';
+    }
+
+    document.getElementById('modal-danger-actions').innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="confirmResetFree(${u.id}, '${u.email}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Resetar Créditos Free
+      </button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteUser(${u.id}, '${u.email}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Excluir Usuário
+      </button>
+    `;
+  } catch (e) {
+    document.getElementById('modal-detail-grid').innerHTML = `<div style="color:var(--crimson-bright);grid-column:1/-1;">Erro: ${e.message}</div>`;
+  }
+}
+
+// ─── QUICK CREDIT ─────────────────────────────────────────────────────
+let qcCallback = null;
+
+function quickCredit(userId, action, email) {
+  const labels = { add: 'Adicionar Créditos', set: 'Definir Saldo Exato', remove: 'Remover Créditos' };
+  const hints = { add: `Adicionar créditos premium para ${email}`, set: `Definir o saldo exato de ${email}`, remove: `Remover créditos premium de ${email}` };
+  document.getElementById('qc-title').textContent = labels[action];
+  document.getElementById('qc-hint').textContent = hints[action];
+  document.getElementById('qc-amount').value = '';
+  document.getElementById('qc-confirm-btn').className = `btn btn-sm ${action === 'add' ? 'btn-emerald' : action === 'set' ? 'btn-brass' : 'btn-danger'}`;
+  openModal('quick-credit-modal');
+
+  qcCallback = async () => {
+    const amount = parseInt(document.getElementById('qc-amount').value);
+    if (isNaN(amount) || amount < 0) { showToast('Valor inválido.', 'error'); return; }
+    const paths = { add: '/api/admin/add-credits', set: '/api/admin/set-credits', remove: '/api/admin/remove-credits' };
+    try {
+      const data = await apiCall('POST', paths[action], { user_id: userId, amount });
+      showToast(data.message || 'Operação concluída!', 'success');
+      closeModal('quick-credit-modal');
+      await openUserDetail(userId);
+      await loadUsers();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  document.getElementById('qc-confirm-btn').onclick = qcCallback;
+}
+
+// ─── CREDITS TAB ─────────────────────────────────────────────────────
+let creditFoundUser = null;
+
+async function lookupUserByEmail() {
+  const email = document.getElementById('credit-email').value.trim().toLowerCase();
+  const foundEl = document.getElementById('credit-user-found');
+  creditFoundUser = null;
+  foundEl.style.display = 'none';
+
+  if (email.length < 4) return;
+  const user = allUsers.find(u => u.email.toLowerCase() === email);
+  if (user) {
+    creditFoundUser = user;
+    document.getElementById('credit-found-id').textContent = user.id;
+    document.getElementById('credit-found-credits').textContent = user.premium_credits;
+    foundEl.style.display = 'block';
+  }
+}
+
+async function doAddCredits() {
+  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
+  const amount = parseInt(document.getElementById('credit-amount').value);
+  if (isNaN(amount) || amount < 1) { showToast('Insira um valor positivo.', 'error'); return; }
+  try {
+    const data = await apiCall('POST', '/api/admin/add-credits', { user_id: creditFoundUser.id, amount });
+    showToast(data.message, 'success');
+    await loadUsers();
+    lookupUserByEmail();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function doSetCredits() {
+  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
+  const amount = parseInt(document.getElementById('credit-amount').value);
+  if (isNaN(amount) || amount < 0) { showToast('Insira um valor >= 0.', 'error'); return; }
+  try {
+    const data = await apiCall('POST', '/api/admin/set-credits', { user_id: creditFoundUser.id, amount });
+    showToast(`Saldo definido para ${data.new_balance} créditos.`, 'success');
+    await loadUsers();
+    lookupUserByEmail();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function doRemoveCredits() {
+  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
+  const amount = parseInt(document.getElementById('credit-amount').value);
+  if (isNaN(amount) || amount < 1) { showToast('Insira um valor positivo.', 'error'); return; }
+  try {
+    const data = await apiCall('POST', '/api/admin/remove-credits', { user_id: creditFoundUser.id, amount });
+    showToast(data.message, 'success');
+    await loadUsers();
+    lookupUserByEmail();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ─── DANGER ACTIONS ───────────────────────────────────────────────────
+function confirmResetFree(userId, email) {
+  document.getElementById('delete-confirm-text').innerHTML = `Você está prestes a <strong style="color:var(--crimson-bright);">resetar os créditos gratuitos</strong> do usuário <strong>${email}</strong> para zero. Isso não afeta os créditos premium.`;
+  document.getElementById('delete-confirm-btn').textContent = 'Resetar Créditos Free';
+  document.getElementById('delete-confirm-btn').onclick = async () => {
+    try {
+      const data = await apiCall('POST', '/api/admin/reset-free-credits', { user_id: userId });
+      showToast(data.message, 'success');
+      closeModal('delete-modal');
+      openUserDetail(userId);
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+  openModal('delete-modal');
+}
+
+function confirmDeleteUser(userId, email) {
+  document.getElementById('delete-confirm-text').innerHTML = `Você está prestes a <strong style="color:var(--crimson-bright);">EXCLUIR PERMANENTEMENTE</strong> o usuário <strong>${email}</strong> (ID #${userId}) e <strong>todas as suas análises</strong>.<br><br>Esta ação <strong>não pode ser desfeita</strong>.`;
+  document.getElementById('delete-confirm-btn').textContent = 'Excluir Permanentemente';
+  document.getElementById('delete-confirm-btn').onclick = async () => {
+    try {
+      const data = await apiCall('POST', '/api/admin/delete-user', { user_id: userId });
+      showToast(data.message, 'success');
+      closeModal('delete-modal');
+      closeModal('user-modal');
+      await loadUsers();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+  openModal('delete-modal');
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Click outside to close
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ─── TOAST ────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  const icons = { success: '✓', error: '✕', info: '●' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─── FEATURES TAB ─────────────────────────────────────────────────────
+async function loadFeatures() {
+  if (statsData?.features) { renderFeatures(statsData.features); return; }
+  try {
+    const data = await apiCall('GET', '/api/admin/stats');
+    statsData = data;
+    if (data.features) renderFeatures(data.features);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// Load features when switching to that tab
+document.querySelector('[data-section="features"]').addEventListener('click', loadFeatures);
+</script>
+</body>
+</html>
