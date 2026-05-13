@@ -206,9 +206,10 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .verdict-card{display:none;border-radius:var(--r-lg);border:1px solid rgba(202,138,4,.3);background:linear-gradient(135deg,rgba(202,138,4,.06),rgba(0,0,0,.4));padding:24px;margin-bottom:16px;}
 .verdict-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
 .verdict-title{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;color:var(--brass-bright);display:flex;align-items:center;gap:10px;}
-.verdict-body{font-size:.88rem;color:var(--platinum);line-height:1.75;white-space:pre-wrap;max-height:400px;overflow-y:auto;padding-right:8px;}
-.verdict-body::-webkit-scrollbar{width:2px;}
-.verdict-body::-webkit-scrollbar-thumb{background:var(--brass-mid);}
+.verdict-body{font-size:.88rem;color:var(--platinum);line-height:1.75;padding-right:8px;}
+.verdict-body p{margin:0 0 6px;}
+.verdict-body strong,.verdict-body b{color:var(--brass-bright);font-weight:700;}
+.verdict-body .vd-sep{border:none;border-top:1px solid rgba(202,138,4,.2);margin:14px 0 10px;}
 .veto-banner{background:rgba(185,28,28,.15);border:1px solid rgba(185,28,28,.4);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:16px;font-size:.82rem;color:var(--crimson-bright);display:flex;align-items:center;gap:10px;}
 .pdf-actions{display:flex;gap:10px;flex-wrap:wrap;}
 /* ── FREE RESULT ── */
@@ -1027,7 +1028,7 @@ async function runPremiumSSE(prompt){
         if(!line.startsWith('data:')) continue;
         const raw = line.slice(5).trim();
         if(raw==='[DONE]'){ sseFinished = true; break; }
-        try { handleSSEEvent(JSON.parse(raw)); } catch(e){}
+        try { handleSSEEvent(JSON.parse(raw)); } catch(e){ console.warn("SSE parse error:", e.message, raw.slice(0,120)); }
       }
     }
     // Limpa estado do juiz ao encerrar o stream
@@ -1110,16 +1111,35 @@ function showScore(score, tribunal){
   pv.textContent = val>=75?'Alta confiança — veredito favorável provável':val>=50?'Confiança moderada — análise equilibrada':'Atenção — pontos críticos identificados';
 }
 
+function _mdToHtml(text){
+  // Minimal markdown → HTML for verdict rendering
+  // 1. Escape raw HTML
+  let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // 2. Bold: **text** or __text__
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/__(.+?)__/g,'<strong>$1</strong>');
+  // 3. Section dividers (━━━ lines)
+  h = h.replace(/^[━─═]{3,}$/gm,'<hr class="vd-sep">');
+  // 4. Newlines → <br> (preserve whitespace structure)
+  h = h.replace(/\n/g,'<br>');
+  return h;
+}
+
 function showVerdict(verdict, vetoTriggered, score){
   const card = document.getElementById('verdict-card');
   card.style.display='block';
-  document.getElementById('verdict-body').textContent = verdict||'';
+  const body = document.getElementById('verdict-body');
+  if(verdict){
+    body.innerHTML = _mdToHtml(verdict);
+  } else {
+    body.textContent = '';
+  }
   document.getElementById('score-badge').textContent = score ? `Score: ${parseFloat(score).toFixed(1)}/100` : '';
   if(vetoTriggered){
     document.getElementById('veto-banner').style.display='flex';
     document.getElementById('veto-flag').style.display='inline-block';
   }
-  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+  card.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 /* ── POLLING ── */
