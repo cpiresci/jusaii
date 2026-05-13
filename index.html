@@ -187,15 +187,15 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .thinking-dots span:nth-child(3){animation-delay:.3s;}
 @keyframes dot-bounce{0%,80%,100%{transform:scale(.8);opacity:.5;}40%{transform:scale(1.2);opacity:1;}}
 /* ── DEVIL / JUDGE PANELS ── */
-.special-panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.special-panels{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px;}
 @media(max-width:700px){.special-panels{grid-template-columns:1fr;}}
-.special-card{border-radius:var(--r-md);border:1px solid var(--border);background:rgba(0,0,0,.35);padding:16px;position:relative;overflow:hidden;}
+.special-card{border-radius:var(--r-md);border:1px solid var(--border);background:rgba(0,0,0,.35);padding:16px;position:relative;overflow:visible;}
 .special-card.devil{border-color:rgba(185,28,28,.25);background:rgba(185,28,28,.04);}
 .special-card.judge{border-color:rgba(202,138,4,.25);background:rgba(202,138,4,.04);}
 .special-card-label{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .special-card.devil .special-card-label{color:var(--crimson-bright);}
 .special-card.judge .special-card-label{color:var(--brass-bright);}
-.special-card-text{font-size:.8rem;color:var(--ash);line-height:1.6;max-height:120px;overflow-y:auto;}
+.special-card-text{font-size:.82rem;color:var(--platinum);line-height:1.7;}
 /* ── SCORE GAUGE ── */
 .score-section{display:none;padding:24px;border-radius:var(--r-lg);border:1px solid var(--border-brass);background:linear-gradient(135deg,rgba(202,138,4,.06),rgba(185,28,28,.04));margin-bottom:20px;}
 .score-inner{display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
@@ -521,8 +521,23 @@ footer{width:100%;padding:48px 24px 32px;border-top:1px solid var(--border);text
             <div class="special-card-text" id="devil-text">Aguardando agentes primários…</div>
           </div>
           <div class="special-card judge" id="judge-card">
-            <div class="special-card-label">🏛️ Juiz IA Quantum</div>
+            <div class="special-card-label" style="justify-content:space-between;flex-wrap:wrap;">
+              <span>🏛️ Juiz IA Quantum</span>
+              <span style="display:flex;align-items:center;gap:8px;">
+                <span id="veto-flag" style="display:none;font-size:.6rem;background:rgba(185,28,28,.2);color:var(--crimson-bright);padding:2px 8px;border-radius:var(--r-pill);">VETO ATIVO</span>
+                <span id="score-badge" style="font-family:var(--font-mono);font-size:.68rem;color:var(--brass-bright);"></span>
+              </span>
+            </div>
+            <div id="veto-banner" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:4px;background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.25);font-size:.8rem;color:var(--platinum);">
+              ⚠️ <strong>Protocolo de Veto Ativado</strong> — Agente crítico detectou irregularidade.
+            </div>
             <div class="special-card-text" id="judge-text">Aguardando contraditório…</div>
+            <div id="verdict-body" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(202,138,4,.15);font-size:.82rem;color:var(--platinum);line-height:1.75;"></div>
+            <div class="pdf-actions" id="pdf-actions" style="margin-top:16px;display:none;">
+              <button class="btn btn-brass btn-lg" id="pdf-btn" onclick="downloadPDF()">📄 Baixar Relatório PDF</button>
+              <button class="btn btn-ghost" onclick="openPetitionModal()">📋 Gerar Petição</button>
+              <button class="btn btn-ghost" onclick="resetAnalysis()">↺ Nova Análise</button>
+            </div>
           </div>
         </div>
 
@@ -562,29 +577,8 @@ footer{width:100%;padding:48px 24px 32px;border-top:1px solid var(--border);text
           </div>
         </div>
 
-        <!-- Verdict -->
-        <div class="verdict-card" id="verdict-card">
-          <div class="verdict-header">
-            <div class="verdict-title">
-              🏛️ Veredito do Juiz IA Quantum
-              <span id="veto-flag" style="display:none;font-size:.7rem;background:rgba(185,28,28,.2);color:var(--crimson-bright);padding:3px 10px;border-radius:var(--r-pill);">VETO ATIVO</span>
-            </div>
-            <div id="score-badge" style="font-family:var(--font-mono);font-size:.75rem;color:var(--brass-bright);"></div>
-          </div>
-          <div class="veto-banner" id="veto-banner" style="display:none;">
-            ⚠️ <strong>Protocolo de Veto Ativado</strong> — Agente crítico detectou irregularidade. Análise interrompida preventivamente.
-          </div>
-          <div class="verdict-body" id="verdict-body"></div>
-          <div class="pdf-actions" id="pdf-actions" style="margin-top:16px;display:none;">
-            <button class="btn btn-brass btn-lg" id="pdf-btn" onclick="downloadPDF()">
-              📄 Baixar Relatório PDF
-            </button>
-            <button class="btn btn-ghost" onclick="openPetitionModal()">📋 Gerar Petição</button>
-            <button class="btn btn-ghost" onclick="resetAnalysis()">↺ Nova Análise</button>
-          </div>
-
-          <!-- DELTA ANALYSIS SECTION -->
-          <div class="delta-section" id="delta-section">
+        <!-- DELTA ANALYSIS SECTION -->
+        <div class="delta-section" id="delta-section">
             <div style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--silver);margin-bottom:16px;">// Comparação de Documentos — Delta Analysis</div>
             <div class="delta-grid">
               <div class="delta-textarea-wrap">
@@ -1035,10 +1029,12 @@ function resetAnalysis(){
   document.getElementById('agents-container').style.display='none';
   document.getElementById('free-result').style.display='none';
   document.getElementById('score-section').style.display='none';
-  document.getElementById('verdict-card').style.display='none';
   document.getElementById('pdf-actions').style.display='none';
   document.getElementById('veto-banner').style.display='none';
   document.getElementById('veto-flag').style.display='none';
+  document.getElementById('score-badge').textContent='';
+  const vb = document.getElementById('verdict-body');
+  if(vb){vb.innerHTML='';vb.style.display='none';}
   document.getElementById('progress-fill').style.width='0%';
   document.getElementById('progress-label').textContent='0/16';
   document.getElementById('judge-text').textContent='Aguardando contraditório…';
@@ -1343,20 +1339,29 @@ function _mdToHtml(text){
 }
 
 function showVerdict(verdict, vetoTriggered, score){
-  const card = document.getElementById('verdict-card');
-  card.style.display='block';
+  // Popula o veredito DENTRO do card do Juiz IA
+  const judgeCard = document.getElementById('judge-card');
   const body = document.getElementById('verdict-body');
+  const judgeText = document.getElementById('judge-text');
+
   if(verdict){
     body.innerHTML = _mdToHtml(verdict);
+    body.style.display = 'block';
+    judgeText.textContent = '✅ Veredito deliberado — leia abaixo';
   } else {
     body.textContent = '';
+    body.style.display = 'none';
   }
+
   document.getElementById('score-badge').textContent = score ? `Score: ${parseFloat(score).toFixed(1)}/100` : '';
+
   if(vetoTriggered){
-    document.getElementById('veto-banner').style.display='flex';
-    document.getElementById('veto-flag').style.display='inline-block';
+    document.getElementById('veto-banner').style.display = 'block';
+    document.getElementById('veto-flag').style.display = 'inline-block';
   }
-  card.scrollIntoView({behavior:'smooth',block:'start'});
+
+  // Scroll suave até o card do Juiz
+  if(judgeCard) judgeCard.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 /* ═══════════════════════════════════════════════
@@ -1804,3 +1809,4 @@ document.querySelectorAll('.feat-card,.mosaic-card,.price-card').forEach(el=>obs
 </script>
 </body>
 </html>
+
