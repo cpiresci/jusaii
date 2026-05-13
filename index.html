@@ -675,10 +675,17 @@ footer{width:100%;padding:48px 24px 32px;border-top:1px solid var(--border);text
 <script>
 /* ═══════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
+   ► Fase atual  (GitHub Pages + Render separados):
+       API_BASE_PROD = URL do seu serviço no Render
+   ► Fase futura (jurir.com ativo):
+       Troque por 'https://api.jurir.com' quando o
+       subdomínio estiver apontando para o Render.
 ═══════════════════════════════════════════════ */
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
+
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:10000'
-  : '';  // Mesmo domínio em produção
+  : API_BASE_PROD;
 
 /* ═══════════════════════════════════════════════
    CANVAS PARTICLE SYSTEM
