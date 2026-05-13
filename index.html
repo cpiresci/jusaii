@@ -1112,15 +1112,21 @@ function showScore(score, tribunal){
 }
 
 function _mdToHtml(text){
-  // Minimal markdown → HTML for verdict rendering
-  // 1. Escape raw HTML
-  let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // 2. Bold: **text** or __text__
-  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  h = h.replace(/__(.+?)__/g,'<strong>$1</strong>');
-  // 3. Section dividers (━━━ lines)
+  if(!text) return '';
+  // 1. Escape HTML — \x3C para < evita que </g dentro de <script> confunda o parser HTML
+  let h = text
+    .replace(/&/g,'&amp;')
+    .replace(/\x3C/g,'&lt;')
+    .replace(/>/g,'&gt;');
+  // 2. Bold/itálico — [\s\S]+? em vez de .+? para funcionar em spans multiline
+  h = h.replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/__([\s\S]+?)__/g,'<strong>$1</strong>');
+  h = h.replace(/\*([\s\S]+?)\*/g,'<em>$1</em>');
+  // 3. Divisores de seção — consome os \n adjacentes primeiro,
+  //    evitando <br> extra ao redor do <hr> no passo seguinte
+  h = h.replace(/\n[━─═]{3,}\n/g,'<hr class="vd-sep">');
   h = h.replace(/^[━─═]{3,}$/gm,'<hr class="vd-sep">');
-  // 4. Newlines → <br> (preserve whitespace structure)
+  // 4. \n → <br> — ÚLTIMO passo, após todos os blocos já substituídos
   h = h.replace(/\n/g,'<br>');
   return h;
 }
