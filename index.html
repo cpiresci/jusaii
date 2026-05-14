@@ -1226,14 +1226,80 @@ async function runPremiumSSE(prompt){
         try { handleSSEEvent(JSON.parse(raw)); } catch(e){ console.warn("SSE parse error:", e.message, raw.slice(0,120)); }
       }
     }
-    // Se o veredito ainda não chegou via SSE, marca como encerrado
+    // Se o veredito ainda não chegou via SSE, tenta recuperar do banco
     if(!verdictReceived){
-      const jt = document.getElementById('judge-text');
-      if(jt) jt.textContent = '✅ Análise concluída.';
+      await _fetchVerdictFallback();
     }
   } catch(e){
     toast(`Streaming: ${e.message}`,'error');
     document.getElementById('judge-text').textContent = `⚠️ ${e.message}\n\nVerifique o backend em ${API_BASE}`;
+  }
+}
+
+/**
+ * _fetchVerdictFallback — recupera o veredito do banco quando o evento
+ * SSE 'verdict' não chegou ao cliente (proxy timeout, queda de conexão, etc.)
+ *
+ * Fluxo:
+ *  1. Se currentAnalysisId foi gravado pelo evento 'saved', usa GET /api/analysis/{id}
+ *  2. Se não tiver ID local, busca a análise mais recente em GET /api/analyses
+ *  3. Em caso de falha total, exibe mensagem de erro sem crédito perdido
+ */
+async function _fetchVerdictFallback(){
+  const jt = document.getElementById('judge-text');
+
+  // Determina o ID: prioriza o do evento 'saved' recebido na mesma sessão;
+  // se não chegou, tenta pegar a última análise salva da conta.
+  let targetId = currentAnalysisId;
+
+  if(!targetId){
+    try {
+      const listR = await fetch(`${API_BASE}/api/analyses`,{
+        headers:{'Authorization':`Bearer ${authToken}`}
+      });
+      if(listR.ok){
+        const list = await listR.json();
+        if(list && list.length > 0) targetId = list[0].id; // mais recente primeiro
+      }
+    } catch(_){}
+  }
+
+  if(!targetId){
+    if(jt) jt.textContent =
+      '⚠️ Veredito não recebido via stream e nenhuma análise encontrada. ' +
+      'Verifique o histórico ou tente novamente.';
+    return;
+  }
+
+  try {
+    if(jt) jt.textContent = '🔄 Recuperando veredito do servidor…';
+
+    const r = await fetch(`${API_BASE}/api/analysis/${targetId}`,{
+      headers:{'Authorization':`Bearer ${authToken}`}
+    });
+
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    const data = await r.json();
+
+    if(data.verdict && data.verdict.trim().length > 10){
+      showVerdict(data.verdict, data.veto_triggered || false, data.jurir_score);
+      // Atualiza ID local caso não estivesse definido
+      if(!currentAnalysisId){
+        currentAnalysisId = targetId;
+        document.getElementById('pdf-actions').style.display = 'flex';
+      }
+      toast('✅ Veredito recuperado do servidor','success');
+    } else {
+      if(jt) jt.textContent =
+        '⚠️ Análise concluída, mas o veredito não está disponível. ' +
+        'Tente gerar o PDF ou aguarde alguns instantes.';
+    }
+  } catch(e){
+    if(jt) jt.textContent =
+      `⚠️ Não foi possível recuperar o veredito: ${e.message}. ` +
+      'Verifique o histórico de análises.';
+    toast(`Fallback de veredito falhou: ${e.message}`,'error');
   }
 }
 
@@ -1297,6 +1363,12 @@ function handleSSEEvent(ev){
       break;
     case 'verdict':
       showVerdict(ev.verdict, ev.veto_triggered, ev.jurir_score);
+      break;
+    case 'error':
+      /* Backend enviou evento de erro — exibe visualmente em vez de engolir */
+      toast(`⚠️ Backend: ${ev.message||'Erro interno'}`, 'error');
+      document.getElementById('judge-text').textContent =
+        `⚠️ ${ev.message||'Erro interno no servidor. Crédito reembolsado automaticamente.'}`;
       break;
     case 'saved':
       currentAnalysisId = ev.analysis_id;
