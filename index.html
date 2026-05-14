@@ -947,6 +947,7 @@ let authToken = localStorage.getItem('jurir_token') || null;
 let userData = JSON.parse(localStorage.getItem('jurir_user') || 'null');
 let currentAnalysisId = null;
 let eventSource = null;
+let verdictReceived = false;
 let agentStates = {};
 let completedAgents = 0;
 let TOTAL_AGENTS = 16;
@@ -1025,7 +1026,7 @@ function switchMode(mode){
 ═══════════════════════════════════════════════ */
 function resetAnalysis(){
   if(eventSource){eventSource.close();eventSource=null;}
-  completedAgents=0; agentStates={}; currentAnalysisId=null;
+  completedAgents=0; agentStates={}; currentAnalysisId=null; verdictReceived=false;
   document.getElementById('agents-container').style.display='none';
   document.getElementById('free-result').style.display='none';
   document.getElementById('score-section').style.display='none';
@@ -1210,6 +1211,7 @@ async function runPremiumSSE(prompt){
     const decoder = new TextDecoder();
     let buffer = '';
     let sseFinished = false;
+    verdictReceived = false;
 
     while(!sseFinished){
       const {done, value} = await reader.read();
@@ -1225,9 +1227,10 @@ async function runPremiumSSE(prompt){
       }
     }
     // Se o veredito ainda não chegou via SSE, marca como encerrado
-    const jt = document.getElementById('judge-text');
-    if(jt && (jt.textContent.includes('deliberando') || jt.textContent.includes('contraditório')))
-      jt.textContent = '✅ Análise concluída.';
+    if(!verdictReceived){
+      const jt = document.getElementById('judge-text');
+      if(jt) jt.textContent = '✅ Análise concluída.';
+    }
   } catch(e){
     toast(`Streaming: ${e.message}`,'error');
     document.getElementById('judge-text').textContent = `⚠️ ${e.message}\n\nVerifique o backend em ${API_BASE}`;
@@ -1347,6 +1350,7 @@ function showVerdict(verdict, vetoTriggered, score){
   if(judgeText){
     if(verdict){
       judgeText.innerHTML = _mdToHtml(verdict);
+      verdictReceived = true;
     } else {
       judgeText.textContent = '⚠️ Veredito não disponível nesta análise.';
     }
