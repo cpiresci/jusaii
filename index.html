@@ -1037,7 +1037,7 @@ function resetAnalysis(){
   if(vb){vb.innerHTML='';vb.style.display='none';}
   document.getElementById('progress-fill').style.width='0%';
   document.getElementById('progress-label').textContent='0/16';
-  document.getElementById('judge-text').textContent='Aguardando contraditório…';
+  document.getElementById('judge-text').innerHTML = 'Aguardando contraditório…';
   document.getElementById('devil-text').textContent='Aguardando agentes primários…';
   document.getElementById('gauge-value').textContent='—';
   document.getElementById('agents-grid').innerHTML='';
@@ -1224,9 +1224,10 @@ async function runPremiumSSE(prompt){
         try { handleSSEEvent(JSON.parse(raw)); } catch(e){ console.warn("SSE parse error:", e.message, raw.slice(0,120)); }
       }
     }
-    // Limpa estado do juiz ao encerrar o stream
+    // Se o veredito ainda não chegou via SSE, marca como encerrado
     const jt = document.getElementById('judge-text');
-    if(jt && jt.textContent.includes('deliberando')) jt.textContent = '✅ Veredito emitido.';
+    if(jt && (jt.textContent.includes('deliberando') || jt.textContent.includes('contraditório')))
+      jt.textContent = '✅ Análise concluída.';
   } catch(e){
     toast(`Streaming: ${e.message}`,'error');
     document.getElementById('judge-text').textContent = `⚠️ ${e.message}\n\nVerifique o backend em ${API_BASE}`;
@@ -1339,28 +1340,32 @@ function _mdToHtml(text){
 }
 
 function showVerdict(verdict, vetoTriggered, score){
-  // Popula o veredito DENTRO do card do Juiz IA
   const judgeCard = document.getElementById('judge-card');
-  const body = document.getElementById('verdict-body');
   const judgeText = document.getElementById('judge-text');
 
-  if(verdict){
-    body.innerHTML = _mdToHtml(verdict);
-    body.style.display = 'block';
-    judgeText.textContent = '✅ Veredito deliberado — leia abaixo';
-  } else {
-    body.textContent = '';
-    body.style.display = 'none';
+  // Mesmo padrão do diabo — innerHTML direto, sem div intermediário
+  if(judgeText){
+    if(verdict){
+      judgeText.innerHTML = _mdToHtml(verdict);
+    } else {
+      judgeText.textContent = '⚠️ Veredito não disponível nesta análise.';
+    }
   }
 
-  document.getElementById('score-badge').textContent = score ? `Score: ${parseFloat(score).toFixed(1)}/100` : '';
+  // Oculta o verdict-body (não mais usado) e garante pdf-actions apareça
+  const vb = document.getElementById('verdict-body');
+  if(vb) vb.style.display = 'none';
+
+  const badge = document.getElementById('score-badge');
+  if(badge && score) badge.textContent = `Score: ${parseFloat(score).toFixed(1)}/100`;
 
   if(vetoTriggered){
-    document.getElementById('veto-banner').style.display = 'block';
-    document.getElementById('veto-flag').style.display = 'inline-block';
+    const banner = document.getElementById('veto-banner');
+    const flag   = document.getElementById('veto-flag');
+    if(banner) banner.style.display = 'block';
+    if(flag)   flag.style.display   = 'inline-block';
   }
 
-  // Scroll suave até o card do Juiz
   if(judgeCard) judgeCard.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
@@ -1809,4 +1814,3 @@ document.querySelectorAll('.feat-card,.mosaic-card,.price-card').forEach(el=>obs
 </script>
 </body>
 </html>
-
