@@ -947,7 +947,10 @@ let authToken = localStorage.getItem('jurir_token') || null;
 let userData = JSON.parse(localStorage.getItem('jurir_user') || 'null');
 let currentAnalysisId = null;
 let eventSource = null;
-let verdictReceived = false;
+let verdictReceived    = false;
+let streamErrorReceived = false;   // true quando backend envia type:'error' — bloqueia o fallback
+let _sessionToken      = null;     // token recebido no evento 'start' — correlaciona análise no fallback
+let _analysisStartTime = 0;        // epoch ms do início do stream — filtra análises antigas no fallback
 let agentStates = {};
 let completedAgents = 0;
 let TOTAL_AGENTS = 16;
@@ -1026,7 +1029,7 @@ function switchMode(mode){
 ═══════════════════════════════════════════════ */
 function resetAnalysis(){
   if(eventSource){eventSource.close();eventSource=null;}
-  completedAgents=0; agentStates={}; currentAnalysisId=null; verdictReceived=false;
+  completedAgents=0; agentStates={}; currentAnalysisId=null; verdictReceived=false; streamErrorReceived=false; _sessionToken=null; _analysisStartTime=Date.now();
   document.getElementById('agents-container').style.display='none';
   document.getElementById('free-result').style.display='none';
   document.getElementById('score-section').style.display='none';
@@ -1212,6 +1215,9 @@ async function runPremiumSSE(prompt){
     let buffer = '';
     let sseFinished = false;
     verdictReceived = false;
+    streamErrorReceived = false;
+    _sessionToken = null;
+    _analysisStartTime = Date.now();
 
     while(!sseFinished){
       const {done, value} = await reader.read();
@@ -1227,7 +1233,8 @@ async function runPremiumSSE(prompt){
       }
     }
     // Se o veredito ainda não chegou via SSE, tenta recuperar do banco
-    if(!verdictReceived){
+    // (a menos que o backend já enviou um evento 'error' — não há o que recuperar)
+    if(!verdictReceived && !streamErrorReceived){
       await _fetchVerdictFallback();
     }
   } catch(e){
@@ -1237,19 +1244,19 @@ async function runPremiumSSE(prompt){
 }
 
 /**
- * _fetchVerdictFallback — recupera o veredito do banco quando o evento
- * SSE 'verdict' não chegou ao cliente (proxy timeout, queda de conexão, etc.)
+ * _fetchVerdictFallback — recupera o veredito quando o evento SSE 'verdict'
+ * não chegou ao cliente (BaseException no backend, proxy timeout, etc.)
  *
- * Fluxo:
- *  1. Se currentAnalysisId foi gravado pelo evento 'saved', usa GET /api/analysis/{id}
- *  2. Se não tiver ID local, busca a análise mais recente em GET /api/analyses
- *  3. Em caso de falha total, exibe mensagem de erro sem crédito perdido
+ * Prioridade de lookup:
+ *  1. currentAnalysisId gravado pelo evento 'saved'
+ *  2. GET /api/analyses → filtra análises criadas nos últimos 10 min
+ *     (evita pegar análise antiga de sessão anterior)
+ *  3. Se nenhuma encontrada → mensagem orientativa sem crédito perdido
  */
 async function _fetchVerdictFallback(){
   const jt = document.getElementById('judge-text');
+  const WINDOW_MS = 10 * 60 * 1000; // 10 minutos
 
-  // Determina o ID: prioriza o do evento 'saved' recebido na mesma sessão;
-  // se não chegou, tenta pegar a última análise salva da conta.
   let targetId = currentAnalysisId;
 
   if(!targetId){
@@ -1259,15 +1266,31 @@ async function _fetchVerdictFallback(){
       });
       if(listR.ok){
         const list = await listR.json();
-        if(list && list.length > 0) targetId = list[0].id; // mais recente primeiro
+        if(list && list.length > 0){
+          // Filtra análises criadas nos últimos 10 min (evita pegar análise antiga)
+          const now = Date.now();
+          const recent = list.find(a => {
+            try {
+              const [datePart, timePart] = a.created_at.split(' ');
+              const [d,m,y] = datePart.split('/');
+              const [hh,mm] = timePart.split(':');
+              const ts = new Date(+y, +m-1, +d, +hh, +mm).getTime();
+              return (now - ts) < WINDOW_MS;
+            } catch(_){ return false; }
+          });
+          if(recent) targetId = recent.id;
+        }
       }
     } catch(_){}
   }
 
   if(!targetId){
-    if(jt) jt.textContent =
-      '⚠️ Veredito não recebido via stream e nenhuma análise encontrada. ' +
-      'Verifique o histórico ou tente novamente.';
+    if(jt) jt.innerHTML =
+      `<div style="color:#718096;padding:12px;border-left:4px solid #718096;background:#f7fafc;border-radius:4px">` +
+      `<strong>ℹ️ Análise em processamento</strong><br><br>` +
+      `O resultado está sendo finalizado no servidor. Verifique o ` +
+      `<strong>histórico de análises</strong> em instantes, ou tente novamente.<br><br>` +
+      `<small>💳 Se nenhuma análise aparecer no histórico, seu crédito foi reembolsado automaticamente.</small></div>`;
     return;
   }
 
@@ -1277,28 +1300,28 @@ async function _fetchVerdictFallback(){
     const r = await fetch(`${API_BASE}/api/analysis/${targetId}`,{
       headers:{'Authorization':`Bearer ${authToken}`}
     });
-
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
-
     const data = await r.json();
 
     if(data.verdict && data.verdict.trim().length > 10){
-      showVerdict(data.verdict, data.veto_triggered || false, data.jurir_score);
-      // Atualiza ID local caso não estivesse definido
+      showVerdict(data.verdict, data.veto_triggered||false, data.jurir_score);
       if(!currentAnalysisId){
         currentAnalysisId = targetId;
         document.getElementById('pdf-actions').style.display = 'flex';
       }
       toast('✅ Veredito recuperado do servidor','success');
     } else {
-      if(jt) jt.textContent =
-        '⚠️ Análise concluída, mas o veredito não está disponível. ' +
-        'Tente gerar o PDF ou aguarde alguns instantes.';
+      if(jt) jt.innerHTML =
+        `<div style="color:#d69e2e;padding:12px;border-left:4px solid #d69e2e;background:#fffff0;border-radius:4px">` +
+        `<strong>⏳ Análise em processamento</strong><br><br>` +
+        `O veredito está sendo gerado. Aguarde e verifique o histórico.<br>` +
+        `<small>ID da análise: #${targetId}</small></div>`;
     }
   } catch(e){
-    if(jt) jt.textContent =
-      `⚠️ Não foi possível recuperar o veredito: ${e.message}. ` +
-      'Verifique o histórico de análises.';
+    if(jt) jt.innerHTML =
+      `<div style="color:#718096;padding:12px;border-left:4px solid #718096;background:#f7fafc;border-radius:4px">` +
+      `Não foi possível recuperar o veredito (${e.message}). ` +
+      `Verifique o histórico de análises.</div>`;
     toast(`Fallback de veredito falhou: ${e.message}`,'error');
   }
 }
@@ -1307,6 +1330,7 @@ function handleSSEEvent(ev){
   switch(ev.type){
     case 'start':
       TOTAL_AGENTS = ev.total || 16;
+      if(ev.session_token) _sessionToken = ev.session_token;
       if(ev.tribunal) document.getElementById('score-tribunal').querySelector('span').textContent = `Tribunal: ${ev.tribunal}`;
       toast(`Análise iniciada — ${TOTAL_AGENTS} agentes em execução`,'info');
       break;
@@ -1365,10 +1389,14 @@ function handleSSEEvent(ev){
       showVerdict(ev.verdict, ev.veto_triggered, ev.jurir_score);
       break;
     case 'error':
-      /* Backend enviou evento de erro — exibe visualmente em vez de engolir */
+      /* Backend enviou evento de erro — exibe visualmente e bloqueia o fallback */
+      streamErrorReceived = true;
       toast(`⚠️ Backend: ${ev.message||'Erro interno'}`, 'error');
-      document.getElementById('judge-text').textContent =
-        `⚠️ ${ev.message||'Erro interno no servidor. Crédito reembolsado automaticamente.'}`;
+      document.getElementById('judge-text').innerHTML =
+        `<div style="color:#e53e3e;padding:12px;border-left:4px solid #e53e3e;background:#fff5f5;border-radius:4px">` +
+        `<strong>⚠️ Erro na análise</strong><br><br>` +
+        `${ev.message||'Erro interno no servidor.'}<br><br>` +
+        `<small>💳 Seu crédito foi reembolsado automaticamente.</small></div>`;
       break;
     case 'saved':
       currentAnalysisId = ev.analysis_id;
@@ -1806,7 +1834,7 @@ function toast(msg, type='info'){
 /* ═══════════════════════════════════════════════
    FEATURES DATA
 ═══════════════════════════════════════════════ */
-const FEATURES = [
+FEATURES = [
   {icon:'🌊',title:'Streaming SSE em Tempo Real',desc:'Veja cada agente completar sua análise ao vivo via Server-Sent Events. Zero polling, latência mínima, experiência imersiva.',badge:'SSE · asyncio'},
   {icon:'⚔️',title:'Advogado do Diabo Obrigatório',desc:'Contraditório forçado v3.0: refuta todos os pareceres e identifica fragilidades. Resetamento de circuit breakers + retry com cooldown.',badge:'Devil v3.0'},
   {icon:'🏛️',title:'Juiz IA Quantum',desc:'Veredito consolidado com probabilidade de êxito, fundamento jurídico e próximos passos. Hard timeout + fallback pré-computado.',badge:'Quantum Jurist'},
