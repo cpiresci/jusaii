@@ -175,9 +175,17 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 @keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 .agent-area{font-size:.8rem;font-weight:600;color:var(--platinum);margin-bottom:4px;}
 .agent-conf{font-family:var(--font-mono);font-size:.68rem;color:var(--brass-bright);}
-.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;max-height:220px;overflow-y:auto;}
+.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;}
 .agent-analysis.visible{display:block;}
 .agent-analysis strong,.agent-analysis b{color:var(--brass-bright);}
+.agent-analysis h1,.agent-analysis h2,.agent-analysis h3,.agent-analysis h4{color:var(--brass-bright);font-size:.85rem;margin:10px 0 4px;font-weight:700;letter-spacing:.03em;}
+.agent-analysis table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.75rem;}
+.agent-analysis th{background:rgba(202,138,4,.12);color:var(--brass-bright);padding:4px 8px;border:1px solid rgba(255,255,255,.1);text-align:left;font-weight:600;}
+.agent-analysis td{padding:4px 8px;border:1px solid rgba(255,255,255,.07);color:var(--platinum);}
+.agent-analysis tr:nth-child(even) td{background:rgba(255,255,255,.025);}
+.agent-analysis ul,.agent-analysis ol{padding-left:16px;margin:4px 0;}
+.agent-analysis li{margin:2px 0;}
+.agent-analysis blockquote{border-left:3px solid var(--brass-mid);padding:4px 10px;margin:6px 0;color:var(--silver);font-style:italic;background:rgba(255,255,255,.03);border-radius:0 4px 4px 0;}
 .agent-specialty{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:6px;}
 .agent-risks{margin-top:8px;padding:6px 8px;border-radius:4px;background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.15);font-size:.75rem;color:rgba(255,120,120,.85);}
 .agent-risks-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-bright);margin-bottom:3px;}
@@ -1158,13 +1166,8 @@ function updateAgentCard(agentId, state, conf, riskLevel, analysis, specialty, t
       if(specialty){
         html += `<div class="agent-specialty">// ${specialty}</div>`;
       }
-      // Formata o texto principal: bold, quebras de linha
-      const bodyHtml = analysis
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/__([\s\S]+?)__/g,'<strong>$1</strong>')
-        .replace(/\n/g,'<br>');
-      html += `<div>${bodyHtml}</div>`;
+      // [FIX] Renderização rica: tabelas, headings, listas via _mdToHtml
+      html += `<div>${_mdToHtml(analysis)}</div>`;
       // Bloco de riscos
       if(topRisk || topReversal){
         html += `<div class="agent-risks">`;
@@ -1361,12 +1364,8 @@ function handleSSEEvent(ev){
     case 'devil_done':{
       const devilEl = document.getElementById('devil-text');
       if(ev.analysis){
-        const devilHtml = ev.analysis
-          .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          .replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>')
-          .replace(/__([\s\S]+?)__/g,'<strong>$1</strong>')
-          .replace(/\n/g,'<br>');
-        devilEl.innerHTML = devilHtml;
+        // [FIX] Usa _mdToHtml para renderizar tabelas e headings do Diabo
+        devilEl.innerHTML = _mdToHtml(ev.analysis);
       } else {
         devilEl.textContent = 'Contraditório concluído.';
       }
@@ -1424,20 +1423,48 @@ function showScore(score, tribunal){
 
 function _mdToHtml(text){
   if(!text) return '';
-  // 1. Escape HTML — \x3C para < evita que </g dentro de <script> confunda o parser HTML
+  // 1. Escape HTML
   let h = text
     .replace(/&/g,'&amp;')
     .replace(/\x3C/g,'&lt;')
     .replace(/>/g,'&gt;');
-  // 2. Bold/itálico — [\s\S]+? em vez de .+? para funcionar em spans multiline
+  // 2. Headings (###, ##, #) — antes de bold para evitar conflito
+  h = h.replace(/^#### (.+)$/gm,'<h4>$1</h4>');
+  h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  // 3. Bold / itálico
   h = h.replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>');
   h = h.replace(/__([\s\S]+?)__/g,'<strong>$1</strong>');
   h = h.replace(/\*([\s\S]+?)\*/g,'<em>$1</em>');
-  // 3. Divisores de seção — consome os \n adjacentes primeiro,
-  //    evitando <br> extra ao redor do <hr> no passo seguinte
+  // 4. Blockquote (> texto)
+  h = h.replace(/^&gt; ?(.*)$/gm,'<blockquote>$1</blockquote>');
+  // 5. Tabelas markdown — converte linhas | col | col | em <table>
+  h = h.replace(/((?:^\|.+\|\n?)+)/gm, (block)=>{
+    const rows = block.trim().split('\n').filter(r=>r.trim());
+    if(rows.length < 2) return block;
+    let out = '<table>';
+    rows.forEach((row,i)=>{
+      if(/^\|[\s\-:|]+\|/.test(row)) return; // pula linha separadora
+      const cells = row.replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
+      if(i===0){
+        out += '<tr>' + cells.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+      } else {
+        out += '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+      }
+    });
+    out += '</table>';
+    return out;
+  });
+  // 6. Listas não-ordenadas (- item ou * item)
+  h = h.replace(/^[-*] (.+)$/gm,'<li>$1</li>');
+  h = h.replace(/(<li>[\s\S]+?<\/li>(?:\n<li>[\s\S]+?<\/li>)*)/g,'<ul>$1</ul>');
+  // 7. Listas ordenadas (1. item)
+  h = h.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  // 8. Divisores de seção
   h = h.replace(/\n[━─═]{3,}\n/g,'<hr class="vd-sep">');
-  h = h.replace(/^[━─═]{3,}$/gm,'<hr class="vd-sep">');
-  // 4. \n → <br> — ÚLTIMO passo, após todos os blocos já substituídos
+  h = h.replace(/^[━─═-]{3,}$/gm,'<hr class="vd-sep">');
+  // 9. \n → <br> — último passo, após todos os blocos substituídos
   h = h.replace(/\n/g,'<br>');
   return h;
 }
