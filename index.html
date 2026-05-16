@@ -129,7 +129,10 @@ section{width:100%;max-width:1200px;padding:80px 24px;}
 
 /* ── ANALYSIS PANEL ── */
 .analysis-section{width:100%;max-width:1200px;padding:80px 24px;}
-.panel{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;backdrop-filter:blur(20px);}
+.panel{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);overflow:visible;backdrop-filter:blur(20px);}
+/* [FIX] panel-header e panel-body herdam o clip do border-radius via mask */
+.panel-header{border-radius:var(--r-xl) var(--r-xl) 0 0;overflow:hidden;}
+.panel-body{border-radius:0 0 var(--r-xl) var(--r-xl);}
 .panel-header{padding:28px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
 .panel-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:700;color:var(--platinum);display:flex;align-items:center;gap:12px;}
 .panel-title-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--crimson-pulse);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;}
@@ -159,7 +162,7 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--brass-mid));border-radius:2px;transition:width .4s ease;}
 .progress-label{font-family:var(--font-mono);font-size:.68rem;color:var(--silver);min-width:36px;}
 .agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:20px;}
-.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.3);padding:14px;transition:all .3s;position:relative;overflow:visible;}
+.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.3);padding:14px;transition:border-color .3s,background .3s;position:relative;overflow:visible;}
 .agent-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;}
 .agent-card.thinking::before{background:radial-gradient(circle at 30% 50%,rgba(202,138,4,.07),transparent 70%);opacity:1;}
 .agent-card.done::before{background:radial-gradient(circle at 30% 50%,rgba(16,185,129,.05),transparent 70%);opacity:1;}
@@ -175,7 +178,11 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 @keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 .agent-area{font-size:.8rem;font-weight:600;color:var(--platinum);margin-bottom:4px;}
 .agent-conf{font-family:var(--font-mono);font-size:.68rem;color:var(--brass-bright);}
-.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;}
+.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;max-height:260px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(202,138,4,.3) transparent;}
+.agent-analysis::-webkit-scrollbar{width:4px;}
+.agent-analysis::-webkit-scrollbar-track{background:transparent;}
+.agent-analysis::-webkit-scrollbar-thumb{background:rgba(202,138,4,.3);border-radius:2px;}
+.agent-analysis::-webkit-scrollbar-thumb:hover{background:rgba(202,138,4,.6);}
 .agent-analysis.visible{display:block;}
 .agent-analysis strong,.agent-analysis b{color:var(--brass-bright);}
 .agent-analysis h1,.agent-analysis h2,.agent-analysis h3,.agent-analysis h4{color:var(--brass-bright);font-size:.85rem;margin:10px 0 4px;font-weight:700;letter-spacing:.03em;}
@@ -189,6 +196,10 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .agent-specialty{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:6px;}
 .agent-risks{margin-top:8px;padding:6px 8px;border-radius:4px;background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.15);font-size:.75rem;color:rgba(255,120,120,.85);}
 .agent-risks-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-bright);margin-bottom:3px;}
+.agent-expand-btn{display:none;margin-top:6px;width:100%;background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--silver);font-size:.7rem;font-family:var(--font-mono);letter-spacing:.06em;padding:4px 8px;cursor:pointer;text-align:center;transition:background .2s,color .2s;}
+.agent-expand-btn:hover{background:rgba(255,255,255,.06);color:var(--platinum);}
+.agent-expand-btn.visible{display:block;}
+.agent-analysis.expanded{max-height:none;}
 .thinking-dots{display:inline-flex;gap:3px;}
 .thinking-dots span{width:4px;height:4px;border-radius:50%;background:var(--brass-mid);animation:dot-bounce .8s infinite;}
 .thinking-dots span:nth-child(2){animation-delay:.15s;}
@@ -1143,6 +1154,7 @@ function buildAgentsGrid(){
       <div class="agent-area">${a.area}${a.critical?' <span style="color:var(--crimson-bright);font-size:.65rem;">●</span>':''}</div>
       <div class="agent-conf" id="conf-${a.id}">—</div>
       <div class="agent-analysis" id="analysis-${a.id}"></div>
+      <button class="agent-expand-btn" id="expand-${a.id}" onclick="toggleAnalysis('${a.id}')">▼ VER MAIS</button>
     `;
     grid.appendChild(card);
   });
@@ -1181,10 +1193,36 @@ function updateAgentCard(agentId, state, conf, riskLevel, analysis, specialty, t
       }
       analysisEl.innerHTML = html;
       analysisEl.classList.add('visible');
+      // Mostra botão "VER MAIS" apenas se conteúdo ultrapassa 260px
+      const expandBtn = document.getElementById(`expand-${agentId}`);
+      if(expandBtn){
+        // Usa setTimeout para medir após render
+        setTimeout(()=>{
+          if(analysisEl.scrollHeight > analysisEl.clientHeight + 10){
+            expandBtn.classList.add('visible');
+          }
+        }, 50);
+      }
     }
   } else if(state==='veto'){
     statusEl.className='agent-status veto'; statusEl.textContent='VETO';
     card.className='agent-card veto';
+  }
+}
+
+function toggleAnalysis(agentId){
+  const analysisEl = document.getElementById(`analysis-${agentId}`);
+  const expandBtn  = document.getElementById(`expand-${agentId}`);
+  if(!analysisEl || !expandBtn) return;
+  const isExpanded = analysisEl.classList.contains('expanded');
+  if(isExpanded){
+    analysisEl.classList.remove('expanded');
+    expandBtn.textContent = '▼ VER MAIS';
+    // Scroll suave de volta ao topo do card
+    document.getElementById(`agent-${agentId}`)?.scrollIntoView({behavior:'smooth', block:'nearest'});
+  } else {
+    analysisEl.classList.add('expanded');
+    expandBtn.textContent = '▲ COLAPSAR';
   }
 }
 
