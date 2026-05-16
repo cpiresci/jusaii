@@ -159,52 +159,80 @@ textarea.case-input:focus{border-color:rgba(185,28,28,.5);box-shadow:0 0 0 3px r
 .agents-title{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--silver);}
 .progress-wrap{display:flex;align-items:center;gap:12px;flex:1;max-width:320px;}
 .progress-bar-bg{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
-.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--brass-mid));border-radius:2px;transition:width .4s ease;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--brass-mid));border-radius:2px;transition:width .5s ease;}
 .progress-label{font-family:var(--font-mono);font-size:.68rem;color:var(--silver);min-width:36px;}
-.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:20px;}
-.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.3);padding:14px;transition:border-color .3s,background .3s;position:relative;overflow:visible;}
-.agent-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;}
-.agent-card.thinking::before{background:radial-gradient(circle at 30% 50%,rgba(202,138,4,.07),transparent 70%);opacity:1;}
-.agent-card.done::before{background:radial-gradient(circle at 30% 50%,rgba(16,185,129,.05),transparent 70%);opacity:1;}
-.agent-card.done{border-color:rgba(16,185,129,.2);}
-.agent-card.veto{border-color:rgba(185,28,28,.5);background:rgba(185,28,28,.06);}
-.agent-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.agent-icon{width:28px;height:28px;border-radius:8px;background:var(--ghost);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-size:.85rem;}
-.agent-status{font-size:.6rem;font-family:var(--font-mono);letter-spacing:.1em;padding:2px 8px;border-radius:var(--r-pill);}
+
+/* ── AGENT CARD REDESIGN ── */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px;}
+.agent-card{border-radius:var(--r-md);border:1px solid var(--border-light);background:rgba(0,0,0,.28);overflow:hidden;transition:border-color .35s,background .35s,box-shadow .35s,transform .2s;position:relative;animation:cardAppear .3s ease both;}
+@keyframes cardAppear{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.agent-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:inherit;}
+.agent-card.thinking::after{background:radial-gradient(ellipse at 0% 50%,rgba(202,138,4,.1),transparent 70%);opacity:1;}
+.agent-card.done::after{background:radial-gradient(ellipse at 0% 50%,rgba(16,185,129,.06),transparent 70%);opacity:1;}
+.agent-card.done{border-color:rgba(16,185,129,.25);box-shadow:0 2px 14px rgba(16,185,129,.05);}
+.agent-card.veto{border-color:rgba(185,28,28,.55);background:rgba(185,28,28,.06);}
+.agent-card.unavailable{opacity:.6;border-color:rgba(255,255,255,.05);}
+.agent-card-header{padding:13px 14px 11px;position:relative;z-index:1;}
+.agent-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.agent-icon{width:30px;height:30px;border-radius:8px;background:var(--ghost);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.agent-status{font-size:.58rem;font-family:var(--font-mono);letter-spacing:.1em;padding:3px 9px;border-radius:var(--r-pill);white-space:nowrap;}
 .agent-status.idle{background:rgba(255,255,255,.05);color:var(--silver);}
-.agent-status.thinking{background:rgba(202,138,4,.15);color:var(--brass-bright);animation:statusPulse 1.5s infinite;}
+.agent-status.thinking{background:rgba(202,138,4,.15);color:var(--brass-bright);animation:statusPulse 1.4s infinite;}
 .agent-status.done{background:rgba(16,185,129,.15);color:var(--emerald-bright);}
+.agent-status.error{background:rgba(185,28,28,.12);color:rgba(240,120,120,.9);}
 .agent-status.veto{background:rgba(185,28,28,.2);color:var(--crimson-bright);}
-@keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-.agent-area{font-size:.8rem;font-weight:600;color:var(--platinum);margin-bottom:4px;}
-.agent-conf{font-family:var(--font-mono);font-size:.68rem;color:var(--brass-bright);}
-.agent-analysis{display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-size:.8rem;color:var(--platinum);line-height:1.65;max-height:260px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(202,138,4,.3) transparent;}
-.agent-analysis::-webkit-scrollbar{width:4px;}
-.agent-analysis::-webkit-scrollbar-track{background:transparent;}
-.agent-analysis::-webkit-scrollbar-thumb{background:rgba(202,138,4,.3);border-radius:2px;}
-.agent-analysis::-webkit-scrollbar-thumb:hover{background:rgba(202,138,4,.6);}
-.agent-analysis.visible{display:block;}
+@keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+.agent-area{font-size:.82rem;font-weight:700;color:var(--platinum);display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.agent-critical-dot{width:5px;height:5px;border-radius:50%;background:var(--crimson-bright);box-shadow:0 0 6px var(--crimson-bright);flex-shrink:0;}
+.agent-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.agent-conf{font-family:var(--font-mono);font-size:.65rem;color:var(--brass-bright);}
+.agent-risk-badge{font-family:var(--font-mono);font-size:.57rem;padding:2px 8px;border-radius:var(--r-pill);display:none;}
+.agent-risk-badge.high{background:rgba(185,28,28,.15);color:var(--crimson-bright);}
+.agent-risk-badge.medium{background:rgba(202,138,4,.15);color:var(--brass-bright);}
+.agent-risk-badge.low{background:rgba(16,185,129,.15);color:var(--emerald-bright);}
+.agent-specialty{font-family:var(--font-mono);font-size:.57rem;letter-spacing:.08em;color:rgba(185,185,185,.45);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── ANALYSIS CONTENT WRAPPER (height-controlled) ── */
+.agent-analysis-wrap{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(0.4,0,0.2,1);}
+.agent-analysis-wrap.open{max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(202,138,4,.28) transparent;}
+.agent-analysis-wrap.open.expanded{max-height:1400px;}
+.agent-analysis-wrap::-webkit-scrollbar{width:3px;}
+.agent-analysis-wrap::-webkit-scrollbar-track{background:transparent;}
+.agent-analysis-wrap::-webkit-scrollbar-thumb{background:rgba(202,138,4,.28);border-radius:2px;}
+.agent-analysis{padding:11px 14px 12px;font-size:.79rem;color:var(--platinum);line-height:1.68;border-top:1px solid rgba(255,255,255,.05);}
 .agent-analysis strong,.agent-analysis b{color:var(--brass-bright);}
-.agent-analysis h1,.agent-analysis h2,.agent-analysis h3,.agent-analysis h4{color:var(--brass-bright);font-size:.85rem;margin:10px 0 4px;font-weight:700;letter-spacing:.03em;}
-.agent-analysis table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.75rem;}
-.agent-analysis th{background:rgba(202,138,4,.12);color:var(--brass-bright);padding:4px 8px;border:1px solid rgba(255,255,255,.1);text-align:left;font-weight:600;}
-.agent-analysis td{padding:4px 8px;border:1px solid rgba(255,255,255,.07);color:var(--platinum);}
-.agent-analysis tr:nth-child(even) td{background:rgba(255,255,255,.025);}
-.agent-analysis ul,.agent-analysis ol{padding-left:16px;margin:4px 0;}
-.agent-analysis li{margin:2px 0;}
-.agent-analysis blockquote{border-left:3px solid var(--brass-mid);padding:4px 10px;margin:6px 0;color:var(--silver);font-style:italic;background:rgba(255,255,255,.03);border-radius:0 4px 4px 0;}
-.agent-specialty{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:6px;}
-.agent-risks{margin-top:8px;padding:6px 8px;border-radius:4px;background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.15);font-size:.75rem;color:rgba(255,120,120,.85);}
-.agent-risks-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-bright);margin-bottom:3px;}
-.agent-expand-btn{display:none;margin-top:6px;width:100%;background:none;border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--silver);font-size:.7rem;font-family:var(--font-mono);letter-spacing:.06em;padding:4px 8px;cursor:pointer;text-align:center;transition:background .2s,color .2s;}
-.agent-expand-btn:hover{background:rgba(255,255,255,.06);color:var(--platinum);}
-.agent-expand-btn.visible{display:block;}
-.agent-analysis.expanded{max-height:none;}
-.thinking-dots{display:inline-flex;gap:3px;}
-.thinking-dots span{width:4px;height:4px;border-radius:50%;background:var(--brass-mid);animation:dot-bounce .8s infinite;}
+.agent-analysis em{color:var(--silver);}
+.agent-analysis h1,.agent-analysis h2,.agent-analysis h3,.agent-analysis h4{color:var(--brass-bright);font-size:.82rem;margin:10px 0 5px;font-weight:700;letter-spacing:.03em;font-family:var(--font-serif);}
+.agent-analysis table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.72rem;}
+.agent-analysis th{background:rgba(202,138,4,.1);color:var(--brass-bright);padding:4px 8px;border:1px solid rgba(255,255,255,.07);text-align:left;font-weight:600;}
+.agent-analysis td{padding:4px 8px;border:1px solid rgba(255,255,255,.05);color:var(--platinum);}
+.agent-analysis tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.agent-analysis ul,.agent-analysis ol{padding-left:16px;margin:5px 0;}
+.agent-analysis li{margin:3px 0;}
+.agent-analysis blockquote{border-left:2px solid var(--brass-mid);padding:5px 10px;margin:7px 0;color:var(--silver);font-style:italic;background:rgba(255,255,255,.02);border-radius:0 5px 5px 0;}
+.agent-analysis hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:10px 0;}
+
+/* Risks block inside card */
+.agent-risks-block{margin:0 14px 10px;padding:8px 10px;border-radius:6px;background:rgba(185,28,28,.07);border:1px solid rgba(185,28,28,.14);font-size:.74rem;color:rgba(255,140,140,.85);}
+.agent-risks-label{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--crimson-bright);margin-bottom:3px;}
+
+/* Error message inside card */
+.agent-error-msg{padding:10px 14px 12px;font-size:.75rem;color:rgba(200,110,110,.8);border-top:1px solid rgba(185,28,28,.1);font-style:italic;display:flex;align-items:flex-start;gap:7px;}
+.agent-error-msg::before{content:'⚠';font-style:normal;color:var(--crimson-bright);flex-shrink:0;margin-top:1px;}
+
+/* Expand/Collapse button */
+.agent-expand-btn{width:100%;background:none;border:none;border-top:1px solid rgba(255,255,255,.05);color:rgba(185,185,185,.55);font-size:.64rem;font-family:var(--font-mono);letter-spacing:.1em;padding:7px 14px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px;transition:background .2s,color .2s;position:relative;z-index:1;}
+.agent-expand-btn.visible{display:flex;}
+.agent-expand-btn:hover{background:rgba(255,255,255,.04);color:var(--platinum);}
+.expand-chevron{font-size:.5rem;transition:transform .35s cubic-bezier(0.4,0,0.2,1);display:inline-block;}
+.agent-expand-btn.active .expand-chevron{transform:rotate(180deg);}
+
+/* Thinking animation */
+.thinking-dots{display:inline-flex;gap:3px;align-items:center;}
+.thinking-dots span{width:4px;height:4px;border-radius:50%;background:var(--brass-mid);animation:dotBounce .8s infinite;}
 .thinking-dots span:nth-child(2){animation-delay:.15s;}
 .thinking-dots span:nth-child(3){animation-delay:.3s;}
-@keyframes dot-bounce{0%,80%,100%{transform:scale(.8);opacity:.5;}40%{transform:scale(1.2);opacity:1;}}
+@keyframes dotBounce{0%,80%,100%{transform:scale(.75);opacity:.45;}40%{transform:scale(1.2);opacity:1;}}
 /* ── DEVIL / JUDGE PANELS ── */
 .special-panels{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px;}
 @media(max-width:700px){.special-panels{grid-template-columns:1fr;}}
@@ -1147,82 +1175,146 @@ function buildAgentsGrid(){
     card.className='agent-card';
     card.id=`agent-${a.id}`;
     card.innerHTML=`
-      <div class="agent-card-top">
-        <div class="agent-icon">${a.icon}</div>
-        <span class="agent-status idle" id="status-${a.id}">AGUARDA</span>
+      <div class="agent-card-header">
+        <div class="agent-card-top">
+          <div class="agent-icon">${a.icon}</div>
+          <span class="agent-status idle" id="status-${a.id}">AGUARDA</span>
+        </div>
+        <div class="agent-area">
+          ${a.area}${a.critical?'<span class="agent-critical-dot"></span>':''}
+        </div>
+        <div class="agent-meta-row">
+          <span class="agent-conf" id="conf-${a.id}"></span>
+          <span class="agent-risk-badge" id="risk-${a.id}"></span>
+        </div>
+        <div class="agent-specialty" id="spec-${a.id}"></div>
       </div>
-      <div class="agent-area">${a.area}${a.critical?' <span style="color:var(--crimson-bright);font-size:.65rem;">●</span>':''}</div>
-      <div class="agent-conf" id="conf-${a.id}">—</div>
-      <div class="agent-analysis" id="analysis-${a.id}"></div>
-      <button class="agent-expand-btn" id="expand-${a.id}" onclick="toggleAnalysis('${a.id}')">▼ VER MAIS</button>
+      <div class="agent-analysis-wrap" id="wrap-${a.id}">
+        <div class="agent-analysis" id="analysis-${a.id}"></div>
+      </div>
+      <div class="agent-risks-block" id="risks-${a.id}" style="display:none"></div>
+      <button class="agent-expand-btn" id="expand-${a.id}" onclick="toggleAnalysis('${a.id}')">
+        <span class="expand-chevron">▼</span>
+        <span id="expand-lbl-${a.id}">VER ANÁLISE COMPLETA</span>
+      </button>
     `;
     grid.appendChild(card);
   });
 }
 
 function updateAgentCard(agentId, state, conf, riskLevel, analysis, specialty, topRisk, topReversal){
-  const card = document.getElementById(`agent-${agentId}`);
-  const statusEl = document.getElementById(`status-${agentId}`);
-  const confEl = document.getElementById(`conf-${agentId}`);
-  const analysisEl = document.getElementById(`analysis-${agentId}`);
+  const card      = document.getElementById(`agent-${agentId}`);
+  const statusEl  = document.getElementById(`status-${agentId}`);
+  const confEl    = document.getElementById(`conf-${agentId}`);
+  const riskBadge = document.getElementById(`risk-${agentId}`);
+  const specEl    = document.getElementById(`spec-${agentId}`);
+  const analysisEl= document.getElementById(`analysis-${agentId}`);
+  const wrapEl    = document.getElementById(`wrap-${agentId}`);
+  const risksEl   = document.getElementById(`risks-${agentId}`);
+  const expandBtn = document.getElementById(`expand-${agentId}`);
   if(!card) return;
-  card.className = `agent-card ${state}`;
+
   if(state==='thinking'){
-    statusEl.className='agent-status thinking'; statusEl.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div>';
-  } else if(state==='done'){
-    statusEl.className='agent-status done'; statusEl.textContent=`CONF ${conf||0}%`;
-    if(riskLevel) confEl.textContent = `Risco: ${riskLevel}`;
-    // ── Renderiza a análise completa no card ──────────────────────────
+    card.className='agent-card thinking';
+    statusEl.className='agent-status thinking';
+    statusEl.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div>';
+    return;
+  }
+
+  if(state==='veto'){
+    card.className='agent-card veto';
+    statusEl.className='agent-status veto';
+    statusEl.textContent='VETO';
+    return;
+  }
+
+  if(state==='done'){
+    // Detect provider failure — short error messages, no real analysis
+    const isError = !analysis || (
+      analysis.length < 220 && (
+        analysis.includes('provider indisponível') ||
+        analysis.includes('análise não concluída') ||
+        analysis.includes('não concluída') ||
+        analysis.includes('indisponível') ||
+        analysis.startsWith('⚠')
+      )
+    );
+
+    card.className = `agent-card done${isError ? ' unavailable' : ''}`;
+    statusEl.className = isError ? 'agent-status error' : 'agent-status done';
+    statusEl.textContent = isError ? 'FALHOU' : `CONF ${conf||0}%`;
+
+    if(!isError && conf){
+      confEl.textContent = `Conf: ${conf}%`;
+    }
+
+    if(!isError && riskLevel){
+      const rl = (riskLevel||'').toLowerCase();
+      const cls = (rl.includes('alto')||rl.includes('high')||rl.includes('crítico')) ? 'high'
+                : (rl.includes('baixo')||rl.includes('low')) ? 'low' : 'medium';
+      riskBadge.className = `agent-risk-badge ${cls}`;
+      riskBadge.textContent = `Risco ${riskLevel}`;
+      riskBadge.style.display = 'inline-block';
+    }
+
+    if(specialty && specEl){
+      specEl.textContent = `// ${specialty}`;
+    }
+
+    // Error state — compact inline message, no expand
+    if(isError){
+      if(wrapEl){
+        wrapEl.className = 'agent-analysis-wrap';
+        wrapEl.innerHTML = `<div class="agent-error-msg">${(analysis||'Provider indisponível — crédito reembolsado automaticamente.').replace(/^[⚠️\s]+/,'')}</div>`;
+      }
+      return;
+    }
+
+    // Success — render analysis content
     if(analysisEl && analysis){
-      let html = '';
-      if(specialty){
-        html += `<div class="agent-specialty">// ${specialty}</div>`;
-      }
-      // [FIX] Renderização rica: tabelas, headings, listas via _mdToHtml
-      html += `<div>${_mdToHtml(analysis)}</div>`;
-      // Bloco de riscos
-      if(topRisk || topReversal){
-        html += `<div class="agent-risks">`;
-        if(topRisk){
-          html += `<div class="agent-risks-label">⚠ Principal Risco</div><div>${topRisk}</div>`;
-        }
-        if(topReversal){
-          html += `<div class="agent-risks-label" style="margin-top:6px;">🔄 Risco de Reversão</div><div>${topReversal}</div>`;
-        }
-        html += `</div>`;
-      }
-      analysisEl.innerHTML = html;
-      analysisEl.classList.add('visible');
-      // Mostra botão "VER MAIS" apenas se conteúdo ultrapassa 260px
-      const expandBtn = document.getElementById(`expand-${agentId}`);
-      if(expandBtn){
-        // Usa setTimeout para medir após render
-        setTimeout(()=>{
-          if(analysisEl.scrollHeight > analysisEl.clientHeight + 10){
+      analysisEl.innerHTML = _mdToHtml(analysis);
+    }
+    if(wrapEl) wrapEl.className = 'agent-analysis-wrap open';
+
+    // Risks block
+    if((topRisk || topReversal) && risksEl){
+      let rhtml = '';
+      if(topRisk)      rhtml += `<div class="agent-risks-label">⚠ Principal Risco</div><div>${topRisk}</div>`;
+      if(topReversal)  rhtml += `<div class="agent-risks-label" style="margin-top:6px;">🔄 Reversão Possível</div><div>${topReversal}</div>`;
+      risksEl.innerHTML = rhtml;
+      risksEl.style.display = 'block';
+    }
+
+    // Reliable expand-button detection via double requestAnimationFrame
+    if(expandBtn && wrapEl){
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          // wrapEl is open, max-height:280px — compare scrollHeight vs clientHeight
+          if(wrapEl.scrollHeight > wrapEl.clientHeight + 8){
             expandBtn.classList.add('visible');
           }
-        }, 50);
-      }
+        });
+      });
     }
-  } else if(state==='veto'){
-    statusEl.className='agent-status veto'; statusEl.textContent='VETO';
-    card.className='agent-card veto';
   }
 }
 
 function toggleAnalysis(agentId){
-  const analysisEl = document.getElementById(`analysis-${agentId}`);
-  const expandBtn  = document.getElementById(`expand-${agentId}`);
-  if(!analysisEl || !expandBtn) return;
-  const isExpanded = analysisEl.classList.contains('expanded');
+  const wrapEl    = document.getElementById(`wrap-${agentId}`);
+  const expandBtn = document.getElementById(`expand-${agentId}`);
+  const lblEl     = document.getElementById(`expand-lbl-${agentId}`);
+  if(!wrapEl || !expandBtn) return;
+
+  const isExpanded = expandBtn.classList.contains('active');
   if(isExpanded){
-    analysisEl.classList.remove('expanded');
-    expandBtn.textContent = '▼ VER MAIS';
-    // Scroll suave de volta ao topo do card
+    expandBtn.classList.remove('active');
+    wrapEl.classList.remove('expanded');
+    if(lblEl) lblEl.textContent = 'VER ANÁLISE COMPLETA';
     document.getElementById(`agent-${agentId}`)?.scrollIntoView({behavior:'smooth', block:'nearest'});
   } else {
-    analysisEl.classList.add('expanded');
-    expandBtn.textContent = '▲ COLAPSAR';
+    expandBtn.classList.add('active');
+    wrapEl.classList.add('expanded');
+    if(lblEl) lblEl.textContent = 'COLAPSAR';
   }
 }
 
