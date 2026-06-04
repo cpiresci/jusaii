@@ -2323,7 +2323,7 @@ footer{
 /* ═══════════════════════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
 ═══════════════════════════════════════════════════════════════ */
-const JURIR_VERSION = 'v9.2'; // [FIX v9.2] /wake endpoint + cron-job fix
+const JURIR_VERSION = 'v9.3'; // [FIX v9.3] checkHealth padrão Wuzo: waits[] + 60s timeout + setInterval 4min
 const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
 const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
   || (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
@@ -3332,61 +3332,64 @@ const obs=new IntersectionObserver(entries=>{
 document.querySelectorAll('.feat-card,.mc,.price-card').forEach(el=>obs.observe(el));
 
 /* ── PING BACKEND COM RETRY — cold start awareness ── */
+/* ── HEALTH CHECK (padrão Wuzo) ─────────────────────────────────────
+   Estratégia idêntica ao Wuzo que funciona com UptimeRobot 5min/60s:
+   • waits[] — 9 tentativas espaçadas, cobre até ~3min de cold start
+   • timeout 60s por tentativa — UptimeRobot também usa 60s
+   • setInterval 4min — keep-alive interno após conexão estabelecida
+   • /wake — endpoint <50ms, sem DB, nunca trava
+   ────────────────────────────────────────────────────────────────── */
 function retryPing(){
   const btn=document.getElementById('retry-ping-btn');
   if(btn) btn.style.display='none';
-  _doPing();
+  _checkHealth();
 }
 
-async function _doPing(){
-  const _dot  = ()=>document.querySelector('.badge-led.green');
-  const _span = ()=>document.querySelector('.ctrl-badges .badge:first-child span');
-  const _btn  = ()=>document.getElementById('retry-ping-btn');
+function _setBackendStatus(online, msg){
+  const dot  = document.querySelector('.badge-led.green');
+  const span = document.querySelector('.ctrl-badges .badge:first-child span');
+  const btn  = document.getElementById('retry-ping-btn');
+  if(dot){
+    dot.style.background = online ? '' : 'var(--r4)';
+    dot.style.boxShadow  = online ? '' : '0 0 6px var(--r4)';
+    dot.style.animation  = online ? '' : 'none';
+  }
+  if(span) span.textContent = msg;
+  if(btn)  btn.style.display = online ? 'none' : 'inline-flex';
+}
 
-  const setStatus=(online,msg)=>{
-    const dot=_dot(); const span=_span(); const btn=_btn();
-    if(dot){
-      dot.style.background  = online?'':'var(--r4)';
-      dot.style.boxShadow   = online?'':'0 0 6px var(--r4)';
-      dot.style.animation   = online?'':'none';
-    }
-    if(span) span.textContent=msg;
-    if(btn)  btn.style.display=online?'none':'inline-flex';
-  };
+async function _checkHealth(){
+  _setBackendStatus(false, 'Verificando API…');
 
-  setStatus(false,'Verificando API…');
+  // Mesmos intervalos do Wuzo: 9 tentativas, espaçamento crescente.
+  // Total máximo de espera: 0+5+10+15+20+25+30+35+40 = ~3min — cobre cold start completo.
+  const waits = [0, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000];
 
-  let attempts=0;
-  // [FIX v9.1] MAX 6 tentativas × 15s = 90s — cobre cold start completo do Render Free.
-  // Antes: MAX=3 × 8s = 24s era insuficiente; badge ficava "offline" antes do serviço acordar,
-  // induzindo o usuário a clicar em Analisar prematuramente e receber "Sem conexão".
-  const MAX=6;
-
-  while(attempts<MAX){
+  for(let i = 0; i < waits.length; i++){
+    if(waits[i] > 0) await new Promise(r => setTimeout(r, waits[i]));
     try{
-      // [FIX v9.2] /wake é o endpoint mais leve do backend — sem DB, sem CORS logic,
-      // responde em <50ms. Ideal para detectar se o processo está vivo.
-      const r=await fetch(`${API_BASE}/wake`,{signal:AbortSignal.timeout(10000)});
+      // /wake: endpoint ultra-leve (<50ms), sem DB, sem CORS logic.
+      // timeout 60s — igual ao UptimeRobot, garante que cold start (~50-90s) seja aguardado.
+      const r = await fetch(`${API_BASE}/wake`, {signal: AbortSignal.timeout(60000)});
       if(r.ok){
-        setStatus(true,'API Online ✓');
+        _setBackendStatus(true, 'API Online ✓');
+        // Keep-alive interno: bate a cada 4min (< 15min de inatividade do Render Free).
+        // Mantém o processo vivo entre os pings do UptimeRobot (5min).
+        setInterval(()=>{ fetch(`${API_BASE}/wake`,{signal:AbortSignal.timeout(5000)}).catch(()=>{}); }, 4*60*1000);
         return;
       }
     }catch(e){}
-
-    attempts++;
-    if(attempts<MAX){
-      setStatus(false,`Aguardando backend… tentativa ${attempts}/${MAX}`);
-      await new Promise(r=>setTimeout(r,15000));
-    }
+    if(i < waits.length - 1)
+      _setBackendStatus(false, `Servidor acordando… (${i+1}/${waits.length-1})`);
   }
 
-  setStatus(false,'Backend offline — clique ↺ para reconectar');
-  const span=_span();
-  if(span) span.title='Cold start do Render Free pode levar até 90s — clique ↺ Reconectar para tentar novamente';
-  toast('⚠️ Backend offline. Render Free pode levar até 90s para acordar — clique ↺ Reconectar.','info');
+  _setBackendStatus(false, 'Backend offline — clique ↺ para reconectar');
+  const span = document.querySelector('.ctrl-badges .badge:first-child span');
+  if(span) span.title = 'Cold start Render Free pode levar até 90s — clique ↺ Reconectar';
+  toast('⚠️ Backend offline. Aguarde ~90s e clique ↺ Reconectar.','info');
 }
 
-(async()=>{ await _doPing(); })();
+(async()=>{ await _checkHealth(); })();
 
 
 /* ═══════════════════════════════════════════════════════════════
