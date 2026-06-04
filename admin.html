@@ -4,942 +4,1310 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JURIR — Painel Administrativo</title>
+<script src="webview-guard.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --void:#030308;
-  --abyss:#060610;
-  --deep:#0A0A18;
-  --surface:#0F0F20;
-  --glass:rgba(10,10,24,0.80);
-  --glass-light:rgba(15,15,32,0.92);
-  --crimson:#B91C1C;
-  --crimson-mid:#DC2626;
-  --crimson-bright:#EF4444;
-  --crimson-glow:rgba(185,28,28,0.30);
-  --crimson-pulse:rgba(220,38,38,0.15);
-  --brass:#A16207;
-  --brass-mid:#CA8A04;
-  --brass-bright:#EAB308;
-  --brass-pale:#FDE68A;
-  --brass-glow:rgba(202,138,4,0.22);
-  --platinum:#EDE9E0;
-  --ivory:#F5F0E8;
-  --silver:#B8B0A4;
-  --ash:rgba(232,228,220,0.55);
-  --ghost:rgba(255,255,255,0.06);
-  --emerald:#059669;
-  --emerald-bright:#10B981;
-  --emerald-glow:rgba(16,185,129,0.20);
-  --amber:#D97706;
-  --border:rgba(185,28,28,0.18);
-  --border-brass:rgba(202,138,4,0.22);
-  --border-light:rgba(255,255,255,0.07);
-  --font-display:'Cinzel Decorative',serif;
-  --font-serif:'Playfair Display',serif;
-  --font-sans:'Outfit',sans-serif;
-  --font-mono:'JetBrains Mono',monospace;
-  --r-sm:10px;--r-md:16px;--r-lg:22px;--r-xl:28px;--r-pill:100px;
+  --void:#02020A;--abyss:#05050F;--deep:#080818;--surface:#0C0C1E;--lift:#121228;
+  --glass:rgba(8,8,24,0.82);--glass2:rgba(12,12,30,0.94);
+  --r1:#991515;--r2:#B91C1C;--r3:#DC2626;--r4:#EF4444;
+  --r-glow:rgba(185,28,28,0.28);--r-trace:rgba(185,28,28,0.06);
+  --g1:#92600A;--g2:#B07D10;--g3:#CA8A04;--g4:#EAB308;--g5:#FDE68A;
+  --g-glow:rgba(202,138,4,0.20);
+  --n0:#F8F4EE;--n1:#EDE6DA;--n2:#D4C9B8;--n3:#B5A99A;--n4:#8A7D70;--n5:#5C5248;
+  --n6:rgba(248,244,238,0.07);--n7:rgba(248,244,238,0.04);
+  --emerald:#059669;--emerald2:#10B981;
+  --br:rgba(185,28,28,0.16);--bg:rgba(202,138,4,0.18);
+  --bn:rgba(248,244,238,0.07);--bn2:rgba(248,244,238,0.04);
+  --f-display:'Cormorant Garamond',Georgia,serif;
+  --f-sans:'Syne',sans-serif;--f-mono:'DM Mono',monospace;
+  --r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:26px;--r-pill:999px;
+  --shadow-deep:0 20px 60px rgba(0,0,0,0.7),0 4px 16px rgba(0,0,0,0.4);
+  --shadow-crimson:0 8px 40px rgba(185,28,28,0.22),0 2px 8px rgba(0,0,0,0.5);
 }
-html{scroll-behavior:smooth;}
-body{background:var(--void);color:var(--platinum);font-family:var(--font-sans);min-height:100vh;overflow-x:hidden;}
-::selection{background:var(--crimson);color:#fff;}
-::-webkit-scrollbar{width:3px;}
+html{font-size:16px;}
+body{background:var(--void);color:var(--n1);font-family:var(--f-sans);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--crimson);border-radius:2px;}
+::-webkit-scrollbar-thumb{background:var(--r2);border-radius:2px;}
 
-/* BACKGROUND */
-.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
-.orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(185,28,28,0.10),transparent 70%);top:-250px;left:-200px;}
-.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(161,98,7,0.08),transparent 70%);bottom:-150px;right:-150px;}
-.lex-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.018;background-image:repeating-linear-gradient(0deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 80px),repeating-linear-gradient(90deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 80px);}
-.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 40%,rgba(3,3,8,0.6) 100%);}
+/* ── ATMOSPHERE ── */
+.atm{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(100px);}
+.atm-1{width:800px;height:800px;background:radial-gradient(circle,rgba(120,15,15,0.12) 0%,transparent 65%);top:-300px;left:-250px;}
+.atm-2{width:600px;height:600px;background:radial-gradient(circle,rgba(100,65,0,0.08) 0%,transparent 65%);bottom:-200px;right:-200px;}
+.lex-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.016;background-image:repeating-linear-gradient(0deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 88px),repeating-linear-gradient(90deg,rgba(185,28,28,1) 0,rgba(185,28,28,1) 1px,transparent 1px,transparent 88px);}
 
-/* LAYOUT */
-#app{position:relative;z-index:10;min-height:100vh;display:flex;}
-.sidebar{width:260px;min-height:100vh;background:var(--glass-light);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s;}
-.main-content{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+/* ── LAYOUT ── */
+#admin-app{position:relative;z-index:10;display:flex;min-height:100vh;}
 
-/* SIDEBAR */
-.sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
-.sidebar-logo{font-family:var(--font-display);font-size:.85rem;letter-spacing:.14em;color:var(--platinum);font-weight:900;}
-.sidebar-logo span{color:var(--crimson-bright);}
-.sidebar-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:var(--brass-bright);background:rgba(202,138,4,0.10);border:1px solid rgba(202,138,4,0.25);border-radius:var(--r-pill);padding:3px 10px;margin-top:8px;}
-.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--brass-bright);box-shadow:0 0 6px var(--brass-bright);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.sidebar-nav{flex:1;padding:20px 12px;display:flex;flex-direction:column;gap:4px;}
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--r-md);cursor:pointer;border:none;background:transparent;color:var(--silver);font-family:var(--font-sans);font-size:.83rem;font-weight:500;letter-spacing:.02em;transition:all .2s;width:100%;text-align:left;}
-.nav-item:hover{background:var(--ghost);color:var(--platinum);}
-.nav-item.active{background:var(--crimson-pulse);color:var(--platinum);border:1px solid var(--border);}
-.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7;}
-.nav-item.active svg{opacity:1;}
-.nav-sep{height:1px;background:var(--border);margin:8px 0;}
-.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
-.connection-status{display:flex;align-items:center;gap:8px;font-size:.72rem;font-family:var(--font-mono);color:var(--silver);}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#444;transition:background .3s;}
-.status-dot.connected{background:var(--emerald-bright);box-shadow:0 0 8px var(--emerald-bright);}
-.status-dot.error{background:var(--crimson-bright);box-shadow:0 0 8px var(--crimson-bright);}
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:rgba(2,2,10,0.92);
+  border-right:1px solid var(--br);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  backdrop-filter:blur(20px);
+}
+.sb-brand{
+  padding:22px 20px 18px;
+  border-bottom:1px solid var(--br);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo{width:30px;height:30px;flex-shrink:0;}
+.sb-logo svg{width:100%;height:100%;}
+.sb-wordmark{font-family:var(--f-display);font-size:1.2rem;font-weight:700;letter-spacing:.10em;color:var(--n0);}
+.sb-wordmark em{font-style:normal;color:var(--r3);}
+.sb-wordmark sub{font-size:.40rem;font-family:var(--f-mono);letter-spacing:.18em;color:var(--n5);display:block;text-transform:uppercase;margin-top:1px;font-weight:400;}
 
-/* HEADER */
-.page-header{padding:24px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(3,3,8,0.6);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40;}
-.page-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:700;color:var(--platinum);}
-.page-sub{font-size:.75rem;color:var(--silver);font-family:var(--font-mono);margin-top:2px;}
-.header-actions{display:flex;align-items:center;gap:10px;}
+/* Nav sections */
+.sb-section{padding:14px 12px 0;}
+.sb-section-lbl{font-family:var(--f-mono);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--n5);padding:0 8px;margin-bottom:6px;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:var(--r-sm);
+  font-size:.79rem;font-weight:500;color:var(--n4);
+  cursor:pointer;transition:all .2s;border:1px solid transparent;
+  margin-bottom:3px;font-family:var(--f-sans);
+}
+.sb-item:hover{background:var(--n7);color:var(--n1);}
+.sb-item.active{background:var(--r-trace);border-color:var(--br);color:var(--n0);}
+.sb-item.active .sb-item-icon{color:var(--r4);}
+.sb-item-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0;}
+.sb-item-badge{margin-left:auto;font-family:var(--f-mono);font-size:.55rem;padding:2px 7px;border-radius:var(--r-pill);background:rgba(185,28,28,.18);color:var(--r4);}
 
-/* CONTENT */
-.page-body{padding:28px 32px;flex:1;}
-.section{display:none;}
-.section.active{display:block;}
+.sb-footer{margin-top:auto;padding:14px 12px;border-top:1px solid var(--bn2);}
+.sb-user{display:flex;align-items:center;gap:9px;padding:8px;border-radius:var(--r-sm);background:var(--n7);border:1px solid var(--bn2);}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--r2),var(--g3));display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-user-name{font-size:.76rem;font-weight:600;color:var(--n1);}
+.sb-user-role{font-size:.60rem;color:var(--n5);letter-spacing:.06em;}
+.sb-logout{margin-left:auto;cursor:pointer;color:var(--n5);font-size:.75rem;transition:color .2s;}
+.sb-logout:hover{color:var(--r4);}
 
-/* CARDS */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px;}
-.stat-card{background:var(--glass-light);border:1px solid var(--border-light);border-radius:var(--r-lg);padding:24px;position:relative;overflow:hidden;transition:border-color .2s;}
-.stat-card:hover{border-color:var(--border);}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
-.stat-card.crimson::before{background:linear-gradient(90deg,var(--crimson),var(--crimson-mid));}
-.stat-card.brass::before{background:linear-gradient(90deg,var(--brass),var(--brass-mid));}
-.stat-card.emerald::before{background:linear-gradient(90deg,var(--emerald),var(--emerald-bright));}
-.stat-card.silver::before{background:linear-gradient(90deg,#555,#888);}
-.stat-icon{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:14px;}
-.stat-card.crimson .stat-icon{background:rgba(185,28,28,0.15);border:1px solid var(--border);}
-.stat-card.brass .stat-icon{background:rgba(202,138,4,0.12);border:1px solid var(--border-brass);}
-.stat-card.emerald .stat-icon{background:rgba(16,185,129,0.10);border:1px solid rgba(16,185,129,0.2);}
-.stat-card.silver .stat-icon{background:rgba(255,255,255,0.05);border:1px solid var(--border-light);}
-.stat-value{font-family:var(--font-display);font-size:2rem;font-weight:900;margin-bottom:4px;line-height:1;}
-.stat-card.crimson .stat-value{background:linear-gradient(135deg,var(--crimson-bright),var(--crimson-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.stat-card.brass .stat-value{background:linear-gradient(135deg,var(--brass-bright),var(--brass-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.stat-card.emerald .stat-value{background:linear-gradient(135deg,var(--emerald-bright),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.stat-card.silver .stat-value{color:var(--platinum);}
-.stat-label{font-size:.74rem;color:var(--silver);letter-spacing:.06em;text-transform:uppercase;font-weight:500;}
+/* ── MAIN ── */
+.main{margin-left:240px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* PANEL */
-.panel{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:24px;}
-.panel-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.panel-title{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;color:var(--platinum);display:flex;align-items:center;gap:10px;}
-.panel-title-icon{width:32px;height:32px;border-radius:8px;background:var(--crimson-pulse);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
-.panel-body{padding:0;}
+/* Top bar */
+.topbar{
+  position:sticky;top:0;z-index:90;
+  padding:0 28px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--br);
+  background:rgba(2,2,10,0.85);backdrop-filter:blur(20px);
+}
+.topbar-title{font-family:var(--f-display);font-size:1.15rem;font-weight:600;color:var(--n0);}
+.topbar-title span{font-family:var(--f-mono);font-size:.60rem;color:var(--n5);display:block;letter-spacing:.12em;text-transform:uppercase;margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.top-status{display:flex;align-items:center;gap:7px;padding:5px 13px;border-radius:var(--r-pill);border:1px solid rgba(16,185,129,.22);background:rgba(16,185,129,.07);font-size:.72rem;color:var(--emerald2);font-family:var(--f-mono);}
+.top-led{width:6px;height:6px;border-radius:50%;background:var(--emerald2);box-shadow:0 0 8px var(--emerald2);animation:ledP 2s infinite;}
+@keyframes ledP{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-/* TABLE */
-.data-table{width:100%;border-collapse:collapse;}
-.data-table th{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--silver);padding:12px 20px;text-align:left;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
-.data-table td{padding:14px 20px;font-size:.84rem;color:var(--platinum);border-bottom:1px solid rgba(255,255,255,0.04);}
-.data-table tr:last-child td{border-bottom:none;}
-.data-table tr:hover td{background:rgba(255,255,255,0.02);}
-.data-table tr{cursor:pointer;transition:background .15s;}
+/* ── CONTENT ── */
+.content{padding:26px 28px;flex:1;}
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-family:var(--font-mono);font-weight:600;padding:3px 10px;border-radius:var(--r-pill);}
-.badge-credits{background:rgba(202,138,4,0.15);color:var(--brass-bright);border:1px solid var(--border-brass);}
-.badge-id{background:rgba(255,255,255,0.06);color:var(--silver);border:1px solid var(--border-light);}
-.badge-analyses{background:rgba(16,185,129,0.12);color:var(--emerald-bright);border:1px solid rgba(16,185,129,0.2);}
-.badge-free{background:rgba(185,28,28,0.12);color:var(--crimson-bright);border:1px solid var(--border);}
+/* ── VIEWS ── */
+.view{display:none;}
+.view.active{display:block;}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font-sans);font-weight:600;letter-spacing:.03em;border-radius:var(--r-pill);border:none;cursor:pointer;transition:all .22s;font-size:.8rem;white-space:nowrap;}
-.btn-sm{padding:7px 16px;font-size:.76rem;}
-.btn-md{padding:10px 22px;}
-.btn-crimson{background:linear-gradient(135deg,var(--crimson),var(--crimson-mid));color:#fff;box-shadow:0 3px 14px var(--crimson-glow);}
-.btn-crimson:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--crimson-glow);}
-.btn-brass{background:linear-gradient(135deg,var(--brass),var(--brass-mid));color:#000;box-shadow:0 3px 14px var(--brass-glow);}
-.btn-brass:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--brass-glow);}
-.btn-ghost{background:transparent;border:1px solid var(--border-light);color:var(--silver);}
-.btn-ghost:hover{border-color:var(--border);color:var(--platinum);background:var(--ghost);}
-.btn-emerald{background:linear-gradient(135deg,var(--emerald),var(--emerald-bright));color:#fff;box-shadow:0 3px 14px var(--emerald-glow);}
-.btn-emerald:hover{transform:translateY(-1px);box-shadow:0 5px 22px var(--emerald-glow);}
-.btn-danger{background:rgba(185,28,28,0.15);border:1px solid var(--border);color:var(--crimson-bright);}
-.btn-danger:hover{background:rgba(185,28,28,0.25);border-color:var(--crimson-mid);}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+/* ── PAGE HEADER ── */
+.page-hdr{margin-bottom:26px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.page-hdr-left{}
+.page-eyebrow{font-family:var(--f-mono);font-size:.60rem;letter-spacing:.18em;text-transform:uppercase;color:var(--r3);margin-bottom:5px;}
+.page-title{font-family:var(--f-display);font-size:1.7rem;font-weight:400;color:var(--n0);line-height:1.2;}
+.page-title em{font-style:italic;color:var(--g4);}
 
-/* SEARCH */
-.search-bar{position:relative;}
-.search-input{background:rgba(0,0,0,.35);border:1px solid var(--border-light);border-radius:var(--r-pill);color:var(--platinum);font-family:var(--font-sans);font-size:.82rem;padding:9px 16px 9px 38px;outline:none;width:260px;transition:border-color .2s;}
-.search-input::placeholder{color:rgba(185,185,185,.35);}
-.search-input:focus{border-color:rgba(185,28,28,.4);box-shadow:0 0 0 3px rgba(185,28,28,.07);}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none;}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--f-sans);font-weight:600;letter-spacing:.04em;border-radius:var(--r-pill);border:none;cursor:pointer;transition:all .22s;font-size:.78rem;padding:8px 18px;}
+.btn-crimson{background:linear-gradient(135deg,var(--r1),var(--r3),var(--r2));color:#fff;box-shadow:var(--shadow-crimson);}
+.btn-crimson:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(185,28,28,.35);}
+.btn-gold{background:linear-gradient(135deg,var(--g1),var(--g3),var(--g2));color:#000;}
+.btn-gold:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--bn);color:var(--n4);}
+.btn-ghost:hover{border-color:var(--bn2);color:var(--n1);background:var(--n7);}
+.btn-danger{background:rgba(185,28,28,.12);border:1px solid rgba(185,28,28,.25);color:var(--r4);}
+.btn-danger:hover{background:rgba(185,28,28,.22);}
+.btn-sm{padding:5px 13px;font-size:.71rem;}
+.btn-xs{padding:3px 9px;font-size:.64rem;}
+.spin{animation:spin360 1s linear infinite;display:none;}
+@keyframes spin360{to{transform:rotate(360deg);}}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(3,3,8,.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--deep);border:1px solid var(--border);border-radius:var(--r-xl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease;}
-@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px);}to{opacity:1;transform:none;}}
-.modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.modal-title{font-family:var(--font-serif);font-size:1.15rem;font-weight:700;color:var(--platinum);}
-.modal-close{background:var(--ghost);border:1px solid var(--border-light);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--silver);font-size:1rem;transition:all .2s;}
-.modal-close:hover{background:rgba(185,28,28,.15);color:var(--crimson-bright);border-color:var(--border);}
-.modal-body{padding:24px 28px;}
-.modal-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:26px;}
+.stat-card{
+  border-radius:var(--r-lg);border:1px solid var(--bn2);
+  background:var(--glass2);padding:20px;position:relative;overflow:hidden;
+  transition:all .25s;
+}
+.stat-card:hover{border-color:var(--bn);transform:translateY(-2px);box-shadow:var(--shadow-deep);}
+.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(185,28,28,.03),transparent);pointer-events:none;}
+.stat-eyebrow{font-family:var(--f-mono);font-size:.57rem;letter-spacing:.14em;text-transform:uppercase;color:var(--n5);margin-bottom:8px;}
+.stat-val{font-family:var(--f-display);font-size:2rem;font-weight:700;color:var(--n0);line-height:1;margin-bottom:4px;}
+.stat-val.gold{background:linear-gradient(135deg,var(--g5),var(--g4));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-val.crimson{background:linear-gradient(135deg,var(--r4),var(--r3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-val.emerald{background:linear-gradient(135deg,#6EE7B7,var(--emerald2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-delta{font-size:.70rem;color:var(--n5);display:flex;align-items:center;gap:5px;margin-top:4px;}
+.stat-delta.up{color:var(--emerald2);}
+.stat-delta.down{color:var(--r4);}
+.stat-icon{position:absolute;top:16px;right:16px;font-size:1.5rem;opacity:.22;}
 
-/* FORM */
-.form-group{margin-bottom:18px;}
-.form-label{display:block;font-size:.74rem;font-family:var(--font-mono);letter-spacing:.08em;color:var(--silver);text-transform:uppercase;margin-bottom:7px;}
-.form-input{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border-light);border-radius:var(--r-md);color:var(--platinum);font-family:var(--font-sans);font-size:.88rem;padding:11px 14px;outline:none;transition:border-color .2s;}
-.form-input::placeholder{color:rgba(185,185,185,.3);}
-.form-input:focus{border-color:rgba(185,28,28,.45);box-shadow:0 0 0 3px rgba(185,28,28,.07);}
-.form-hint{font-size:.7rem;color:var(--silver);margin-top:5px;opacity:.7;}
+/* ── PANEL ── */
+.panel{border-radius:var(--r-xl);border:1px solid var(--br);background:var(--glass2);overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 4px 24px rgba(0,0,0,.35);margin-bottom:18px;}
+.panel-hdr{padding:16px 20px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:rgba(185,28,28,.03);}
+.panel-title{font-family:var(--f-display);font-size:1rem;font-weight:600;color:var(--n0);}
+.panel-title span{font-family:var(--f-mono);font-size:.56rem;letter-spacing:.12em;color:var(--n5);display:block;text-transform:uppercase;margin-top:1px;font-weight:400;}
+.panel-body{padding:18px 20px;}
 
-/* FEATURES GRID */
-.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
-.feature-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-sm);background:rgba(0,0,0,.25);border:1px solid var(--border-light);}
-.feature-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.feature-dot.on{background:var(--emerald-bright);box-shadow:0 0 8px var(--emerald-bright);}
-.feature-dot.off{background:#444;}
-.feature-name{font-size:.78rem;color:var(--ash);font-family:var(--font-mono);}
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-family:var(--f-mono);font-size:.60rem;letter-spacing:.12em;text-transform:uppercase;color:var(--n5);padding:9px 12px;text-align:left;border-bottom:1px solid var(--bn2);white-space:nowrap;}
+td{padding:10px 12px;font-size:.79rem;color:var(--n1);border-bottom:1px solid var(--bn2);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--n7);}
+.td-mono{font-family:var(--f-mono);font-size:.72rem;}
+.td-name{font-weight:600;color:var(--n0);}
 
-/* PROVIDERS */
-.providers-list{display:flex;flex-wrap:wrap;gap:8px;}
-.provider-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-pill);font-size:.74rem;font-family:var(--font-mono);font-weight:600;background:rgba(16,185,129,.12);color:var(--emerald-bright);border:1px solid rgba(16,185,129,.25);}
+/* Badges */
+.tbadge{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:.57rem;letter-spacing:.08em;padding:3px 9px;border-radius:var(--r-pill);}
+.tbadge.active{background:rgba(16,185,129,.12);color:var(--emerald2);border:1px solid rgba(16,185,129,.22);}
+.tbadge.inactive{background:rgba(255,255,255,.04);color:var(--n5);border:1px solid var(--bn2);}
+.tbadge.admin{background:rgba(202,138,4,.12);color:var(--g4);border:1px solid rgba(202,138,4,.22);}
+.tbadge.premium{background:rgba(185,28,28,.12);color:var(--r4);border:1px solid var(--br);}
+.tbadge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
 
-/* TOAST */
-#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
-.toast{background:var(--deep);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 18px;font-size:.82rem;display:flex;align-items:center;gap:10px;min-width:280px;animation:toastIn .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
-.toast.success{border-color:rgba(16,185,129,.35);color:var(--emerald-bright);}
-.toast.error{border-color:rgba(185,28,28,.4);color:var(--crimson-bright);}
-.toast.info{border-color:var(--border-brass);color:var(--brass-bright);}
+/* ── FORM ── */
+.fg{margin-bottom:14px;}
+.fg-lbl{display:block;font-family:var(--f-mono);font-size:.60rem;letter-spacing:.14em;text-transform:uppercase;color:var(--n5);margin-bottom:5px;}
+.fg-input,.fg-select{width:100%;background:rgba(0,0,0,.45);border:1px solid var(--bn);border-radius:var(--r-md);color:var(--n1);font-family:var(--f-sans);font-size:.84rem;padding:9px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fg-input:focus,.fg-select:focus{border-color:rgba(185,28,28,.45);box-shadow:0 0 0 3px rgba(185,28,28,.07);}
+.fg-input::placeholder{color:rgba(180,175,165,.25);}
+.fg-select option{background:var(--deep);}
+.fg-hint{font-size:.67rem;color:var(--n5);margin-top:4px;}
+.fg-err{font-size:.67rem;color:var(--r4);margin-top:4px;display:none;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg-row.three{grid-template-columns:1fr 1fr 1fr;}
 
-/* USER DETAIL */
-.user-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-.detail-card{background:rgba(0,0,0,.3);border:1px solid var(--border-light);border-radius:var(--r-md);padding:16px;}
-.detail-label{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:6px;}
-.detail-value{font-size:.95rem;color:var(--platinum);font-weight:600;}
-.credit-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
-.analyses-mini{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
-.analysis-mini-item{background:rgba(0,0,0,.25);border:1px solid var(--border-light);border-radius:var(--r-sm);padding:10px 14px;font-size:.78rem;}
-.analysis-mini-prompt{color:var(--ash);margin-bottom:4px;}
-.analysis-mini-meta{display:flex;gap:10px;flex-wrap:wrap;}
-.mini-meta-tag{font-family:var(--font-mono);font-size:.62rem;color:var(--silver);}
+/* ── METRICS BARS ── */
+.metric-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.metric-lbl{font-family:var(--f-mono);font-size:.62rem;color:var(--n4);width:170px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.metric-bar{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+.metric-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.metric-fill.c{background:linear-gradient(90deg,var(--r2),var(--g4));}
+.metric-fill.p{background:linear-gradient(90deg,var(--g1),var(--g4));}
+.metric-fill.e{background:linear-gradient(90deg,var(--emerald),var(--emerald2));}
+.metric-fill.r{background:linear-gradient(90deg,var(--r3),var(--r4));}
+.metric-val{font-family:var(--f-mono);font-size:.60rem;color:var(--n5);min-width:38px;text-align:right;}
 
-/* CONNECT SCREEN */
-#connect-screen{position:fixed;inset:0;z-index:300;background:var(--void);display:flex;align-items:center;justify-content:center;padding:24px;}
-.connect-card{background:var(--glass-light);border:1px solid var(--border);border-radius:var(--r-xl);padding:40px;width:100%;max-width:440px;animation:modalIn .3s ease;}
-.connect-logo{font-family:var(--font-display);font-size:1.2rem;font-weight:900;color:var(--platinum);text-align:center;margin-bottom:6px;}
-.connect-logo span{color:var(--crimson-bright);}
-.connect-sub{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;color:var(--silver);text-align:center;margin-bottom:32px;}
+/* ── CREDITS GRID ── */
+.credits-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.cr-opt{
+  border:1px solid var(--bn2);border-radius:var(--r-md);padding:14px;text-align:center;cursor:pointer;
+  transition:all .22s;background:rgba(0,0,0,.3);
+}
+.cr-opt:hover{border-color:var(--bg);background:rgba(202,138,4,.05);}
+.cr-opt.selected{border-color:var(--g3);background:rgba(202,138,4,.08);}
+.cr-opt-val{font-family:var(--f-display);font-size:1.3rem;font-weight:700;color:var(--g4);display:block;margin-bottom:3px;}
+.cr-opt-lbl{font-size:.67rem;color:var(--n5);font-family:var(--f-mono);}
 
-/* LOADING */
-.loading{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--silver);font-family:var(--font-mono);font-size:.8rem;}
-.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--crimson-bright);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+/* ── LOG TERMINAL ── */
+.log-terminal{
+  background:rgba(0,0,0,.65);border:1px solid rgba(185,28,28,.14);
+  border-radius:var(--r-md);padding:14px;
+  font-family:var(--f-mono);font-size:.70rem;line-height:1.65;
+  color:rgba(180,175,165,.70);
+  max-height:280px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(202,138,4,.25) transparent;
+}
+.log-line{display:flex;gap:10px;margin-bottom:2px;}
+.log-time{color:rgba(180,175,165,.35);flex-shrink:0;}
+.log-level{flex-shrink:0;min-width:44px;}
+.log-level.INFO{color:var(--g3);}
+.log-level.WARN{color:var(--g4);}
+.log-level.ERROR{color:var(--r4);}
+.log-level.OK{color:var(--emerald2);}
+.log-msg{color:rgba(180,175,165,.75);}
 
-/* EMPTY */
-.empty-state{text-align:center;padding:48px;color:var(--silver);}
-.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.4;}
-.empty-text{font-size:.85rem;opacity:.6;}
+/* ── CHART PLACEHOLDER ── */
+.chart-area{position:relative;height:180px;display:flex;align-items:flex-end;gap:6px;padding:0 0 28px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;}
+.chart-bar{
+  width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(to top,var(--r2),var(--g4));
+  transition:height .8s cubic-bezier(.4,0,.2,1);
+  min-height:4px;opacity:.85;
+}
+.chart-bar:hover{opacity:1;transform:scaleX(1.05);}
+.chart-lbl{font-family:var(--f-mono);font-size:.56rem;color:var(--n5);}
+.chart-y{position:absolute;left:-22px;top:0;bottom:28px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;}
+.chart-y-lbl{font-family:var(--f-mono);font-size:.55rem;color:var(--n5);}
+.chart-grid{position:absolute;left:0;right:0;top:0;bottom:28px;pointer-events:none;}
+.chart-grid-line{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.04);}
 
-/* DANGER ZONE */
-.danger-zone{background:rgba(185,28,28,0.06);border:1px solid rgba(185,28,28,0.25);border-radius:var(--r-lg);padding:20px;margin-top:20px;}
-.danger-zone-title{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;color:var(--crimson-bright);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.danger-zone-actions{display:flex;flex-wrap:wrap;gap:8px;}
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-backdrop{position:absolute;inset:0;background:rgba(2,2,10,.88);backdrop-filter:blur(14px);}
+.modal{position:relative;width:100%;max-width:480px;background:var(--glass2);border:1px solid var(--bn);border-radius:var(--r-xl);padding:30px;box-shadow:var(--shadow-deep);transform:translateY(16px);transition:transform .3s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{position:absolute;top:13px;right:13px;width:28px;height:28px;border-radius:50%;background:var(--n7);border:1px solid var(--bn);color:var(--n4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;}
+.modal-close:hover{background:var(--r-trace);color:var(--r4);}
+.modal-title{font-family:var(--f-display);font-size:1.1rem;font-weight:600;color:var(--n0);margin-bottom:5px;}
+.modal-sub{font-size:.76rem;color:var(--n4);margin-bottom:20px;}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:3px;background:rgba(0,0,0,.3);border-radius:var(--r-pill);padding:3px;border:1px solid var(--bn2);margin-bottom:20px;}
+.tab-btn{flex:1;font-size:.72rem;font-weight:600;padding:6px 12px;border-radius:var(--r-pill);border:none;background:transparent;color:var(--n5);cursor:pointer;transition:all .2s;font-family:var(--f-sans);text-align:center;}
+.tab-btn.active{background:var(--r2);color:#fff;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* ── SEARCH BAR ── */
+.search-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-input{flex:1;min-width:180px;background:rgba(0,0,0,.4);border:1px solid var(--bn);border-radius:var(--r-pill);color:var(--n1);font-family:var(--f-sans);font-size:.80rem;padding:7px 14px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:rgba(185,28,28,.4);}
+.search-input::placeholder{color:rgba(180,175,165,.25);}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:9px;}
+.pag-info{font-family:var(--f-mono);font-size:.62rem;color:var(--n5);}
+.pag-btns{display:flex;gap:4px;}
+.pag-btn{font-size:.68rem;padding:4px 11px;border-radius:var(--r-sm);border:1px solid var(--bn2);background:transparent;color:var(--n4);cursor:pointer;transition:all .2s;font-family:var(--f-mono);}
+.pag-btn:hover{border-color:var(--br);color:var(--n1);background:var(--n7);}
+.pag-btn.active{border-color:var(--r2);color:var(--r4);background:var(--r-trace);}
+.pag-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px;}
+.toast{display:flex;align-items:center;gap:9px;padding:10px 16px;border-radius:var(--r-md);border:1px solid;backdrop-filter:blur(20px);font-size:.78rem;font-weight:500;transform:translateX(110%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:280px;box-shadow:0 6px 24px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(0);}
+.toast.success{background:rgba(5,150,105,.14);border-color:rgba(16,185,129,.28);color:var(--emerald2);}
+.toast.error{background:rgba(185,28,28,.14);border-color:rgba(185,28,28,.28);color:var(--r4);}
+.toast.info{background:rgba(202,138,4,.11);border-color:rgba(202,138,4,.28);color:var(--g4);}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:50px 20px;}
+.empty-icon{font-size:2.5rem;margin-bottom:13px;opacity:.35;}
+.empty-title{font-family:var(--f-display);font-size:1rem;font-weight:600;color:var(--n4);margin-bottom:6px;}
+.empty-sub{font-size:.76rem;color:var(--n5);}
+
+/* ── AUTH GATE ── */
+#admin-gate{position:fixed;inset:0;z-index:900;background:var(--void);display:flex;align-items:center;justify-content:center;}
+.gate-panel{width:100%;max-width:380px;background:var(--glass2);border:1px solid var(--br);border-radius:var(--r-xl);padding:36px;box-shadow:var(--shadow-deep);}
+.gate-brand{font-family:var(--f-display);font-size:1.5rem;font-weight:700;letter-spacing:.1em;color:var(--n0);margin-bottom:4px;}
+.gate-brand em{font-style:normal;color:var(--r3);}
+.gate-sub{font-size:.75rem;color:var(--n4);margin-bottom:24px;}
+.gate-hint{font-size:.68rem;color:var(--n5);margin-top:12px;text-align:center;}
+
+/* ── CONFIRM DANGER ── */
+.confirm-box{padding:14px;background:rgba(185,28,28,.07);border:1px solid rgba(185,28,28,.22);border-radius:var(--r-sm);margin-bottom:16px;font-size:.78rem;color:rgba(240,110,110,.85);}
 
 /* RESPONSIVE */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);}
-  .sidebar.open{transform:none;}
-  .main-content{margin-left:0;}
-  .page-body{padding:20px 16px;}
-  .page-header{padding:16px 20px;}
-  .user-detail-grid{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
+@media(max-width:900px){
+  .sidebar{width:54px;}
+  .sb-wordmark,.sb-section-lbl,.sb-item span:not(.sb-item-icon),.sb-user-name,.sb-user-role,.sb-logout{display:none;}
+  .sb-item{justify-content:center;padding:10px;}
+  .sb-item-icon{width:auto;}
+  .sb-brand{justify-content:center;padding:16px 8px;}
+  .main{margin-left:54px;}
 }
-@media(max-width:480px){.stats-grid{grid-template-columns:1fr;}}
+@media(max-width:600px){
+  .fg-row,.fg-row.three{grid-template-columns:1fr;}
+  .credits-grid{grid-template-columns:1fr 1fr;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
-
-<!-- BACKGROUNDS -->
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
+<div class="atm atm-1"></div>
+<div class="atm atm-2"></div>
 <div class="lex-grid"></div>
-<div class="vignette"></div>
 
-<!-- TOAST CONTAINER -->
-<div id="toast-container"></div>
-
-<!-- CONNECT SCREEN -->
-<div id="connect-screen">
-  <div class="connect-card">
-    <div class="connect-logo">JUR<span>IR</span></div>
-    <div class="connect-sub">⚙ PAINEL ADMINISTRATIVO</div>
-    <div class="form-group">
-      <label class="form-label">URL da API</label>
-      <input class="form-input" id="api-url" type="url" placeholder="https://seu-backend.onrender.com" value="https://jusaii-app-daqr.onrender.com">
-      <div class="form-hint">Ex: https://jurir.onrender.com</div>
+<!-- ── AUTH GATE ── -->
+<div id="admin-gate">
+  <div class="gate-panel">
+    <div class="gate-brand">JU<em>RIR</em></div>
+    <div class="gate-sub">Painel Administrativo — Acesso Restrito</div>
+    <div class="fg">
+      <label class="fg-lbl">E-mail Admin</label>
+      <input type="email" class="fg-input" id="gate-email" placeholder="admin@jurir.app" autocomplete="email">
     </div>
-    <div class="form-group">
-      <label class="form-label">ADMIN_SECRET</label>
-      <input class="form-input" id="api-secret" type="password" placeholder="Chave secreta do admin">
-      <div class="form-hint">Definida na variável de ambiente ADMIN_SECRET</div>
+    <div class="fg">
+      <label class="fg-lbl">Senha</label>
+      <input type="password" class="fg-input" id="gate-password" placeholder="••••••••" autocomplete="current-password">
+      <div class="fg-err" id="gate-err"></div>
     </div>
-    <button class="btn btn-crimson btn-md" style="width:100%;justify-content:center;" onclick="connect()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-      Conectar ao Painel
+    <button class="btn btn-crimson" style="width:100%;margin-top:8px;justify-content:center;" onclick="doAdminLogin()">
+      <svg id="gate-spin" style="display:none" class="spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+      Acessar Painel
     </button>
-    <div id="connect-error" style="display:none;margin-top:14px;padding:10px 14px;border-radius:var(--r-md);background:rgba(185,28,28,.12);border:1px solid rgba(185,28,28,.3);color:var(--crimson-bright);font-size:.78rem;font-family:var(--font-mono);"></div>
+    <div class="gate-hint">Token JWT Admin válido por 8h · LGPD Compliant</div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="app">
+<!-- ── MAIN APP ── -->
+<div id="admin-app" style="display:none;">
+
   <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="sidebar-logo">JUR<span>IR</span></div>
-      <div class="sidebar-badge">
-        <span class="badge-dot"></span> ADMIN CONSOLE
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <svg viewBox="0 0 34 34" fill="none"><polygon points="17,2 31,10 31,24 17,32 3,24 3,10" fill="none" stroke="#B91C1C" stroke-width="1.4"/><path d="M17 11 L17 23 M12 14.5 L22 14.5 M12 20 L22 20" stroke="#EDE6DA" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="17" r="1.8" fill="#B91C1C"/></svg>
       </div>
+      <div class="sb-wordmark">JU<em>RIR</em><sub>Admin Console</sub></div>
     </div>
-    <nav class="sidebar-nav">
-      <button class="nav-item active" onclick="showSection('dashboard')" data-section="dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </button>
-      <button class="nav-item" onclick="showSection('users')" data-section="users">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Usuários
-      </button>
-      <button class="nav-item" onclick="showSection('credits')" data-section="credits">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Créditos
-      </button>
-      <div class="nav-sep"></div>
-      <button class="nav-item" onclick="showSection('features')" data-section="features">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Features & Providers
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="connection-status">
-        <div class="status-dot connected" id="sidebar-dot"></div>
-        <span id="sidebar-url-display">Conectado</span>
-      </div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%;justify-content:center;" onclick="disconnect()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Desconectar
-      </button>
-    </div>
-  </aside>
 
-  <!-- MAIN -->
-  <div class="main-content">
-    <header class="page-header">
+    <div class="sb-section">
+      <div class="sb-section-lbl">Principal</div>
+      <div class="sb-item active" onclick="showView('dashboard')"><span class="sb-item-icon">📊</span><span>Dashboard</span></div>
+      <div class="sb-item" onclick="showView('users')"><span class="sb-item-icon">👥</span><span>Usuários</span><span class="sb-item-badge" id="users-badge">—</span></div>
+      <div class="sb-item" onclick="showView('analyses')"><span class="sb-item-icon">⚖️</span><span>Análises</span></div>
+      <div class="sb-item" onclick="showView('credits')"><span class="sb-item-icon">💎</span><span>Créditos</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-lbl">Infraestrutura</div>
+      <div class="sb-item" onclick="showView('metrics')"><span class="sb-item-icon">📡</span><span>Métricas IA</span></div>
+      <div class="sb-item" onclick="showView('providers')"><span class="sb-item-icon">🔌</span><span>Providers LLM</span></div>
+      <div class="sb-item" onclick="showView('logs')"><span class="sb-item-icon">📋</span><span>Logs</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-lbl">Ferramentas</div>
+      <div class="sb-item" onclick="showView('reset-credits')"><span class="sb-item-icon">🔄</span><span>Reset Créditos</span></div>
+      <div class="sb-item" onclick="openDelModal()"><span class="sb-item-icon">🗑️</span><span>Excluir Usuário</span></div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-avatar">A</div>
+        <div>
+          <div class="sb-user-name" id="sb-name">Admin</div>
+          <div class="sb-user-role">Administrator</div>
+        </div>
+        <div class="sb-logout" title="Sair" onclick="doLogout()">⏻</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
       <div>
-        <div class="page-title" id="page-title">Dashboard</div>
-        <div class="page-sub" id="page-sub">Visão geral do sistema</div>
+        <div class="topbar-title" id="topbar-title">Dashboard <span id="topbar-sub">// visão geral do sistema</span></div>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-ghost btn-sm" onclick="refreshCurrent()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Atualizar
-        </button>
+      <div class="topbar-right">
+        <div class="top-status"><span class="top-led"></span><span id="api-status">Verificando…</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="refreshCurrentView()">↺ Atualizar</button>
       </div>
-    </header>
+    </div>
 
-    <div class="page-body">
-      <!-- ── DASHBOARD ── -->
-      <div class="section active" id="section-dashboard">
-        <div class="stats-grid" id="stats-grid">
-          <div class="loading"><div class="spinner"></div> Carregando...</div>
-        </div>
-        <div class="panel" id="providers-panel" style="display:none">
-          <div class="panel-head">
-            <div class="panel-title">
-              <div class="panel-title-icon">⚡</div>
-              Providers Ativos
-            </div>
-          </div>
-          <div class="panel-body" style="padding:20px 24px;">
-            <div class="providers-list" id="providers-list"></div>
-          </div>
-        </div>
-      </div>
+    <div class="content">
 
-      <!-- ── USERS ── -->
-      <div class="section" id="section-users">
+      <!-- ══ DASHBOARD ══ -->
+      <div class="view active" id="view-dashboard">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// visão geral</div>
+            <div class="page-title">Dashboard <em>Principal</em></div>
+          </div>
+          <button class="btn btn-crimson" onclick="loadDashboard()">↺ Atualizar Dados</button>
+        </div>
+        <div class="stat-grid" id="stat-grid">
+          <div class="stat-card"><div class="stat-eyebrow">Total Usuários</div><div class="stat-val gold" id="stat-users">—</div><div class="stat-delta" id="stat-users-d">Carregando…</div><div class="stat-icon">👥</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Análises Hoje</div><div class="stat-val crimson" id="stat-today">—</div><div class="stat-delta" id="stat-today-d">—</div><div class="stat-icon">⚖️</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Total Análises</div><div class="stat-val" id="stat-total">—</div><div class="stat-delta" id="stat-total-d">—</div><div class="stat-icon">📊</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Score Médio</div><div class="stat-val emerald" id="stat-score">—</div><div class="stat-delta" id="stat-score-d">—</div><div class="stat-icon">🎯</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Créditos Emitidos</div><div class="stat-val gold" id="stat-credits">—</div><div class="stat-delta">Total acumulado</div><div class="stat-icon">💎</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Falhas de Agente</div><div class="stat-val crimson" id="stat-failures">—</div><div class="stat-delta" id="stat-failures-d">—</div><div class="stat-icon">⚠️</div></div>
+        </div>
+
+        <!-- Chart -->
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title">
-              <div class="panel-title-icon">👥</div>
-              Lista de Usuários
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <div class="search-bar">
-                <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="search-input" id="user-search" type="text" placeholder="Buscar por email ou ID..." oninput="filterUsers()">
-              </div>
+          <div class="panel-hdr">
+            <div class="panel-title">Análises por Dia <span>// últimos 14 dias</span></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-family:var(--f-mono);font-size:.60rem;color:var(--n5);">Clique nas barras para detalhes</span>
             </div>
           </div>
           <div class="panel-body">
-            <div id="users-table-wrap">
-              <div class="loading"><div class="spinner"></div> Carregando usuários...</div>
+            <div style="position:relative;padding-left:28px;">
+              <div class="chart-y" id="chart-y">
+                <span class="chart-y-lbl">100</span><span class="chart-y-lbl">75</span><span class="chart-y-lbl">50</span><span class="chart-y-lbl">25</span><span class="chart-y-lbl">0</span>
+              </div>
+              <div class="chart-grid">
+                <div class="chart-grid-line" style="bottom:28px;"></div>
+                <div class="chart-grid-line" style="bottom:calc(28px + 25%)"></div>
+                <div class="chart-grid-line" style="bottom:calc(28px + 50%)"></div>
+                <div class="chart-grid-line" style="bottom:calc(28px + 75%)"></div>
+              </div>
+              <div class="chart-area" id="chart-area"></div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- ── CREDITS ── -->
-      <div class="section" id="section-credits">
-        <div class="panel" style="margin-bottom:24px;">
-          <div class="panel-head">
-            <div class="panel-title">
-              <div class="panel-title-icon">💰</div>
-              Gerenciar Créditos por Email
+        <!-- Top areas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Áreas Mais Consultadas <span>// top 8</span></div></div>
+            <div class="panel-body" id="top-areas-panel">
+              <div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Carregando…</div></div>
             </div>
           </div>
-          <div class="panel-body" style="padding:24px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:640px;">
-              <div>
-                <div class="form-group">
-                  <label class="form-label">Email do Usuário</label>
-                  <input class="form-input" id="credit-email" type="email" placeholder="usuario@email.com" oninput="lookupUserByEmail()">
-                </div>
-                <div id="credit-user-found" style="display:none;padding:10px 14px;border-radius:var(--r-md);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);font-size:.78rem;margin-bottom:14px;">
-                  <span style="color:var(--emerald-bright);font-family:var(--font-mono);">✓ Usuário encontrado</span>
-                  <div style="margin-top:4px;color:var(--ash);">ID: <span id="credit-found-id" style="color:var(--brass-bright);"></span> · Créditos Premium: <span id="credit-found-credits" style="color:var(--brass-bright);"></span></div>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Quantidade</label>
-                  <input class="form-input" id="credit-amount" type="number" min="0" placeholder="Ex: 10">
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:10px;justify-content:flex-end;padding-bottom:18px;">
-                <button class="btn btn-emerald btn-md" onclick="doAddCredits()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Adicionar Créditos
-                </button>
-                <button class="btn btn-brass btn-md" onclick="doSetCredits()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  Definir Saldo Exato
-                </button>
-                <button class="btn btn-danger btn-md" onclick="doRemoveCredits()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Remover Créditos
-                </button>
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Análises Recentes <span>// últimas 5</span></div></div>
+            <div class="panel-body">
+              <div class="tbl-wrap">
+                <table><thead><tr><th>ID</th><th>Score</th><th>Área</th><th>Data</th></tr></thead>
+                <tbody id="recent-analyses-tbody"><tr><td colspan="4" style="text-align:center;color:var(--n5);padding:20px;">Carregando…</td></tr></tbody></table>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── FEATURES ── -->
-      <div class="section" id="section-features">
+      <!-- ══ USERS ══ -->
+      <div class="view" id="view-users">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// gestão</div>
+            <div class="page-title">Usuários <em>Cadastrados</em></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="loadUsers()">↺ Atualizar</button>
+          </div>
+        </div>
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title">
-              <div class="panel-title-icon">🔬</div>
-              Features do Sistema
+          <div class="panel-hdr">
+            <div class="search-bar">
+              <input type="text" class="search-input" id="user-search" placeholder="Buscar por e-mail, ID…" oninput="filterUsers()">
+              <select class="fg-select" id="user-filter" style="width:auto;padding:7px 12px;" onchange="filterUsers()">
+                <option value="">Todos</option>
+                <option value="active">Ativos</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div style="font-family:var(--f-mono);font-size:.62rem;color:var(--n5);" id="users-count-label">— usuários</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>E-mail</th><th>Status</th><th>Créditos</th><th>Análises</th><th>Cadastro</th><th>Ações</th></tr></thead>
+              <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center;color:var(--n5);padding:30px;">Carregando usuários…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="pag-info" id="users-pag-info">—</span>
+            <div class="pag-btns" id="users-pag-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ANALYSES ══ -->
+      <div class="view" id="view-analyses">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// histórico</div>
+            <div class="page-title">Análises <em>Realizadas</em></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAnalyses()">↺ Atualizar</button>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="search-bar">
+              <input type="text" class="search-input" id="analysis-search" placeholder="Buscar análise…" style="max-width:280px;">
+              <select class="fg-select" id="analysis-filter" style="width:auto;padding:7px 12px;">
+                <option value="">Todas</option>
+                <option value="high">Score ≥ 70</option>
+                <option value="veto">Com Veto</option>
+              </select>
             </div>
           </div>
-          <div class="panel-body" style="padding:24px;">
-            <div class="features-grid" id="features-grid">
-              <div class="loading"><div class="spinner"></div> Carregando...</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Usuário</th><th>Score</th><th>Agentes</th><th>Tribunal</th><th>Veto</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="analyses-tbody"><tr><td colspan="8" style="text-align:center;color:var(--n5);padding:30px;">Carregando análises…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="pag-info" id="analyses-pag-info">—</span>
+            <div class="pag-btns" id="analyses-pag-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CREDITS ══ -->
+      <div class="view" id="view-credits">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// gestão financeira</div>
+            <div class="page-title">Gestão de <em>Créditos</em></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <!-- Add credits -->
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Adicionar Créditos <span>// premium_credits</span></div></div>
+            <div class="panel-body">
+              <div class="fg">
+                <label class="fg-lbl">E-mail ou User ID</label>
+                <input type="text" class="fg-input" id="cr-user" placeholder="usuario@email.com ou ID">
+              </div>
+              <div class="credits-grid" id="credits-grid">
+                <div class="cr-opt" onclick="selectCredits(10)"><span class="cr-opt-val">10</span><span class="cr-opt-lbl">Básico</span></div>
+                <div class="cr-opt selected" onclick="selectCredits(50)"><span class="cr-opt-val">50</span><span class="cr-opt-lbl">Standard</span></div>
+                <div class="cr-opt" onclick="selectCredits(100)"><span class="cr-opt-val">100</span><span class="cr-opt-lbl">Premium</span></div>
+                <div class="cr-opt" onclick="selectCredits(200)"><span class="cr-opt-val">200</span><span class="cr-opt-lbl">Pro</span></div>
+                <div class="cr-opt" onclick="selectCredits(500)"><span class="cr-opt-val">500</span><span class="cr-opt-lbl">Enterprise</span></div>
+                <div class="cr-opt" id="cr-custom-opt" onclick="selectCredits('custom')"><span class="cr-opt-val">?</span><span class="cr-opt-lbl">Custom</span></div>
+              </div>
+              <div class="fg" id="cr-custom-field" style="display:none;">
+                <label class="fg-lbl">Quantidade customizada</label>
+                <input type="number" class="fg-input" id="cr-custom-val" placeholder="Ex: 75" min="1" max="9999">
+              </div>
+              <div class="fg">
+                <label class="fg-lbl">Razão (interno)</label>
+                <input type="text" class="fg-input" id="cr-reason" placeholder="Ex: Plano mensal — Nov/2026">
+              </div>
+              <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="doAddCredits()">
+                <svg id="cr-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                💎 Adicionar Créditos
+              </button>
+            </div>
+          </div>
+          <!-- Remove / Set credits -->
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Remover / Definir Créditos <span>// operações precisas</span></div></div>
+            <div class="panel-body">
+              <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchCrTab('remove')">Remover</button>
+                <button class="tab-btn" onclick="switchCrTab('set')">Definir Exato</button>
+              </div>
+              <div class="tab-pane active" id="cr-tab-remove">
+                <div class="fg">
+                  <label class="fg-lbl">E-mail ou User ID</label>
+                  <input type="text" class="fg-input" id="cr-rm-user" placeholder="usuario@email.com">
+                </div>
+                <div class="fg">
+                  <label class="fg-lbl">Quantidade a remover</label>
+                  <input type="number" class="fg-input" id="cr-rm-amount" placeholder="Ex: 10" min="1">
+                </div>
+                <div class="fg">
+                  <label class="fg-lbl">Motivo</label>
+                  <input type="text" class="fg-input" id="cr-rm-reason" placeholder="Ex: Estorno por falha">
+                </div>
+                <button class="btn btn-danger" style="width:100%;justify-content:center;" onclick="doRemoveCredits()">
+                  <svg id="cr-rm-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                  ⬇ Remover Créditos
+                </button>
+              </div>
+              <div class="tab-pane" id="cr-tab-set">
+                <div class="fg">
+                  <label class="fg-lbl">E-mail ou User ID</label>
+                  <input type="text" class="fg-input" id="cr-set-user" placeholder="usuario@email.com">
+                </div>
+                <div class="fg">
+                  <label class="fg-lbl">Novo saldo exato</label>
+                  <input type="number" class="fg-input" id="cr-set-amount" placeholder="Ex: 100" min="0">
+                  <div class="fg-hint">Define o saldo diretamente, independente do valor atual.</div>
+                </div>
+                <button class="btn btn-crimson" style="width:100%;justify-content:center;" onclick="doSetCredits()">
+                  <svg id="cr-set-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                  ⚡ Definir Saldo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Reset free credits -->
+        <div class="panel" style="margin-top:18px;">
+          <div class="panel-hdr">
+            <div class="panel-title">Reset de Créditos Gratuitos <span>// free_credits diários</span></div>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:.80rem;color:var(--n4);margin-bottom:14px;">Reseta o contador de análises gratuitas de todos os usuários (operação diária automatizada, mas pode ser forçada manualmente).</p>
+            <div class="confirm-box" id="reset-confirm" style="display:none;">
+              ⚠️ Esta operação afeta TODOS os usuários. Confirme digitando <strong>RESETAR</strong> abaixo.
+            </div>
+            <div class="fg" id="reset-confirm-field" style="display:none;">
+              <input type="text" class="fg-input" id="reset-confirm-input" placeholder="Digite RESETAR para confirmar">
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-ghost" onclick="toggleResetConfirm()">🔄 Resetar Créditos Gratuitos</button>
+              <button class="btn btn-danger" id="reset-exec-btn" style="display:none;" onclick="doResetFreeCredits()">
+                <svg id="reset-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                Confirmar Reset
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- ══ METRICS ══ -->
+      <div class="view" id="view-metrics">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// observabilidade IA</div>
+            <div class="page-title">Métricas <em>Operacionais</em></div>
+          </div>
+          <button class="btn btn-crimson btn-sm" onclick="loadMetrics()">
+            <svg id="metrics-spin" style="display:none" class="spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+            ↺ Buscar /api/metrics
+          </button>
+        </div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="stat-eyebrow">Total Análises</div><div class="stat-val" id="m-total">—</div><div class="stat-icon">📊</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Score Médio</div><div class="stat-val emerald" id="m-score">—</div><div class="stat-icon">🎯</div></div>
+          <div class="stat-card"><div class="stat-eyebrow">Taxa de Fallback</div><div class="stat-val crimson" id="m-fallback">—</div><div class="stat-icon">⚠️</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Performance dos Agentes <span>// success rate + p95</span></div></div>
+            <div class="panel-body" id="agents-metrics-panel">
+              <div class="empty-state"><div class="empty-icon">🤖</div><div class="empty-title">Clique em "Buscar /api/metrics"</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Providers LLM <span>// latência + 429s</span></div></div>
+            <div class="panel-body" id="providers-metrics-panel">
+              <div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Clique em "Buscar /api/metrics"</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Insights Operacionais <span>// top failing + slow agents</span></div></div>
+          <div class="panel-body" id="insights-panel">
+            <div class="empty-state"><div class="empty-icon">💡</div><div class="empty-title">Sem dados ainda</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PROVIDERS ══ -->
+      <div class="view" id="view-providers">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// status LLM</div>
+            <div class="page-title">Providers <em>LLM</em></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadProviders()">↺ Atualizar</button>
+        </div>
+        <div class="panel">
+          <div class="panel-body" id="providers-panel">
+            <div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Carregando providers…</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LOGS ══ -->
+      <div class="view" id="view-logs">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// terminal</div>
+            <div class="page-title">Logs <em>do Sistema</em></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearLogs()">🗑 Limpar</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadLogs()">↺ Atualizar</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <select class="fg-select" id="log-level-filter" style="width:auto;padding:6px 10px;font-size:.73rem;" onchange="filterLogs()">
+                <option value="">Todos</option>
+                <option value="ERROR">Erros</option>
+                <option value="WARN">Avisos</option>
+                <option value="INFO">Info</option>
+                <option value="OK">Sucesso</option>
+              </select>
+              <span style="font-family:var(--f-mono);font-size:.60rem;color:var(--n5);" id="log-count">0 entradas</span>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--n4);cursor:pointer;">
+              <input type="checkbox" id="log-autoscroll" checked style="accent-color:var(--r3);">
+              Auto-scroll
+            </label>
+          </div>
+          <div class="panel-body" style="padding:12px;">
+            <div class="log-terminal" id="log-terminal">
+              <div class="log-line"><span class="log-time">00:00:00</span><span class="log-level OK">OK</span><span class="log-msg">JURIR Admin Console inicializado — aguardando dados do servidor…</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ RESET CREDITS ══ -->
+      <div class="view" id="view-reset-credits">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <div class="page-eyebrow">// manutenção</div>
+            <div class="page-title">Reset de <em>Créditos Gratuitos</em></div>
+          </div>
+        </div>
+        <div class="panel" style="max-width:520px;">
+          <div class="panel-hdr"><div class="panel-title">Reset Global <span>// free_analyses_used</span></div></div>
+          <div class="panel-body">
+            <p style="font-size:.81rem;color:var(--n3);line-height:1.6;margin-bottom:16px;">Reseta o campo <code style="font-family:var(--f-mono);font-size:.75rem;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;">free_analyses_used</code> de todos os usuários para zero. Equivalente ao job diário automático.</p>
+            <div class="confirm-box">⚠️ Operação irreversível. Afeta todos os usuários do banco.</div>
+            <div class="fg">
+              <label class="fg-lbl">Confirmar com senha admin</label>
+              <input type="password" class="fg-input" id="rc-pwd" placeholder="Sua senha de admin">
+            </div>
+            <button class="btn btn-danger" onclick="doResetFreeCreditsView()">
+              <svg id="rc-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+              🔄 Executar Reset Global
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /admin-app -->
+
+<!-- ── DELETE USER MODAL ── -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal-backdrop" onclick="closeDelModal()"></div>
+  <div class="modal">
+    <button class="modal-close" onclick="closeDelModal()">✕</button>
+    <div class="modal-title">🗑️ Excluir Usuário</div>
+    <div class="modal-sub">Esta operação é irreversível. Remove conta, análises e memória FAISS.</div>
+    <div class="confirm-box">Todos os dados do usuário serão permanentemente excluídos, incluindo análises, memória jurídica FAISS e preferências.</div>
+    <div class="fg">
+      <label class="fg-lbl">E-mail ou User ID</label>
+      <input type="text" class="fg-input" id="del-user" placeholder="usuario@email.com">
+    </div>
+    <div class="fg">
+      <label class="fg-lbl">Confirmar digitando DELETE</label>
+      <input type="text" class="fg-input" id="del-confirm" placeholder="DELETE">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeDelModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="doDeleteUser()">
+        <svg id="del-spin" style="display:none" class="spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+        Excluir Permanentemente
+      </button>
     </div>
   </div>
 </div>
 
-<!-- USER DETAIL MODAL -->
-<div class="modal-overlay" id="user-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-user-title">Detalhe do Usuário</div>
-      <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="user-detail-grid" id="modal-detail-grid"></div>
-      <div style="margin-bottom:14px;">
-        <div style="font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:10px;">Ações de Crédito</div>
-        <div class="credit-actions" id="modal-credit-actions"></div>
-      </div>
-      <div>
-        <div style="font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;color:var(--silver);text-transform:uppercase;margin-bottom:10px;">Últimas Análises</div>
-        <div class="analyses-mini" id="modal-analyses"></div>
-      </div>
-      <div class="danger-zone" id="modal-danger">
-        <div class="danger-zone-title">⚠ Zona de Perigo</div>
-        <div class="danger-zone-actions" id="modal-danger-actions"></div>
-      </div>
-    </div>
+<!-- ── USER DETAIL MODAL ── -->
+<div class="modal-overlay" id="user-detail-modal">
+  <div class="modal-backdrop" onclick="closeUserDetail()"></div>
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeUserDetail()">✕</button>
+    <div class="modal-title" id="ud-title">Detalhes do Usuário</div>
+    <div class="modal-sub" id="ud-sub">—</div>
+    <div id="ud-body" style="font-size:.81rem;color:var(--n1);line-height:1.7;"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;" id="ud-actions"></div>
   </div>
 </div>
 
-<!-- QUICK CREDIT MODAL -->
-<div class="modal-overlay" id="quick-credit-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="qc-title">Ajustar Créditos</div>
-      <button class="modal-close" onclick="closeModal('quick-credit-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Quantidade</label>
-        <input class="form-input" id="qc-amount" type="number" min="0" placeholder="Ex: 5">
-      </div>
-      <div style="font-size:.78rem;color:var(--ash);" id="qc-hint"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('quick-credit-modal')">Cancelar</button>
-      <button class="btn btn-crimson btn-sm" id="qc-confirm-btn">Confirmar</button>
-    </div>
-  </div>
-</div>
-
-<!-- CONFIRM DELETE MODAL -->
-<div class="modal-overlay" id="delete-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" style="color:var(--crimson-bright);">⚠ Confirmar Exclusão</div>
-      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="font-size:.88rem;color:var(--ash);line-height:1.6;" id="delete-confirm-text"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('delete-modal')">Cancelar</button>
-      <button class="btn btn-danger btn-sm" id="delete-confirm-btn">Excluir Permanentemente</button>
-    </div>
-  </div>
-</div>
+<div id="toast-container"></div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────
-let API_URL = '';
-let ADMIN_SECRET = '';
-let allUsers = [];
-let currentUserId = null;
-let statsData = null;
+/* ═══════════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════════ */
+const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
+  || ((window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1')
+      ? 'http://localhost:10000' : 'https://jusaii-app-daqr.onrender.com');
 
-// ─── CONNECT ─────────────────────────────────────────────────────────
-async function connect() {
-  const url = document.getElementById('api-url').value.trim().replace(/\/$/, '');
-  const secret = document.getElementById('api-secret').value.trim();
-  const errEl = document.getElementById('connect-error');
-  errEl.style.display = 'none';
+let adminToken=sessionStorage.getItem('jurir_admin_token')||null;
+let allUsers=[];let userPage=1;const USER_PER_PAGE=15;
+let allAnalyses=[];let analysisPage=1;const ANAL_PER_PAGE=12;
+let allLogs=[];let selectedCredits=50;
+let currentCrTab='remove';
 
-  if (!url || !secret) {
-    errEl.textContent = 'Preencha a URL da API e o ADMIN_SECRET.';
-    errEl.style.display = 'block';
-    return;
-  }
-  try {
-    const res = await fetch(`${url}/api/admin/stats`, {
-      headers: { 'Authorization': `Bearer ${secret}` }
-    });
-    if (res.status === 403 || res.status === 401) {
-      errEl.textContent = 'Acesso negado. Verifique o ADMIN_SECRET.';
-      errEl.style.display = 'block';
-      return;
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    API_URL = url;
-    ADMIN_SECRET = secret;
-    document.getElementById('connect-screen').style.display = 'none';
-    document.getElementById('sidebar-url-display').textContent = new URL(url).hostname;
-    statsData = data;
-    renderDashboard(data);
-    loadUsers();
-    showToast('Conectado com sucesso!', 'success');
-  } catch (e) {
-    errEl.textContent = `Erro ao conectar: ${e.message}. Verifique a URL e tente novamente.`;
-    errEl.style.display = 'block';
-  }
+/* ── AUTH GATE ── */
+async function doAdminLogin(){
+  const email=document.getElementById('gate-email').value.trim();
+  const pwd=document.getElementById('gate-password').value;
+  const err=document.getElementById('gate-err');err.style.display='none';
+  if(!email||!pwd){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  document.getElementById('gate-spin').style.display='block';
+  try{
+    const r=await fetch(`${API_BASE}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pwd})});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||'Credenciais inválidas');
+    adminToken=data.access_token||data.token;
+    sessionStorage.setItem('jurir_admin_token',adminToken);
+    document.getElementById('admin-gate').style.display='none';
+    document.getElementById('admin-app').style.display='flex';
+    document.getElementById('sb-name').textContent=email.split('@')[0];
+    document.getElementById('sb-avatar').textContent=(email[0]||'A').toUpperCase();
+    initAdmin();toast('✅ Painel carregado!','success');
+  }catch(e){err.textContent=e.message;err.style.display='block';}
+  finally{document.getElementById('gate-spin').style.display='none';}
+}
+document.getElementById('gate-password').addEventListener('keydown',e=>{if(e.key==='Enter') doAdminLogin();});
+
+function doLogout(){adminToken=null;sessionStorage.removeItem('jurir_admin_token');document.getElementById('admin-gate').style.display='flex';document.getElementById('admin-app').style.display='none';}
+
+/* ── AUTO-LOGIN ── */
+if(adminToken){
+  document.getElementById('admin-gate').style.display='none';
+  document.getElementById('admin-app').style.display='flex';
+  setTimeout(initAdmin,100);
 }
 
-function disconnect() {
-  API_URL = '';
-  ADMIN_SECRET = '';
-  allUsers = [];
-  statsData = null;
-  document.getElementById('connect-screen').style.display = 'flex';
+/* ── API HELPER ── */
+async function apiFetch(path,opts={}){
+  const r=await fetch(`${API_BASE}${path}`,{...opts,headers:{...opts.headers||{},'Authorization':`Bearer ${adminToken}`,'Content-Type':'application/json'}});
+  if(r.status===403){doLogout();throw new Error('Sessão expirada');}
+  return r;
 }
 
-// ─── API ─────────────────────────────────────────────────────────────
-async function apiCall(method, path, body = null) {
-  const opts = {
-    method,
-    headers: { 'Authorization': `Bearer ${ADMIN_SECRET}`, 'Content-Type': 'application/json' },
-  };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${API_URL}${path}`, opts);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
-  }
-  return res.json();
+/* ── INIT ── */
+function initAdmin(){
+  pingAPI();loadDashboard();loadUsers();loadAnalyses();
+  setInterval(pingAPI,30000);
 }
 
-// ─── NAVIGATION ──────────────────────────────────────────────────────
-function showSection(name) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`section-${name}`).classList.add('active');
-  document.querySelector(`[data-section="${name}"]`).classList.add('active');
-  const titles = { dashboard: ['Dashboard', 'Visão geral do sistema'], users: ['Usuários', 'Gerenciar todos os usuários'], credits: ['Créditos', 'Adicionar, remover ou definir créditos'], features: ['Features & Providers', 'Estado atual do sistema'] };
-  const [t, s] = titles[name] || ['Admin', ''];
-  document.getElementById('page-title').textContent = t;
-  document.getElementById('page-sub').textContent = s;
-}
-
-function refreshCurrent() {
-  const active = document.querySelector('.nav-item.active')?.dataset.section;
-  if (active === 'dashboard') loadStats();
-  else if (active === 'users') loadUsers();
-  else if (active === 'features') loadStats();
-}
-
-// ─── DASHBOARD ───────────────────────────────────────────────────────
-async function loadStats() {
-  try {
-    const data = await apiCall('GET', '/api/admin/stats');
-    statsData = data;
-    renderDashboard(data);
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-function renderDashboard(d) {
-  const grid = document.getElementById('stats-grid');
-  grid.innerHTML = `
-    <div class="stat-card crimson">
-      <div class="stat-icon crimson">👤</div>
-      <div class="stat-value">${d.total_users ?? 0}</div>
-      <div class="stat-label">Total de Usuários</div>
-    </div>
-    <div class="stat-card brass">
-      <div class="stat-icon brass">⚖️</div>
-      <div class="stat-value">${d.total_analyses ?? 0}</div>
-      <div class="stat-label">Análises Premium</div>
-    </div>
-    <div class="stat-card emerald">
-      <div class="stat-icon emerald">📊</div>
-      <div class="stat-value">${d.analyses_today ?? 0}</div>
-      <div class="stat-label">Análises Hoje</div>
-    </div>
-    <div class="stat-card silver">
-      <div class="stat-icon silver">⚙️</div>
-      <div class="stat-value">${d.active_jobs ?? 0}</div>
-      <div class="stat-label">Jobs Ativos</div>
-    </div>
-    <div class="stat-card brass">
-      <div class="stat-icon brass">🔗</div>
-      <div class="stat-value">${d.sse_active ?? 0}</div>
-      <div class="stat-label">SSE Conexões</div>
-    </div>
-    <div class="stat-card silver">
-      <div class="stat-icon silver">🔒</div>
-      <div class="stat-value">${d.max_concurrent_jobs ?? 0}</div>
-      <div class="stat-label">Max Jobs</div>
-    </div>
-  `;
-
-  if (d.providers && d.providers.length) {
-    document.getElementById('providers-panel').style.display = 'block';
-    document.getElementById('providers-list').innerHTML = d.providers.map(p =>
-      `<div class="provider-chip">✓ ${p}</div>`
-    ).join('');
-  }
-
-  if (d.features) renderFeatures(d.features);
-}
-
-function renderFeatures(features) {
-  const grid = document.getElementById('features-grid');
-  const keys = Object.keys(features);
-  if (!keys.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔬</div><div class="empty-text">Nenhuma feature mapeada.</div></div>'; return; }
-  grid.innerHTML = keys.map(k => `
-    <div class="feature-item">
-      <div class="feature-dot ${features[k] ? 'on' : 'off'}"></div>
-      <div class="feature-name">${k.replace(/_/g, ' ')}</div>
-    </div>`).join('');
-}
-
-// ─── USERS ───────────────────────────────────────────────────────────
-async function loadUsers() {
-  document.getElementById('users-table-wrap').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando usuários...</div>';
-  try {
-    allUsers = await apiCall('GET', '/api/admin/users');
-    renderUsersTable(allUsers);
-  } catch (e) {
-    document.getElementById('users-table-wrap').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">${e.message}</div></div>`;
+async function pingAPI(){
+  try{
+    const r=await fetch(`${API_BASE}/ping`,{signal:AbortSignal.timeout(4000)});
+    const el=document.getElementById('api-status');
+    if(r.ok){el.textContent='Online ✓';el.closest('.top-status').style.borderColor='rgba(16,185,129,.22)';}
+    else throw new Error('fail');
+  }catch(e){
+    const el=document.getElementById('api-status');el.textContent='Offline ✗';
+    el.closest('.top-status').style.borderColor='rgba(185,28,28,.3)';
+    el.closest('.top-status').style.color='var(--r4)';
+    addLog('WARN',`Ping falhou: ${e.message}`);
   }
 }
 
-function renderUsersTable(users) {
-  const wrap = document.getElementById('users-table-wrap');
-  if (!users.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Nenhum usuário encontrado.</div></div>';
-    return;
-  }
-  wrap.innerHTML = `
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Créditos Free</th>
-          <th>Créditos Premium</th>
-          <th>Análises</th>
-          <th>Cadastro</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${users.map(u => `
-          <tr onclick="openUserDetail(${u.id})">
-            <td><span class="badge badge-id">#${u.id}</span></td>
-            <td style="color:var(--platinum);font-weight:500;">${u.email}</td>
-            <td><span class="badge badge-free">${u.credits ?? 0}</span></td>
-            <td><span class="badge badge-credits">⭐ ${u.premium_credits ?? 0}</span></td>
-            <td><span class="badge badge-analyses">${u.analyses_count ?? 0}</span></td>
-            <td style="color:var(--silver);font-size:.76rem;font-family:var(--font-mono);">${u.created_at || '—'}</td>
-            <td onclick="event.stopPropagation()">
-              <button class="btn btn-ghost btn-sm" onclick="openUserDetail(${u.id})" title="Ver detalhes">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </button>
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
-  `;
+/* ── VIEWS ── */
+const VIEW_TITLES={dashboard:['Dashboard','// visão geral'],users:['Usuários','// gestão de contas'],analyses:['Análises','// histórico completo'],credits:['Créditos','// gestão financeira'],metrics:['Métricas IA','// observabilidade'],providers:['Providers LLM','// status'],logs:['Logs','// terminal'],'reset-credits':['Reset Créditos','// manutenção']};
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const view=document.getElementById(`view-${id}`);if(view) view.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>{if(i.getAttribute('onclick')?.includes(id)) i.classList.add('active');});
+  const t=VIEW_TITLES[id]||[id,''];
+  document.getElementById('topbar-title').childNodes[0].textContent=t[0]+' ';
+  document.getElementById('topbar-sub').textContent=t[1];
+  if(id==='metrics') loadMetrics();
+  if(id==='providers') loadProviders();
+  if(id==='logs') loadLogs();
+}
+function refreshCurrentView(){const active=document.querySelector('.sb-item.active');if(active){const fn=active.getAttribute('onclick');if(fn){const m=fn.match(/showView\('([^']+)'\)/);if(m) showView(m[1]);}} loadDashboard();}
+
+/* ── DASHBOARD ── */
+async function loadDashboard(){
+  try{
+    const r=await apiFetch('/api/admin/stats');
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    document.getElementById('stat-users').textContent=fmt(data.total_users||0);
+    document.getElementById('stat-today').textContent=fmt(data.analyses_today||0);
+    document.getElementById('stat-total').textContent=fmt(data.total_analyses||0);
+    document.getElementById('stat-score').textContent=data.avg_jurir_score?`${parseFloat(data.avg_jurir_score).toFixed(1)}`:'—';
+    document.getElementById('stat-credits').textContent=fmt(data.total_premium_credits_issued||0);
+    document.getElementById('stat-failures').textContent=data.total_agent_failures||'—';
+    document.getElementById('users-badge').textContent=fmt(data.total_users||0);
+    buildChart(data.analyses_per_day||[]);
+    buildTopAreas(data.top_areas||[]);
+    buildRecentAnalyses(data.recent_analyses||[]);
+    addLog('OK',`Dashboard atualizado — ${fmt(data.total_users||0)} usuários, ${fmt(data.total_analyses||0)} análises`);
+  }catch(e){addLog('ERROR',`Dashboard: ${e.message}`);}
 }
 
-function filterUsers() {
-  const q = document.getElementById('user-search').value.toLowerCase();
-  const filtered = allUsers.filter(u =>
-    u.email.toLowerCase().includes(q) ||
-    String(u.id).includes(q)
-  );
-  renderUsersTable(filtered);
-}
+function fmt(n){return Number(n).toLocaleString('pt-BR');}
 
-// ─── USER DETAIL ─────────────────────────────────────────────────────
-async function openUserDetail(userId) {
-  currentUserId = userId;
-  openModal('user-modal');
-  document.getElementById('modal-detail-grid').innerHTML = '<div class="loading" style="grid-column:1/-1;"><div class="spinner"></div> Carregando...</div>';
-  document.getElementById('modal-analyses').innerHTML = '';
-  document.getElementById('modal-credit-actions').innerHTML = '';
-  document.getElementById('modal-danger-actions').innerHTML = '';
-
-  try {
-    const data = await apiCall('GET', `/api/admin/user/${userId}`);
-    const u = data.user;
-    document.getElementById('modal-user-title').textContent = u.email;
-
-    document.getElementById('modal-detail-grid').innerHTML = `
-      <div class="detail-card">
-        <div class="detail-label">ID</div>
-        <div class="detail-value" style="font-family:var(--font-mono);color:var(--brass-bright);">#${u.id}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">Email</div>
-        <div class="detail-value">${u.email}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">Créditos Gratuitos</div>
-        <div class="detail-value" style="color:var(--crimson-bright);">${u.credits ?? 0}</div>
-      </div>
-      <div class="detail-card">
-        <div class="detail-label">Créditos Premium</div>
-        <div class="detail-value" style="color:var(--brass-bright);">⭐ ${u.premium_credits ?? 0}</div>
-      </div>
-      <div class="detail-card" style="grid-column:1/-1;">
-        <div class="detail-label">Membro desde</div>
-        <div class="detail-value" style="font-family:var(--font-mono);font-size:.85rem;">${u.created_at || '—'}</div>
-      </div>
-    `;
-
-    document.getElementById('modal-credit-actions').innerHTML = `
-      <button class="btn btn-emerald btn-sm" onclick="quickCredit(${u.id}, 'add', '${u.email}')">+ Adicionar</button>
-      <button class="btn btn-brass btn-sm" onclick="quickCredit(${u.id}, 'set', '${u.email}')">≡ Definir</button>
-      <button class="btn btn-danger btn-sm" onclick="quickCredit(${u.id}, 'remove', '${u.email}')">− Remover</button>
-    `;
-
-    const analyses = data.analyses || [];
-    if (analyses.length) {
-      document.getElementById('modal-analyses').innerHTML = analyses.map(a => `
-        <div class="analysis-mini-item">
-          <div class="analysis-mini-prompt">${a.prompt || '—'}</div>
-          <div class="analysis-mini-meta">
-            <span class="mini-meta-tag">📅 ${a.created_at}</span>
-            ${a.is_premium ? '<span class="mini-meta-tag" style="color:var(--brass-bright);">⭐ Premium</span>' : ''}
-            ${a.jurir_score ? `<span class="mini-meta-tag" style="color:var(--emerald-bright);">Score: ${a.jurir_score}</span>` : ''}
-            ${a.tribunal ? `<span class="mini-meta-tag">🏛 ${a.tribunal}</span>` : ''}
-          </div>
-        </div>`).join('');
-    } else {
-      document.getElementById('modal-analyses').innerHTML = '<div style="color:var(--silver);font-size:.8rem;padding:8px;">Nenhuma análise encontrada.</div>';
-    }
-
-    document.getElementById('modal-danger-actions').innerHTML = `
-      <button class="btn btn-ghost btn-sm" onclick="confirmResetFree(${u.id}, '${u.email}')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Resetar Créditos Free
-      </button>
-      <button class="btn btn-danger btn-sm" onclick="confirmDeleteUser(${u.id}, '${u.email}')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        Excluir Usuário
-      </button>
-    `;
-  } catch (e) {
-    document.getElementById('modal-detail-grid').innerHTML = `<div style="color:var(--crimson-bright);grid-column:1/-1;">Erro: ${e.message}</div>`;
-  }
-}
-
-// ─── QUICK CREDIT ─────────────────────────────────────────────────────
-let qcCallback = null;
-
-function quickCredit(userId, action, email) {
-  const labels = { add: 'Adicionar Créditos', set: 'Definir Saldo Exato', remove: 'Remover Créditos' };
-  const hints = { add: `Adicionar créditos premium para ${email}`, set: `Definir o saldo exato de ${email}`, remove: `Remover créditos premium de ${email}` };
-  document.getElementById('qc-title').textContent = labels[action];
-  document.getElementById('qc-hint').textContent = hints[action];
-  document.getElementById('qc-amount').value = '';
-  document.getElementById('qc-confirm-btn').className = `btn btn-sm ${action === 'add' ? 'btn-emerald' : action === 'set' ? 'btn-brass' : 'btn-danger'}`;
-  openModal('quick-credit-modal');
-
-  qcCallback = async () => {
-    const amount = parseInt(document.getElementById('qc-amount').value);
-    if (isNaN(amount) || amount < 0) { showToast('Valor inválido.', 'error'); return; }
-    const paths = { add: '/api/admin/add-credits', set: '/api/admin/set-credits', remove: '/api/admin/remove-credits' };
-    try {
-      const data = await apiCall('POST', paths[action], { user_id: userId, amount });
-      showToast(data.message || 'Operação concluída!', 'success');
-      closeModal('quick-credit-modal');
-      await openUserDetail(userId);
-      await loadUsers();
-    } catch (e) { showToast(e.message, 'error'); }
-  };
-
-  document.getElementById('qc-confirm-btn').onclick = qcCallback;
-}
-
-// ─── CREDITS TAB ─────────────────────────────────────────────────────
-let creditFoundUser = null;
-
-async function lookupUserByEmail() {
-  const email = document.getElementById('credit-email').value.trim().toLowerCase();
-  const foundEl = document.getElementById('credit-user-found');
-  creditFoundUser = null;
-  foundEl.style.display = 'none';
-
-  if (email.length < 4) return;
-  const user = allUsers.find(u => u.email.toLowerCase() === email);
-  if (user) {
-    creditFoundUser = user;
-    document.getElementById('credit-found-id').textContent = user.id;
-    document.getElementById('credit-found-credits').textContent = user.premium_credits;
-    foundEl.style.display = 'block';
-  }
-}
-
-async function doAddCredits() {
-  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
-  const amount = parseInt(document.getElementById('credit-amount').value);
-  if (isNaN(amount) || amount < 1) { showToast('Insira um valor positivo.', 'error'); return; }
-  try {
-    const data = await apiCall('POST', '/api/admin/add-credits', { user_id: creditFoundUser.id, amount });
-    showToast(data.message, 'success');
-    await loadUsers();
-    lookupUserByEmail();
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-async function doSetCredits() {
-  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
-  const amount = parseInt(document.getElementById('credit-amount').value);
-  if (isNaN(amount) || amount < 0) { showToast('Insira um valor >= 0.', 'error'); return; }
-  try {
-    const data = await apiCall('POST', '/api/admin/set-credits', { user_id: creditFoundUser.id, amount });
-    showToast(`Saldo definido para ${data.new_balance} créditos.`, 'success');
-    await loadUsers();
-    lookupUserByEmail();
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-async function doRemoveCredits() {
-  if (!creditFoundUser) { showToast('Usuário não encontrado. Verifique o email.', 'error'); return; }
-  const amount = parseInt(document.getElementById('credit-amount').value);
-  if (isNaN(amount) || amount < 1) { showToast('Insira um valor positivo.', 'error'); return; }
-  try {
-    const data = await apiCall('POST', '/api/admin/remove-credits', { user_id: creditFoundUser.id, amount });
-    showToast(data.message, 'success');
-    await loadUsers();
-    lookupUserByEmail();
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-// ─── DANGER ACTIONS ───────────────────────────────────────────────────
-function confirmResetFree(userId, email) {
-  document.getElementById('delete-confirm-text').innerHTML = `Você está prestes a <strong style="color:var(--crimson-bright);">resetar os créditos gratuitos</strong> do usuário <strong>${email}</strong> para zero. Isso não afeta os créditos premium.`;
-  document.getElementById('delete-confirm-btn').textContent = 'Resetar Créditos Free';
-  document.getElementById('delete-confirm-btn').onclick = async () => {
-    try {
-      const data = await apiCall('POST', '/api/admin/reset-free-credits', { user_id: userId });
-      showToast(data.message, 'success');
-      closeModal('delete-modal');
-      openUserDetail(userId);
-    } catch (e) { showToast(e.message, 'error'); }
-  };
-  openModal('delete-modal');
-}
-
-function confirmDeleteUser(userId, email) {
-  document.getElementById('delete-confirm-text').innerHTML = `Você está prestes a <strong style="color:var(--crimson-bright);">EXCLUIR PERMANENTEMENTE</strong> o usuário <strong>${email}</strong> (ID #${userId}) e <strong>todas as suas análises</strong>.<br><br>Esta ação <strong>não pode ser desfeita</strong>.`;
-  document.getElementById('delete-confirm-btn').textContent = 'Excluir Permanentemente';
-  document.getElementById('delete-confirm-btn').onclick = async () => {
-    try {
-      const data = await apiCall('POST', '/api/admin/delete-user', { user_id: userId });
-      showToast(data.message, 'success');
-      closeModal('delete-modal');
-      closeModal('user-modal');
-      await loadUsers();
-    } catch (e) { showToast(e.message, 'error'); }
-  };
-  openModal('delete-modal');
-}
-
-// ─── MODALS ───────────────────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// Click outside to close
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
+function buildChart(data){
+  const area=document.getElementById('chart-area');area.innerHTML='';
+  if(!data.length){area.innerHTML='<div style="color:var(--n5);font-size:.75rem;align-self:center;width:100%;text-align:center;">Sem dados de histórico</div>';return;}
+  const max=Math.max(...data.map(d=>d.count||0),1);
+  const yLabels=['100','75','50','25','0'];
+  const yDiv=document.getElementById('chart-y');yDiv.innerHTML='';
+  const scaledMax=Math.ceil(max/10)*10;
+  [scaledMax,Math.floor(scaledMax*.75),Math.floor(scaledMax*.5),Math.floor(scaledMax*.25),0].forEach(v=>{const s=document.createElement('span');s.className='chart-y-lbl';s.textContent=v;yDiv.appendChild(s);});
+  data.slice(-14).forEach(d=>{
+    const pct=scaledMax?(d.count/scaledMax)*100:0;
+    const wrap=document.createElement('div');wrap.className='chart-bar-wrap';
+    const bar=document.createElement('div');bar.className='chart-bar';
+    bar.style.height='4px';bar.title=`${d.date||''}: ${d.count} análises`;
+    const lbl=document.createElement('div');lbl.className='chart-lbl';
+    lbl.textContent=(d.date||'').slice(-5);
+    wrap.appendChild(bar);wrap.appendChild(lbl);area.appendChild(wrap);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.height=`${Math.max(pct,3)}%`;}));
   });
-});
+}
 
-// ─── TOAST ────────────────────────────────────────────────────────────
-function showToast(msg, type = 'info') {
-  const icons = { success: '✓', error: '✕', info: '●' };
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+function buildTopAreas(areas){
+  const el=document.getElementById('top-areas-panel');
+  if(!areas.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Sem dados</div></div>';return;}
+  const max=Math.max(...areas.map(a=>a.count||0),1);
+  el.innerHTML=areas.slice(0,8).map(a=>{
+    const pct=((a.count||0)/max)*100;
+    return `<div class="metric-row"><span class="metric-lbl">${a.area||'—'}</span><div class="metric-bar"><div class="metric-fill c" style="width:${pct}%"></div></div><span class="metric-val">${a.count||0}</span></div>`;
+  }).join('');
+}
+
+function buildRecentAnalyses(analyses){
+  const tb=document.getElementById('recent-analyses-tbody');
+  if(!analyses.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--n5);padding:20px;">Sem análises recentes</td></tr>';return;}
+  tb.innerHTML=analyses.slice(0,5).map(a=>`
+    <tr>
+      <td class="td-mono" style="color:var(--n5);">#${a.id||'—'}</td>
+      <td><span style="font-size:.75rem;padding:3px 9px;border-radius:var(--r-pill);background:${scoreColor(a.jurir_score)};color:#000;">${parseFloat(a.jurir_score||0).toFixed(1)}</span></td>
+      <td style="color:var(--n3);font-size:.75rem;">${a.legal_area||'—'}</td>
+      <td class="td-mono" style="color:var(--n5);font-size:.65rem;">${(a.created_at||'—').toString().slice(0,16)}</td>
+    </tr>`).join('');
+}
+function scoreColor(s){const v=parseFloat(s||0);return v>=70?'rgba(16,185,129,.6)':v>=45?'rgba(234,179,8,.6)':'rgba(185,28,28,.6)';}
+
+/* ── USERS ── */
+async function loadUsers(){
+  try{
+    const r=await apiFetch('/api/admin/users');
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    allUsers=data.users||data||[];
+    document.getElementById('users-count-label').textContent=`${allUsers.length} usuários`;
+    renderUsers();addLog('OK',`${allUsers.length} usuários carregados`);
+  }catch(e){addLog('ERROR',`Usuários: ${e.message}`);}
+}
+
+function filterUsers(){renderUsers();}
+
+function renderUsers(){
+  const search=(document.getElementById('user-search')?.value||'').toLowerCase();
+  const filter=document.getElementById('user-filter')?.value||'';
+  let filtered=allUsers.filter(u=>{
+    if(search&&!JSON.stringify(u).toLowerCase().includes(search)) return false;
+    if(filter==='active'&&u.is_active===false) return false;
+    if(filter==='premium'&&!(u.premium_credits>0)) return false;
+    return true;
+  });
+  const total=filtered.length;const pages=Math.ceil(total/USER_PER_PAGE)||1;
+  if(userPage>pages) userPage=1;
+  const slice=filtered.slice((userPage-1)*USER_PER_PAGE,userPage*USER_PER_PAGE);
+  const tb=document.getElementById('users-tbody');
+  if(!slice.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--n5);padding:30px;">Nenhum usuário encontrado</td></tr>';return;}
+  tb.innerHTML=slice.map(u=>`
+    <tr>
+      <td class="td-mono" style="color:var(--n5);">${u.id||'—'}</td>
+      <td class="td-name">${u.email||'—'}</td>
+      <td><span class="tbadge ${u.is_active!==false?'active':'inactive'}"><span class="tbadge-dot"></span>${u.is_active!==false?'Ativo':'Inativo'}</span>${u.is_admin?'<span class="tbadge admin" style="margin-left:4px;">Admin</span>':''}</td>
+      <td class="td-mono" style="color:var(--g4);">${u.premium_credits||0}</td>
+      <td class="td-mono">${u.total_analyses||0}</td>
+      <td class="td-mono" style="font-size:.65rem;color:var(--n5);">${(u.created_at||'—').toString().slice(0,10)}</td>
+      <td>
+        <div style="display:flex;gap:5px;">
+          <button class="btn btn-ghost btn-xs" onclick="showUserDetail(${u.id})">Ver</button>
+          <button class="btn btn-gold btn-xs" onclick="quickAddCredits(${u.id},'${u.email}')">+💎</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  document.getElementById('users-pag-info').textContent=`${(userPage-1)*USER_PER_PAGE+1}–${Math.min(userPage*USER_PER_PAGE,total)} de ${total}`;
+  const pag=document.getElementById('users-pag-btns');
+  pag.innerHTML=`<button class="pag-btn" onclick="userPage=Math.max(1,userPage-1);renderUsers()" ${userPage<=1?'disabled':''}>‹</button>`;
+  for(let p=Math.max(1,userPage-2);p<=Math.min(pages,userPage+2);p++){pag.innerHTML+=`<button class="pag-btn ${p===userPage?'active':''}" onclick="userPage=${p};renderUsers()">${p}</button>`;}
+  pag.innerHTML+=`<button class="pag-btn" onclick="userPage=Math.min(${pages},userPage+1);renderUsers()" ${userPage>=pages?'disabled':''}>›</button>`;
+}
+
+async function showUserDetail(userId){
+  const user=allUsers.find(u=>u.id===userId);if(!user) return;
+  document.getElementById('ud-title').textContent=`Usuário #${user.id}`;
+  document.getElementById('ud-sub').textContent=user.email;
+  document.getElementById('ud-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      ${[['E-mail',user.email],['Status',user.is_active!==false?'Ativo':'Inativo'],['Créditos Premium',user.premium_credits||0],['Créditos Gratuitos Usados',user.free_analyses_used||0],['Total Análises',user.total_analyses||0],['Cadastro',(user.created_at||'—').toString().slice(0,16)]].map(([k,v])=>`
+        <div style="background:rgba(0,0,0,.3);border:1px solid var(--bn2);border-radius:var(--r-sm);padding:10px;">
+          <div style="font-family:var(--f-mono);font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--n5);margin-bottom:3px;">${k}</div>
+          <div style="font-size:.82rem;font-weight:600;color:var(--n0);">${v}</div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('ud-actions').innerHTML=`
+    <button class="btn btn-ghost btn-sm" onclick="closeUserDetail()">Fechar</button>
+    <button class="btn btn-gold btn-sm" onclick="closeUserDetail();document.getElementById('cr-user').value='${user.email}';showView('credits')">Gerenciar Créditos</button>
+    <button class="btn btn-danger btn-sm" onclick="closeUserDetail();document.getElementById('del-user').value='${user.email}';openDelModal()">Excluir</button>`;
+  document.getElementById('user-detail-modal').classList.add('open');
+}
+function closeUserDetail(){document.getElementById('user-detail-modal').classList.remove('open');}
+
+function quickAddCredits(userId,email){
+  document.getElementById('cr-user').value=email;
+  showView('credits');toast(`Usuário ${email} selecionado para créditos`,'info');
+}
+
+/* ── ANALYSES ── */
+async function loadAnalyses(){
+  try{
+    const r=await apiFetch('/api/admin/analyses?limit=200');
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();allAnalyses=data.analyses||data||[];renderAnalyses();
+    addLog('OK',`${allAnalyses.length} análises carregadas`);
+  }catch(e){addLog('ERROR',`Análises: ${e.message}`);}
+}
+
+function renderAnalyses(){
+  const total=allAnalyses.length;const pages=Math.ceil(total/ANAL_PER_PAGE)||1;
+  if(analysisPage>pages) analysisPage=1;
+  const slice=allAnalyses.slice((analysisPage-1)*ANAL_PER_PAGE,analysisPage*ANAL_PER_PAGE);
+  const tb=document.getElementById('analyses-tbody');
+  if(!slice.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--n5);padding:30px;">Nenhuma análise encontrada</td></tr>';return;}
+  tb.innerHTML=slice.map(a=>`
+    <tr>
+      <td class="td-mono" style="color:var(--n5);">#${a.id||'—'}</td>
+      <td style="font-size:.73rem;color:var(--n3);">${a.user_email||(a.user_id?`UID ${a.user_id}`:'—')}</td>
+      <td><span style="font-size:.75rem;padding:3px 9px;border-radius:var(--r-pill);background:${scoreColor(a.jurir_score)};color:#000;">${parseFloat(a.jurir_score||0).toFixed(1)}</span></td>
+      <td class="td-mono">${a.valid_agents||a.agents_count||'—'}/16</td>
+      <td style="font-size:.73rem;">${a.tribunal||'—'}</td>
+      <td>${a.veto_triggered?'<span class="tbadge premium"><span class="tbadge-dot"></span>VETO</span>':'<span style="color:var(--n5);font-size:.72rem;">—</span>'}</td>
+      <td class="td-mono" style="font-size:.65rem;color:var(--n5);">${(a.created_at||'—').toString().slice(0,16)}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="viewAnalysisDetail(${a.id})">Abrir</button></td>
+    </tr>`).join('');
+  document.getElementById('analyses-pag-info').textContent=`${(analysisPage-1)*ANAL_PER_PAGE+1}–${Math.min(analysisPage*ANAL_PER_PAGE,total)} de ${total}`;
+  const pag=document.getElementById('analyses-pag-btns');
+  pag.innerHTML=`<button class="pag-btn" onclick="analysisPage=Math.max(1,analysisPage-1);renderAnalyses()" ${analysisPage<=1?'disabled':''}>‹</button>`;
+  for(let p=Math.max(1,analysisPage-2);p<=Math.min(pages,analysisPage+2);p++){pag.innerHTML+=`<button class="pag-btn ${p===analysisPage?'active':''}" onclick="analysisPage=${p};renderAnalyses()">${p}</button>`;}
+  pag.innerHTML+=`<button class="pag-btn" onclick="analysisPage=Math.min(${pages},analysisPage+1);renderAnalyses()" ${analysisPage>=pages?'disabled':''}>›</button>`;
+}
+
+async function viewAnalysisDetail(id){
+  try{
+    const r=await apiFetch(`/api/analysis/${id}`);if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    document.getElementById('ud-title').textContent=`Análise #${id}`;
+    document.getElementById('ud-sub').textContent=`Score: ${parseFloat(data.jurir_score||0).toFixed(1)} · Tribunal: ${data.tribunal||'—'} · ${(data.created_at||'').toString().slice(0,16)}`;
+    const verdict=(data.verdict||data.veredito||'').slice(0,800);
+    document.getElementById('ud-body').innerHTML=`<div style="background:rgba(0,0,0,.35);border:1px solid var(--bn2);border-radius:var(--r-sm);padding:13px;font-size:.78rem;color:var(--n2);line-height:1.65;white-space:pre-wrap;max-height:360px;overflow-y:auto;">${verdict||'Veredito não disponível'}</div>`;
+    document.getElementById('ud-actions').innerHTML=`<button class="btn btn-ghost btn-sm" onclick="closeUserDetail()">Fechar</button>`;
+    document.getElementById('user-detail-modal').classList.add('open');
+  }catch(e){toast(`Análise: ${e.message}`,'error');}
+}
+
+/* ── CREDITS ── */
+function selectCredits(val){
+  selectedCredits=val;
+  document.querySelectorAll('.cr-opt').forEach(o=>o.classList.remove('selected'));
+  if(val==='custom'){
+    document.getElementById('cr-custom-opt').classList.add('selected');
+    document.getElementById('cr-custom-field').style.display='block';
+  }else{
+    document.getElementById('cr-custom-field').style.display='none';
+    document.querySelectorAll('.cr-opt').forEach(o=>{if(parseInt(o.querySelector('.cr-opt-val').textContent)===val) o.classList.add('selected');});
+  }
+}
+
+async function doAddCredits(){
+  const user=document.getElementById('cr-user').value.trim();
+  let amount=selectedCredits==='custom'?parseInt(document.getElementById('cr-custom-val').value):selectedCredits;
+  const reason=document.getElementById('cr-reason').value.trim();
+  if(!user){toast('Informe o usuário.','error');return;}
+  if(!amount||amount<1){toast('Quantidade inválida.','error');return;}
+  const spin=document.getElementById('cr-spin');spin.style.display='inline-block';
+  try{
+    const body=isNaN(user)?{email:user,amount,reason}:{user_id:parseInt(user),amount,reason};
+    const r=await apiFetch('/api/admin/add-credits',{method:'POST',body:JSON.stringify(body)});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`✅ +${amount} créditos adicionados!`,'success');
+    addLog('OK',`+${amount} créditos → ${user} | Razão: ${reason||'—'}`);
+    document.getElementById('cr-user').value='';document.getElementById('cr-reason').value='';
+    loadUsers();loadDashboard();
+  }catch(e){toast(`Créditos: ${e.message}`,'error');addLog('ERROR',`add-credits: ${e.message}`);}
+  finally{spin.style.display='none';}
+}
+
+function switchCrTab(tab){
+  currentCrTab=tab;
+  document.querySelectorAll('#view-credits .tab-btn').forEach((b,i)=>b.classList.toggle('active',i===(tab==='remove'?0:1)));
+  document.getElementById('cr-tab-remove').classList.toggle('active',tab==='remove');
+  document.getElementById('cr-tab-set').classList.toggle('active',tab==='set');
+}
+
+async function doRemoveCredits(){
+  const user=document.getElementById('cr-rm-user').value.trim();
+  const amount=parseInt(document.getElementById('cr-rm-amount').value);
+  const reason=document.getElementById('cr-rm-reason').value.trim();
+  if(!user||!amount||amount<1){toast('Preencha usuário e quantidade.','error');return;}
+  const spin=document.getElementById('cr-rm-spin');spin.style.display='inline-block';
+  try{
+    const body=isNaN(user)?{email:user,amount,reason}:{user_id:parseInt(user),amount,reason};
+    const r=await apiFetch('/api/admin/remove-credits',{method:'POST',body:JSON.stringify(body)});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`⬇ ${amount} créditos removidos`,'info');addLog('WARN',`-${amount} créditos ← ${user} | ${reason||'—'}`);
+    loadUsers();
+  }catch(e){toast(`Remove: ${e.message}`,'error');}
+  finally{spin.style.display='none';}
+}
+
+async function doSetCredits(){
+  const user=document.getElementById('cr-set-user').value.trim();
+  const amount=parseInt(document.getElementById('cr-set-amount').value);
+  if(!user||isNaN(amount)||amount<0){toast('Preencha usuário e valor.','error');return;}
+  const spin=document.getElementById('cr-set-spin');spin.style.display='inline-block';
+  try{
+    const body=isNaN(user)?{email:user,amount}:{user_id:parseInt(user),amount};
+    const r=await apiFetch('/api/admin/set-credits',{method:'POST',body:JSON.stringify(body)});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`⚡ Saldo definido para ${amount}`,'success');addLog('OK',`set-credits=${amount} → ${user}`);
+    loadUsers();
+  }catch(e){toast(`Set: ${e.message}`,'error');}
+  finally{spin.style.display='none';}
+}
+
+function toggleResetConfirm(){
+  const c=document.getElementById('reset-confirm');const f=document.getElementById('reset-confirm-field');const b=document.getElementById('reset-exec-btn');
+  const shown=c.style.display!=='none';
+  c.style.display=shown?'none':'block';f.style.display=shown?'none':'block';b.style.display=shown?'none':'inline-flex';
+}
+
+async function doResetFreeCredits(){
+  const confirm=document.getElementById('reset-confirm-input').value.trim();
+  if(confirm!=='RESETAR'){toast('Digite RESETAR para confirmar.','error');return;}
+  const spin=document.getElementById('reset-spin');spin.style.display='inline-block';
+  try{
+    const r=await apiFetch('/api/admin/reset-free-credits',{method:'POST',body:JSON.stringify({})});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`✅ ${data.affected||0} usuários resetados`,'success');addLog('OK',`reset-free-credits: ${data.affected||0} afetados`);
+    toggleResetConfirm();document.getElementById('reset-confirm-input').value='';
+  }catch(e){toast(`Reset: ${e.message}`,'error');}
+  finally{spin.style.display='none';}
+}
+
+async function doResetFreeCreditsView(){
+  const pwd=document.getElementById('rc-pwd').value;if(!pwd){toast('Informe a senha.','error');return;}
+  const spin=document.getElementById('rc-spin');spin.style.display='inline-block';
+  try{
+    const r=await apiFetch('/api/admin/reset-free-credits',{method:'POST',body:JSON.stringify({password:pwd})});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`✅ ${data.affected||0} usuários resetados`,'success');addLog('OK',`reset-free-credits: ${data.affected||0} afetados`);
+    document.getElementById('rc-pwd').value='';
+  }catch(e){toast(`Reset: ${e.message}`,'error');}
+  finally{spin.style.display='none';}
+}
+
+/* ── METRICS ── */
+async function loadMetrics(){
+  const spin=document.getElementById('metrics-spin');spin.style.display='inline-block';
+  try{
+    const r=await apiFetch('/api/metrics');if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    const pipeline=data.pipeline||{};const agents=data.agents||{};const providers=data.providers||{};
+    document.getElementById('m-total').textContent=fmt(pipeline.total_analyses||0);
+    document.getElementById('m-score').textContent=parseFloat(pipeline.avg_jurir_score||0).toFixed(1);
+    document.getElementById('m-fallback').textContent=`${((pipeline.fallback_rate||0)*100).toFixed(1)}%`;
+
+    // Agents
+    const ap=document.getElementById('agents-metrics-panel');
+    if(Object.keys(agents).length){
+      ap.innerHTML=Object.entries(agents).slice(0,16).map(([id,m])=>{
+        const sr=((m.success_rate||0)*100).toFixed(0);
+        const cls=sr>=80?'e':sr>=60?'p':'r';
+        return `<div class="metric-row"><span class="metric-lbl">${id}</span><div class="metric-bar"><div class="metric-fill ${cls}" style="width:${sr}%"></div></div><span class="metric-val">${sr}%</span></div>`;
+      }).join('');
+    }else{ap.innerHTML='<div class="empty-state"><div class="empty-title" style="font-size:.80rem;">Sem dados de agentes</div></div>';}
+
+    // Providers
+    const pp=document.getElementById('providers-metrics-panel');
+    if(Object.keys(providers).length){
+      pp.innerHTML=Object.entries(providers).map(([id,m])=>{
+        const sr=((m.success_rate||0)*100).toFixed(0);
+        return `<div class="metric-row"><span class="metric-lbl">${id}</span><div class="metric-bar"><div class="metric-fill p" style="width:${sr}%"></div></div><span class="metric-val">${sr}% · ${(m.avg_latency_ms||0).toFixed(0)}ms</span></div>`;
+      }).join('');
+    }else{pp.innerHTML='<div class="empty-state"><div class="empty-title" style="font-size:.80rem;">Sem dados de providers</div></div>';}
+
+    // Insights
+    const ins=data.insights||{};const ip=document.getElementById('insights-panel');
+    if(ins.top_failing_agents?.length||ins.top_slow_agents_p95?.length){
+      ip.innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><div style="font-family:var(--f-mono);font-size:.60rem;letter-spacing:.14em;text-transform:uppercase;color:var(--r4);margin-bottom:8px;">Top Falhos</div>${(ins.top_failing_agents||[]).slice(0,5).map(a=>`<div class="metric-row"><span class="metric-lbl">${a.agent_id||'—'}</span><span class="metric-val" style="color:var(--r4);">${a.fail_count||0} falhas</span></div>`).join('')}</div>
+          <div><div style="font-family:var(--f-mono);font-size:.60rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g3);margin-bottom:8px;">Mais Lentos (P95)</div>${(ins.top_slow_agents_p95||[]).slice(0,5).map(a=>`<div class="metric-row"><span class="metric-lbl">${a.agent_id||'—'}</span><span class="metric-val" style="color:var(--g4);">${(a.p95_duration_ms||0).toFixed(0)}ms</span></div>`).join('')}</div>
+        </div>`;
+    }else{ip.innerHTML='<div class="empty-state"><div class="empty-icon">💡</div><div class="empty-title">Sem insights disponíveis</div></div>';}
+
+    addLog('OK',`Métricas carregadas — ${Object.keys(agents).length} agentes, ${Object.keys(providers).length} providers`);
+  }catch(e){toast(`Métricas: ${e.message}`,'error');addLog('ERROR',`/api/metrics: ${e.message}`);}
+  finally{spin.style.display='none';}
+}
+
+/* ── PROVIDERS ── */
+async function loadProviders(){
+  const panel=document.getElementById('providers-panel');
+  panel.innerHTML='<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">Carregando…</div></div>';
+  try{
+    const r=await apiFetch('/api/metrics');
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();const providers=data.providers||{};
+    if(!Object.keys(providers).length){panel.innerHTML='<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Sem dados de providers</div><div class="empty-sub">Execute análises para popular as métricas</div></div>';return;}
+    panel.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+      ${Object.entries(providers).map(([id,m])=>{
+        const sr=((m.success_rate||0)*100).toFixed(1);const healthy=sr>=70;
+        return `<div style="border-radius:var(--r-md);border:1px solid ${healthy?'rgba(16,185,129,.18)':'rgba(185,28,28,.22)'};background:${healthy?'rgba(16,185,129,.04)':'rgba(185,28,28,.04)'};padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-weight:700;font-size:.86rem;color:var(--n0);">${id}</span>
+            <span class="tbadge ${healthy?'active':'premium'}"><span class="tbadge-dot"></span>${healthy?'Saudável':'Atenção'}</span>
+          </div>
+          <div class="metric-row" style="margin:4px 0;"><span class="metric-lbl" style="width:100px;font-size:.60rem;">Sucesso</span><div class="metric-bar"><div class="metric-fill e" style="width:${sr}%"></div></div><span class="metric-val">${sr}%</span></div>
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+            <div><div style="font-family:var(--f-mono);font-size:.56rem;color:var(--n5);">LATÊNCIA</div><div style="font-size:.78rem;color:var(--g4);">${(m.avg_latency_ms||0).toFixed(0)}ms</div></div>
+            <div><div style="font-family:var(--f-mono);font-size:.56rem;color:var(--n5);">429s</div><div style="font-size:.78rem;color:var(--r4);">${m.rate_limit_429||0}</div></div>
+            <div><div style="font-family:var(--f-mono);font-size:.56rem;color:var(--n5);">TIMEOUTS</div><div style="font-size:.78rem;color:var(--n4);">${m.timeouts||0}</div></div>
+            <div><div style="font-family:var(--f-mono);font-size:.56rem;color:var(--n5);">TOTAL</div><div style="font-size:.78rem;color:var(--n3);">${m.calls||0}</div></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+    addLog('OK',`${Object.keys(providers).length} providers carregados`);
+  }catch(e){panel.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erro: ${e.message}</div></div>`;addLog('ERROR',`providers: ${e.message}`);}
+}
+
+/* ── LOGS ── */
+function addLog(level,msg){
+  const now=new Date().toTimeString().slice(0,8);
+  allLogs.unshift({time:now,level,msg});
+  if(allLogs.length>500) allLogs.pop();
+  renderLogs();
+}
+function renderLogs(){
+  const lvl=document.getElementById('log-level-filter')?.value||'';
+  const filtered=lvl?allLogs.filter(l=>l.level===lvl):allLogs;
+  document.getElementById('log-count').textContent=`${filtered.length} entradas`;
+  const term=document.getElementById('log-terminal');
+  term.innerHTML=filtered.slice(0,200).map(l=>`<div class="log-line"><span class="log-time">${l.time}</span><span class="log-level ${l.level}">${l.level}</span><span class="log-msg">${l.msg}</span></div>`).join('');
+  if(document.getElementById('log-autoscroll')?.checked) term.scrollTop=0;
+}
+function filterLogs(){renderLogs();}
+function clearLogs(){allLogs=[];renderLogs();toast('Logs limpos','info');}
+async function loadLogs(){
+  try{
+    const r=await apiFetch('/api/admin/stats');
+    if(r.ok){const data=await r.json();addLog('INFO',`Stats: ${data.total_users||0} users · ${data.total_analyses||0} análises · score_avg=${parseFloat(data.avg_jurir_score||0).toFixed(1)}`);}
+  }catch(e){addLog('ERROR',`logs/stats: ${e.message}`);}
+}
+
+/* ── DELETE USER ── */
+function openDelModal(){document.getElementById('del-modal').classList.add('open');}
+function closeDelModal(){document.getElementById('del-modal').classList.remove('open');document.getElementById('del-user').value='';document.getElementById('del-confirm').value='';}
+async function doDeleteUser(){
+  const user=document.getElementById('del-user').value.trim();
+  const confirm=document.getElementById('del-confirm').value.trim();
+  if(confirm!=='DELETE'){toast('Digite DELETE para confirmar.','error');return;}
+  if(!user){toast('Informe o usuário.','error');return;}
+  const spin=document.getElementById('del-spin');spin.style.display='inline-block';
+  try{
+    const body=isNaN(user)?{email:user}:{user_id:parseInt(user)};
+    const r=await apiFetch('/api/admin/delete-user',{method:'DELETE',body:JSON.stringify(body)});
+    const data=await r.json();if(!r.ok) throw new Error(data.detail||`HTTP ${r.status}`);
+    toast(`🗑️ Usuário ${user} excluído`,'success');addLog('WARN',`delete-user: ${user}`);closeDelModal();loadUsers();
+  }catch(e){toast(`Delete: ${e.message}`,'error');addLog('ERROR',`delete-user: ${e.message}`);}
+  finally{spin.style.display='none';}
+}
+
+/* ── TOAST ── */
+function toast(msg,type='info'){
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  const el=document.createElement('div');el.className=`toast ${type}`;
+  el.innerHTML=`<span>${icons[type]||'💬'}</span><span>${msg}</span>`;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},4000);
 }
 
-// ─── FEATURES TAB ─────────────────────────────────────────────────────
-async function loadFeatures() {
-  if (statsData?.features) { renderFeatures(statsData.features); return; }
-  try {
-    const data = await apiCall('GET', '/api/admin/stats');
-    statsData = data;
-    if (data.features) renderFeatures(data.features);
-  } catch (e) { showToast(e.message, 'error'); }
-}
-
-// Load features when switching to that tab
-document.querySelector('[data-section="features"]').addEventListener('click', loadFeatures);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDelModal();closeUserDetail();}});
 </script>
 </body>
 </html>
