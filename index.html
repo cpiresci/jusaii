@@ -2323,7 +2323,7 @@ footer{
 /* ═══════════════════════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
 ═══════════════════════════════════════════════════════════════ */
-const JURIR_VERSION = 'v9.0'; // [FIX] CORS + Memory + SSE UX
+const JURIR_VERSION = 'v9.1'; // [FIX v9.1] CORS credentials + ping retry cold-start
 const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
 const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
   || (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
@@ -2332,21 +2332,30 @@ const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
 /* ── [FIX v9.0] DIAGNÓSTICO DE CONECTIVIDADE E CORS ── */
 (async function _jurirConnectivityCheck(){
   try{
-    const r = await fetch(`${API_BASE}/health`,{method:'GET',credentials:'include',cache:'no-store'});
+    // [FIX v9.1] credentials:'include' removido — /health não usa cookie/auth e
+    // forçava preflight CORS bloqueado silenciosamente quando FRONTEND_URL não estava
+    // configurado no Render. 'omit' é correto para endpoints públicos sem autenticação.
+    const r = await fetch(`${API_BASE}/health`,{method:'GET',credentials:'omit',cache:'no-store'});
     const data = await r.json().catch(()=>({}));
     if(data.cors_wildcard){
       console.warn(
-        '[JURIR v9.0] ⚠️ CORS CRÍTICO: backend retornou wildcard origin ("*") com credentials=false.',
+        '[JURIR v9.1] ⚠️ CORS CRÍTICO: backend retornou wildcard origin ("*") com credentials=false.',
         '\nIsso significa que FRONTEND_URL / ALLOWED_ORIGINS NÃO estão configurados no Render.',
-        '\nSolução: adicione FRONTEND_URL=https://jurir.com nas env vars do Render.',
-        '\nStatus:', data
+        '\nSolução: no painel Render → Environment Variables, adicione:',
+        '\n  FRONTEND_URL=https://jurir.com',
+        '\n  ALLOWED_ORIGINS=https://jurir.com,https://www.jurir.com',
+        '\n  SELF_URL=https://jusaii-app-daqr.onrender.com',
+        '\nStatus completo:', data
       );
     } else {
-      console.info('[JURIR v9.0] ✓ Backend conectado:', API_BASE, '| CORS OK:', data.cors_origins_count, 'origens | credentials:', data.cors_credentials);
+      console.info('[JURIR v9.1] ✓ Backend conectado:', API_BASE,
+        '| CORS OK:', data.cors_origins_count, 'origens',
+        '| credentials:', data.cors_credentials,
+        '| origens aceitas:', data.cors_origins_list);
     }
   }catch(e){
-    console.warn('[JURIR v9.0] Backend inacessível em', API_BASE, '—', e.message,
-      '\nSe estiver no Render Free, o serviço pode estar dormindo. Aguarde 30-60s e recarregue.');
+    console.warn('[JURIR v9.1] Backend inacessível em', API_BASE, '—', e.message,
+      '\nSe estiver no Render Free, o serviço pode estar dormindo. Aguarde 30-90s e clique ↺ Reconectar.');
   }
 })();
 
@@ -2563,17 +2572,19 @@ async function runFreeAnalysis(prompt){
   // Render Free dorme após 15min de inatividade — primeiro request pode levar 50-60s.
   // Com timeout, o usuário recebe mensagem clara e pode tentar novamente.
   const controller = new AbortController();
-  // [FIX v9.0] Timeout 55s para análise gratuita (Render Free cold start até 50s)
-  const _timeoutId = setTimeout(() => controller.abort(), 55000);
+  // [FIX v9.1] Timeout 90s — cobre cold start completo do Render Free (pode levar até 90s).
+  // Antes: 55s causava AbortError antes do serviço terminar de acordar, exibindo
+  // "Sem conexão" quando na verdade era apenas lentidão de inicialização.
+  const _timeoutId = setTimeout(() => controller.abort(), 90000);
 
-  // [FIX v9.0] Mostrar aviso de warm-up após 8s sem resposta
+  // [FIX v9.1] Mostrar aviso de warm-up após 12s sem resposta (era 8s)
   const _warmupTimer = setTimeout(()=>{
     const jt = document.getElementById('judge-text');
     if(jt && jt.textContent.includes('Aguardando')||jt.innerHTML.includes('sp-thinking'))
       document.getElementById('judge-text').innerHTML=
-        '<span class="sp-thinking" style="color:var(--g4);">☕ Backend aquecendo (Render Free pode levar 30-60s no primeiro acesso)'+
+        '<span class="sp-thinking" style="color:var(--g4);">☕ Backend aquecendo (Render Free pode levar até 90s no primeiro acesso do dia)'+
         '<span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span></span>';
-  }, 8000);
+  }, 12000);
 
   try{
     const r=await fetch(`${API_BASE}/api/analyze`,{
@@ -2602,9 +2613,9 @@ async function runFreeAnalysis(prompt){
     const isTimeout   = e.name==='AbortError';
 
     const errMsg = isTimeout
-      ? `⏳ O servidor está acordando (cold start).\n\nO Render Free pode levar até 60 segundos na primeira requisição do dia.\n\n👉 Aguarde alguns segundos e clique em ⚡ Analisar novamente.`
+      ? `⏳ O servidor está acordando (cold start do Render Free).\n\nIsso é normal na primeira requisição do dia — o serviço dorme após 15 min de inatividade.\n\n👉 Clique em ↺ Reconectar no topo e aguarde o badge ficar "API Online ✓", depois tente novamente.`
       : isColdStart
-      ? `🔌 Sem conexão com o backend.\n\nURL: ${API_BASE}\n\nVerifique se o serviço está ativo no Render e tente novamente.`
+      ? `🔌 Sem conexão com o backend.\n\nURL: ${API_BASE}\n\nSe for a primeira visita do dia, aguarde 60–90s (cold start Render Free) e clique ↺ Reconectar.\nSe o problema persistir, verifique se o serviço está ativo no painel do Render.`
       : `⚠️ Erro na análise: ${e.message}\n\nEndpoint: ${API_BASE}/api/analyze`;
 
     document.getElementById('free-result').style.display='block';
@@ -2613,7 +2624,7 @@ async function runFreeAnalysis(prompt){
     const upgradeEl=document.querySelector('.free-upgrade');
     if(upgradeEl) upgradeEl.style.display='none';
 
-    toast(isTimeout?'⏳ Cold start — tente novamente em 10s':`Erro: ${e.message}`,'error');
+    toast(isTimeout?'⏳ Cold start — clique ↺ Reconectar e aguarde o badge ficar Online':`Erro: ${e.message}`,'error');
   }finally{
     setAnalyzeLoading(false);
   }
@@ -2800,7 +2811,9 @@ async function runPremiumSSE(prompt){
   // NÃO chama setAnalyzeLoading(false) aqui — botão fica desabilitado até 'start' ou erro
   try{
     const _fetchCtrl = new AbortController();
-    const _fetchTimeout = setTimeout(()=>_fetchCtrl.abort(), 90000); // 90s timeout
+    // [FIX v9.1] Timeout 120s — 90s cold start + ~30s para iniciar o stream.
+    // Antes: 90s podia expirar durante o próprio cold start antes da análise começar.
+    const _fetchTimeout = setTimeout(()=>_fetchCtrl.abort(), 120000);
     const initR=await fetch(`${API_BASE}/api/analyze/premium/stream`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
@@ -3344,7 +3357,10 @@ async function _doPing(){
   setStatus(false,'Verificando API…');
 
   let attempts=0;
-  const MAX=3;
+  // [FIX v9.1] MAX 6 tentativas × 15s = 90s — cobre cold start completo do Render Free.
+  // Antes: MAX=3 × 8s = 24s era insuficiente; badge ficava "offline" antes do serviço acordar,
+  // induzindo o usuário a clicar em Analisar prematuramente e receber "Sem conexão".
+  const MAX=6;
 
   while(attempts<MAX){
     try{
@@ -3357,15 +3373,15 @@ async function _doPing(){
 
     attempts++;
     if(attempts<MAX){
-      setStatus(false,`Cold start… tentativa ${attempts}/${MAX}`);
-      await new Promise(r=>setTimeout(r,8000));
+      setStatus(false,`Aguardando backend… tentativa ${attempts}/${MAX}`);
+      await new Promise(r=>setTimeout(r,15000));
     }
   }
 
   setStatus(false,'Backend offline — clique ↺ para reconectar');
   const span=_span();
-  if(span) span.title='Se for a primeira visita do dia, aguarde ~60s e clique ↺ Reconectar (cold start Render Free)';
-  toast('⚠️ Backend offline. No Render Free pode levar ~60s para acordar — clique ↺ Reconectar.','info');
+  if(span) span.title='Cold start do Render Free pode levar até 90s — clique ↺ Reconectar para tentar novamente';
+  toast('⚠️ Backend offline. Render Free pode levar até 90s para acordar — clique ↺ Reconectar.','info');
 }
 
 (async()=>{ await _doPing(); })();
