@@ -890,7 +890,7 @@ section{width:100%;max-width:1340px;padding:88px 32px;}
   letter-spacing:.15em;text-transform:uppercase;
   color:var(--g3);margin-bottom:12px;
 }
-.free-result-text{font-size:.83rem;color:var(--n3);line-height:1.7;white-space:pre-wrap;}
+.free-result-text{font-size:.83rem;color:var(--n3);line-height:1.7;}
 .free-upgrade{
   margin-top:16px;padding:14px;
   border-radius:var(--r-sm);
@@ -1853,7 +1853,7 @@ footer{
         <div class="ctrl-badges">
           <div class="badge">
             <span class="badge-led green"></span>
-            <span>API Online</span>
+            <span>Verificando API…</span>
           </div>
           <div class="badge" id="tribunal-badge">
             <span class="badge-led gold"></span>
@@ -1868,6 +1868,10 @@ footer{
         <button class="btn btn-crimson btn-lg" id="analyze-btn" onclick="runAnalysis()">
           <svg id="analyze-spinner" style="display:none" class="spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
           <span id="analyze-label">⚡ Analisar</span>
+        </button>
+        <!-- [FIX v8.0] Botão de retry explícito — aparece só quando backend offline -->
+        <button class="btn btn-ghost" id="retry-ping-btn" onclick="retryPing()" style="display:none;font-size:.73rem;padding:7px 14px;" title="Tentar reconectar ao backend">
+          ↺ Reconectar
         </button>
       </div>
 
@@ -2527,19 +2531,53 @@ function setAnalyzeLoading(loading){
 
 /* ── FREE ── */
 async function runFreeAnalysis(prompt){
+  // [FIX v8.0] Timeout explícito de 20s para não travar em cold start do Render.
+  // Render Free dorme após 15min de inatividade — primeiro request pode levar 50-60s.
+  // Com timeout, o usuário recebe mensagem clara e pode tentar novamente.
+  const controller = new AbortController();
+  const _timeoutId = setTimeout(() => controller.abort(), 20000);
+
   try{
-    const r=await fetch(`${API_BASE}/api/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const r=await fetch(`${API_BASE}/api/analyze`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt}),
+      signal:controller.signal
+    });
+    clearTimeout(_timeoutId);
+
     if(!r.ok){const e=await r.json().catch(()=>({detail:'Erro desconhecido'}));throw new Error(e.detail||'Erro na API');}
     const data=await r.json();
-    document.getElementById('free-result').style.display='block';
-    document.getElementById('free-result-text').textContent=(data.verdict||data.veredito||data.result||JSON.stringify(data,null,2));
+
+    // [FIX v8.0] Garantir que free-result está visível ANTES de preencher
+    const frEl=document.getElementById('free-result');
+    frEl.style.display='block';
+    // Renderiza com markdown básico para melhor leitura
+    const txt=(data.verdict||data.veredito||data.result||JSON.stringify(data,null,2));
+    document.getElementById('free-result-text').innerHTML=_mdToHtml(txt);
     toast('Análise gratuita concluída!','success');
+
   }catch(e){
-    toast(`Erro: ${e.message}`,'error');
+    clearTimeout(_timeoutId);
+    const isColdStart = e.name==='AbortError' || e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
+    const isTimeout   = e.name==='AbortError';
+
+    const errMsg = isTimeout
+      ? `⏳ O servidor está acordando (cold start).\n\nO Render Free pode levar até 60 segundos na primeira requisição do dia.\n\n👉 Aguarde alguns segundos e clique em ⚡ Analisar novamente.`
+      : isColdStart
+      ? `🔌 Sem conexão com o backend.\n\nURL: ${API_BASE}\n\nVerifique se o serviço está ativo no Render e tente novamente.`
+      : `⚠️ Erro na análise: ${e.message}\n\nEndpoint: ${API_BASE}/api/analyze`;
+
     document.getElementById('free-result').style.display='block';
-    document.getElementById('free-result-text').textContent=`⚠️ Não foi possível conectar ao backend.\n\nVerifique que o servidor está rodando em:\n${API_BASE}/\n\nErro: ${e.message}`;
-    document.querySelector('.free-upgrade').style.display='none';
-  }finally{setAnalyzeLoading(false);}
+    document.getElementById('free-result-text').textContent=errMsg;
+
+    const upgradeEl=document.querySelector('.free-upgrade');
+    if(upgradeEl) upgradeEl.style.display='none';
+
+    toast(isTimeout?'⏳ Cold start — tente novamente em 10s':`Erro: ${e.message}`,'error');
+  }finally{
+    setAnalyzeLoading(false);
+  }
 }
 
 /* ── AGENT CONFIG ── */
@@ -3199,21 +3237,57 @@ const obs=new IntersectionObserver(entries=>{
 },{threshold:.08});
 document.querySelectorAll('.feat-card,.mc,.price-card').forEach(el=>obs.observe(el));
 
-/* ── PING BACKEND ── */
-(async()=>{
-  try{
-    const r=await fetch(`${API_BASE}/ping`,{signal:AbortSignal.timeout(4000)});
-    if(r.ok){
-      const firstBadge=document.querySelector('.ctrl-badges .badge:first-child span');
-      if(firstBadge) firstBadge.textContent='API Online ✓';
+/* ── PING BACKEND COM RETRY — cold start awareness ── */
+function retryPing(){
+  const btn=document.getElementById('retry-ping-btn');
+  if(btn) btn.style.display='none';
+  _doPing();
+}
+
+async function _doPing(){
+  const _dot  = ()=>document.querySelector('.badge-led.green');
+  const _span = ()=>document.querySelector('.ctrl-badges .badge:first-child span');
+  const _btn  = ()=>document.getElementById('retry-ping-btn');
+
+  const setStatus=(online,msg)=>{
+    const dot=_dot(); const span=_span(); const btn=_btn();
+    if(dot){
+      dot.style.background  = online?'':'var(--r4)';
+      dot.style.boxShadow   = online?'':'0 0 6px var(--r4)';
+      dot.style.animation   = online?'':'none';
     }
-  }catch(e){
-    const dot=document.querySelector('.badge-led.green');
-    if(dot){dot.style.background='var(--r4)';dot.style.boxShadow='0 0 6px var(--r4)';}
-    const span=document.querySelector('.ctrl-badges .badge:first-child span');
-    if(span) span.textContent='Backend offline';
+    if(span) span.textContent=msg;
+    if(btn)  btn.style.display=online?'none':'inline-flex';
+  };
+
+  setStatus(false,'Verificando API…');
+
+  let attempts=0;
+  const MAX=3;
+
+  while(attempts<MAX){
+    try{
+      const r=await fetch(`${API_BASE}/ping`,{signal:AbortSignal.timeout(10000)});
+      if(r.ok){
+        setStatus(true,'API Online ✓');
+        return;
+      }
+    }catch(e){}
+
+    attempts++;
+    if(attempts<MAX){
+      setStatus(false,`Cold start… tentativa ${attempts}/${MAX}`);
+      await new Promise(r=>setTimeout(r,8000));
+    }
   }
-})();
+
+  setStatus(false,'Backend offline — clique ↺ para reconectar');
+  const span=_span();
+  if(span) span.title='Se for a primeira visita do dia, aguarde ~60s e clique ↺ Reconectar (cold start Render Free)';
+  toast('⚠️ Backend offline. No Render Free pode levar ~60s para acordar — clique ↺ Reconectar.','info');
+}
+
+(async()=>{ await _doPing(); })();
 
 
 /* ═══════════════════════════════════════════════════════════════
