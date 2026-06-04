@@ -2323,7 +2323,7 @@ footer{
 /* ═══════════════════════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
 ═══════════════════════════════════════════════════════════════ */
-const JURIR_VERSION = 'v9.1'; // [FIX v9.1] CORS credentials + ping retry cold-start
+const JURIR_VERSION = 'v9.2'; // [FIX v9.2] /wake endpoint + cron-job fix
 const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
 const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
   || (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
@@ -3364,7 +3364,9 @@ async function _doPing(){
 
   while(attempts<MAX){
     try{
-      const r=await fetch(`${API_BASE}/ping`,{signal:AbortSignal.timeout(10000)});
+      // [FIX v9.2] /wake é o endpoint mais leve do backend — sem DB, sem CORS logic,
+      // responde em <50ms. Ideal para detectar se o processo está vivo.
+      const r=await fetch(`${API_BASE}/wake`,{signal:AbortSignal.timeout(10000)});
       if(r.ok){
         setStatus(true,'API Online ✓');
         return;
