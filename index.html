@@ -633,6 +633,12 @@ section{width:100%;max-width:1340px;padding:88px 32px;}
 }
 .prog-lbl{font-family:var(--f-mono);font-size:.65rem;color:var(--n5);min-width:32px;}
 
+/* ── [FIX v9.0] SKELETON PULSE ANIMATION ── */
+@keyframes skeleton-pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.35;}
+}
+
 /* ── AGENT CARD ── */
 .agents-grid{
   display:grid;
@@ -2317,10 +2323,32 @@ footer{
 /* ═══════════════════════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
 ═══════════════════════════════════════════════════════════════ */
+const JURIR_VERSION = 'v9.0'; // [FIX] CORS + Memory + SSE UX
 const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
 const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
   || (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
       ? 'http://localhost:10000' : API_BASE_PROD);
+
+/* ── [FIX v9.0] DIAGNÓSTICO DE CONECTIVIDADE E CORS ── */
+(async function _jurirConnectivityCheck(){
+  try{
+    const r = await fetch(`${API_BASE}/health`,{method:'GET',credentials:'include',cache:'no-store'});
+    const data = await r.json().catch(()=>({}));
+    if(data.cors_wildcard){
+      console.warn(
+        '[JURIR v9.0] ⚠️ CORS CRÍTICO: backend retornou wildcard origin ("*") com credentials=false.',
+        '\nIsso significa que FRONTEND_URL / ALLOWED_ORIGINS NÃO estão configurados no Render.',
+        '\nSolução: adicione FRONTEND_URL=https://jurir.com nas env vars do Render.',
+        '\nStatus:', data
+      );
+    } else {
+      console.info('[JURIR v9.0] ✓ Backend conectado:', API_BASE, '| CORS OK:', data.cors_origins_count, 'origens | credentials:', data.cors_credentials);
+    }
+  }catch(e){
+    console.warn('[JURIR v9.0] Backend inacessível em', API_BASE, '—', e.message,
+      '\nSe estiver no Render Free, o serviço pode estar dormindo. Aguarde 30-60s e recarregue.');
+  }
+})();
 
 /* ═══════════════════════════════════════════════════════════════
    CANVAS PARTICLE SYSTEM — Constellation Network
@@ -2535,7 +2563,17 @@ async function runFreeAnalysis(prompt){
   // Render Free dorme após 15min de inatividade — primeiro request pode levar 50-60s.
   // Com timeout, o usuário recebe mensagem clara e pode tentar novamente.
   const controller = new AbortController();
-  const _timeoutId = setTimeout(() => controller.abort(), 20000);
+  // [FIX v9.0] Timeout 55s para análise gratuita (Render Free cold start até 50s)
+  const _timeoutId = setTimeout(() => controller.abort(), 55000);
+
+  // [FIX v9.0] Mostrar aviso de warm-up após 8s sem resposta
+  const _warmupTimer = setTimeout(()=>{
+    const jt = document.getElementById('judge-text');
+    if(jt && jt.textContent.includes('Aguardando')||jt.innerHTML.includes('sp-thinking'))
+      document.getElementById('judge-text').innerHTML=
+        '<span class="sp-thinking" style="color:var(--g4);">☕ Backend aquecendo (Render Free pode levar 30-60s no primeiro acesso)'+
+        '<span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span></span>';
+  }, 8000);
 
   try{
     const r=await fetch(`${API_BASE}/api/analyze`,{
@@ -2559,6 +2597,7 @@ async function runFreeAnalysis(prompt){
 
   }catch(e){
     clearTimeout(_timeoutId);
+    clearTimeout(_warmupTimer);
     const isColdStart = e.name==='AbortError' || e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
     const isTimeout   = e.name==='AbortError';
 
@@ -2745,15 +2784,30 @@ function updateProgress(completed,total){
 
 /* ── PREMIUM SSE ── */
 async function runPremiumSSE(prompt){
+  // [FIX v9.0] GARGALO PRINCIPAL CORRIGIDO:
+  // Antes: buildAgentsGrid() + setAnalyzeLoading(false) ANTES do fetch.
+  // Resultado: usuário via grid aparecer mas botão voltar ao normal instantaneamente,
+  // sem nenhuma atividade visual por 60s (cold start Render). Parecia "botão quebrado".
+  //
+  // Fix: mostrar skeleton animado nos cards IMEDIATAMENTE + manter botão desabilitado
+  // até o primeiro evento SSE chegar. O loading só é removido no evento 'start'.
   buildAgentsGrid();
+  _buildAgentSkeletons(); // [FIX v9.0] skeleton pulsante em todos os 16 cards
   document.getElementById('agents-container').style.display='block';
-  setAnalyzeLoading(false);
+  document.getElementById('judge-text').innerHTML=
+    '<span class="sp-thinking" style="color:var(--g4);">⚡ Conectando ao motor Quantum Jurist'+
+    '<span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span></span>';
+  // NÃO chama setAnalyzeLoading(false) aqui — botão fica desabilitado até 'start' ou erro
   try{
+    const _fetchCtrl = new AbortController();
+    const _fetchTimeout = setTimeout(()=>_fetchCtrl.abort(), 90000); // 90s timeout
     const initR=await fetch(`${API_BASE}/api/analyze/premium/stream`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({prompt}),
+      signal: _fetchCtrl.signal,
     });
+    clearTimeout(_fetchTimeout);
     if(!initR.ok){const err=await initR.json().catch(()=>({detail:'Erro ao iniciar streaming'}));throw new Error(err.detail||`HTTP ${initR.status}`);}
     const reader=initR.body.getReader();
     const decoder=new TextDecoder();
@@ -2772,9 +2826,34 @@ async function runPremiumSSE(prompt){
     }
     if(!verdictReceived&&!streamErrorReceived) await _fetchVerdictFallback();
   }catch(e){
-    toast(`Streaming: ${e.message}`,'error');
-    document.getElementById('judge-text').textContent=`⚠️ ${e.message}\n\nVerifique o backend em ${API_BASE}`;
+    setAnalyzeLoading(false); // libera botão em caso de erro
+    const msg = e.name==='AbortError'
+      ? `Timeout: backend demorou mais de 90s. Verifique se o Render está ativo em ${API_BASE}`
+      : e.message;
+    toast(`Streaming: ${msg}`,'error');
+    document.getElementById('judge-text').textContent=`⚠️ ${msg}\n\nVerifique o backend em ${API_BASE}`;
+  }finally{
+    setAnalyzeLoading(false); // garante liberação em qualquer cenário
   }
+}
+
+/* ── [FIX v9.0] SKELETON ANIMADO NOS AGENT CARDS ── */
+function _buildAgentSkeletons(){
+  AGENT_CONFIGS.forEach(a=>{
+    const statusEl=document.getElementById(`status-${a.id}`);
+    const card=document.getElementById(`agent-${a.id}`);
+    const specEl=document.getElementById(`spec-${a.id}`);
+    const analysisEl=document.getElementById(`analysis-${a.id}`);
+    if(card) card.className='agent-card thinking';
+    if(statusEl){statusEl.className='ac-status thinking';statusEl.textContent='...';}
+    if(specEl) specEl.innerHTML='<span style="color:var(--g4);font-size:.6rem;">Aguardando...</span>';
+    if(analysisEl) analysisEl.innerHTML=
+      '<div style="display:flex;flex-direction:column;gap:5px;padding:8px 0;">'
+      +'<div style="height:8px;background:var(--g2);border-radius:4px;width:90%;animation:skeleton-pulse 1.4s ease infinite;"></div>'
+      +'<div style="height:8px;background:var(--g2);border-radius:4px;width:75%;animation:skeleton-pulse 1.4s ease infinite .2s;"></div>'
+      +'<div style="height:8px;background:var(--g2);border-radius:4px;width:60%;animation:skeleton-pulse 1.4s ease infinite .4s;"></div>'
+      +'</div>';
+  });
 }
 
 /* ── FALLBACK VERDICT ── */
@@ -2825,7 +2904,9 @@ function handleSSEEvent(ev){
       TOTAL_AGENTS=ev.total||16;
       if(ev.session_token) _sessionToken=ev.session_token;
       if(ev.tribunal) document.getElementById('score-tribunal').querySelector('span').textContent=`Tribunal: ${ev.tribunal}`;
-      toast(`Análise iniciada — ${TOTAL_AGENTS} agentes em execução`,'info');
+      // [FIX v9.0] Motor confirmado — libera loading e mostra status real
+      setAnalyzeLoading(false);
+      toast(`⚡ ${TOTAL_AGENTS} especialistas Quantum Jurist iniciados | ${ev.tribunal||''}`, 'info');
       break;
     case 'cooldown':
       document.getElementById('judge-text').textContent=`⏳ Cooldown: ${ev.seconds}s — ${ev.message||''}`;
