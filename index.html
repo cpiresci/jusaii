@@ -2554,6 +2554,26 @@ async function runAnalysis(){
   const prompt=document.getElementById('case-prompt').value.trim();
   if(!prompt||prompt.length<20){toast('Descreva o caso com pelo menos 20 caracteres.','error');return;}
   if((currentMode==='premium'||currentMode==='polling')&&!authToken){toast('Faça login para usar análise premium.','info');openModal('login');return;}
+
+  // [FIX v9.3] GARGALO PRINCIPAL: verificar estado da conexão ANTES de disparar análise.
+  // Cenário corrigido: usuário abre a página durante cold start, clica Analisar
+  // imediatamente, e 90s depois recebe "servidor está acordando" — experiência péssima.
+  //
+  // Estratégia:
+  //   1. Se _checkHealth ainda está rodando → await nela (max 3min, já tem waits[] interno)
+  //   2. Após await, se backend ainda offline → mostrar mensagem amigável e abortar
+  //   3. Se já online → segue normalmente (zero overhead — Promise já resolvida)
+  if(_checkHealthPromise){
+    try{ await _checkHealthPromise; }catch(e){}
+  }
+  if(!_backendIsOnline){
+    toast('⏳ Backend ainda iniciando — aguarde o badge "API Online ✓" e tente novamente.','info');
+    const jt=document.getElementById('judge-text');
+    if(jt) jt.innerHTML='<span style="color:var(--g4);">☕ Servidor acordando (Render Free cold start).<br>Aguarde o badge <strong>"API Online ✓"</strong> no topo e clique em Analisar novamente.</span>';
+    document.getElementById('free-result').style.display='block';
+    return;
+  }
+
   resetAnalysis();setAnalyzeLoading(true);
   if(currentMode==='free') await runFreeAnalysis(prompt);
   else if(currentMode==='premium') await runPremiumSSE(prompt);
@@ -3332,6 +3352,11 @@ const obs=new IntersectionObserver(entries=>{
 document.querySelectorAll('.feat-card,.mc,.price-card').forEach(el=>obs.observe(el));
 
 /* ── PING BACKEND COM RETRY — cold start awareness ── */
+// [FIX v9.3] Flag global de estado da conexão — consultada por runAnalysis()
+// antes de disparar qualquer fetch ao backend. Evita o cenário onde o usuário
+// clica "Analisar" durante o cold start e recebe "servidor está acordando" 90s depois.
+let _backendIsOnline = false;
+let _checkHealthPromise = null; // Promise do check em andamento (evita corridas)
 /* ── HEALTH CHECK (padrão Wuzo) ─────────────────────────────────────
    Estratégia idêntica ao Wuzo que funciona com UptimeRobot 5min/60s:
    • waits[] — 9 tentativas espaçadas, cobre até ~3min de cold start
@@ -3342,10 +3367,11 @@ document.querySelectorAll('.feat-card,.mc,.price-card').forEach(el=>obs.observe(
 function retryPing(){
   const btn=document.getElementById('retry-ping-btn');
   if(btn) btn.style.display='none';
-  _checkHealth();
+  _checkHealthPromise = _checkHealth(); // [FIX v9.3] recria promise para runAnalysis() poder await
 }
 
 function _setBackendStatus(online, msg){
+  _backendIsOnline = online; // [FIX v9.3] mantém flag global sincronizada
   const dot  = document.querySelector('.badge-led.green');
   const span = document.querySelector('.ctrl-badges .badge:first-child span');
   const btn  = document.getElementById('retry-ping-btn');
@@ -3359,6 +3385,7 @@ function _setBackendStatus(online, msg){
 }
 
 async function _checkHealth(){
+  // [FIX v9.3] Expõe a Promise para que runAnalysis() possa await nela
   _setBackendStatus(false, 'Verificando API…');
 
   // Mesmos intervalos do Wuzo: 9 tentativas, espaçamento crescente.
@@ -3389,7 +3416,7 @@ async function _checkHealth(){
   toast('⚠️ Backend offline. Aguarde ~90s e clique ↺ Reconectar.','info');
 }
 
-(async()=>{ await _checkHealth(); })();
+_checkHealthPromise = _checkHealth(); // [FIX v9.3] armazena promise para await em runAnalysis()
 
 
 /* ═══════════════════════════════════════════════════════════════
