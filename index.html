@@ -2323,7 +2323,7 @@ footer{
 /* ═══════════════════════════════════════════════════════════════
    CONFIG — EDITE AQUI A URL DO SEU BACKEND
 ═══════════════════════════════════════════════════════════════ */
-const JURIR_VERSION = 'v9.3'; // [FIX v9.3] checkHealth padrão Wuzo: waits[] + 60s timeout + setInterval 4min
+const JURIR_VERSION = 'v9.5'; // [FIX v9.5] timeout 600s: /api/analyze carrega legal_engine na 1ª chamada (pode levar 2-3min)
 const API_BASE_PROD = 'https://jusaii-app-daqr.onrender.com';
 const API_BASE = (window.JurirGuard && window.JurirGuard.apiBase())
   || (window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
@@ -2598,14 +2598,14 @@ async function runFreeAnalysis(prompt){
   // [FIX v9.1] Timeout 90s — cobre cold start completo do Render Free (pode levar até 90s).
   // Antes: 55s causava AbortError antes do serviço terminar de acordar, exibindo
   // "Sem conexão" quando na verdade era apenas lentidão de inicialização.
-  const _timeoutId = setTimeout(() => controller.abort(), 150000); // [FIX v9.4] 90s→150s: /api/analyze carrega legal_engine na 1ª chamada, pode levar >90s
+  const _timeoutId = setTimeout(() => controller.abort(), 600000); // [FIX v9.5] 150s→600s: /api/analyze carrega legal_engine inteiro na 1ª chamada (pode levar 2-3min)
 
   // [FIX v9.1] Mostrar aviso de warm-up após 12s sem resposta (era 8s)
   const _warmupTimer = setTimeout(()=>{
     const jt = document.getElementById('judge-text');
     if(jt && jt.textContent.includes('Aguardando')||jt.innerHTML.includes('sp-thinking'))
       document.getElementById('judge-text').innerHTML=
-        '<span class="sp-thinking" style="color:var(--g4);">☕ Backend aquecendo (Render Free pode levar até 90s no primeiro acesso do dia)'+
+        '<span class="sp-thinking" style="color:var(--g4);">☕ Motor jurídico aquecendo — primeira análise pode levar até 3 minutos'+
         '<span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span><span class="sp-thinking-dot"></span></span>';
   }, 12000);
 
@@ -2636,7 +2636,7 @@ async function runFreeAnalysis(prompt){
     const isTimeout   = e.name==='AbortError';
 
     const errMsg = isTimeout
-      ? `⏳ A primeira análise do dia pode levar até 2 minutos (carregamento inicial).\n\nAguarde e tente novamente — o badge já está Online, o motor está aquecendo.`
+      ? `⏳ A primeira análise do dia pode levar até 3 minutos (carregamento do motor jurídico).\n\nAguarde e tente novamente. Se o badge estiver Online, o motor está aquecendo normalmente.`
       : isColdStart
       ? `🔌 Sem conexão com o backend.\n\nURL: ${API_BASE}\n\nSe for a primeira visita do dia, aguarde 60–90s (cold start Render Free) e clique ↺ Reconectar.\nSe o problema persistir, verifique se o serviço está ativo no painel do Render.`
       : `⚠️ Erro na análise: ${e.message}\n\nEndpoint: ${API_BASE}/api/analyze`;
@@ -2647,7 +2647,7 @@ async function runFreeAnalysis(prompt){
     const upgradeEl=document.querySelector('.free-upgrade');
     if(upgradeEl) upgradeEl.style.display='none';
 
-    toast(isTimeout?'⏳ Cold start — clique ↺ Reconectar e aguarde o badge ficar Online':`Erro: ${e.message}`,'error');
+    toast(isTimeout?'⏳ Aguardando motor jurídico — pode levar até 3 min na 1ª análise do dia':`Erro: ${e.message}`,'error');
   }finally{
     setAnalyzeLoading(false);
   }
