@@ -2567,10 +2567,13 @@ async function runAnalysis(){
     try{ await _checkHealthPromise; }catch(e){}
   }
   if(!_backendIsOnline){
+    resetAnalysis(); // [FIX v9.3b] limpa estado anterior antes de mostrar erro
     toast('⏳ Backend ainda iniciando — aguarde o badge "API Online ✓" e tente novamente.','info');
-    const jt=document.getElementById('judge-text');
-    if(jt) jt.innerHTML='<span style="color:var(--g4);">☕ Servidor acordando (Render Free cold start).<br>Aguarde o badge <strong>"API Online ✓"</strong> no topo e clique em Analisar novamente.</span>';
     document.getElementById('free-result').style.display='block';
+    document.getElementById('free-result-text').innerHTML=
+      '<span style="color:var(--g4);">☕ Servidor acordando (Render Free cold start).<br>' +
+      'Aguarde o badge <strong>"API Online ✓"</strong> no topo e clique em Analisar novamente.</span>';
+    document.querySelector('.free-upgrade') && (document.querySelector('.free-upgrade').style.display='none');
     return;
   }
 
@@ -2846,8 +2849,18 @@ async function runPremiumSSE(prompt){
     const decoder=new TextDecoder();
     let buffer='',sseFinished=false;
     verdictReceived=false;streamErrorReceived=false;_sessionToken=null;_analysisStartTime=Date.now();
+    // [FIX v9.3] Timeout de primeiro evento: se nenhum dado SSE chegar em 40s,
+    // o proxy do Render provavelmente fechou a conexão silenciosamente.
+    // Sem este timeout, o loop while trava com reader.read() pendente para sempre.
+    let _firstEventReceived=false;
+    const _firstEventTimeout=setTimeout(()=>{
+      if(!_firstEventReceived){
+        _fetchCtrl.abort(); // aborta o reader
+      }
+    },40000);
     while(!sseFinished){
       const {done,value}=await reader.read();if(done) break;
+      if(!_firstEventReceived){_firstEventReceived=true;clearTimeout(_firstEventTimeout);}
       buffer+=decoder.decode(value,{stream:true});
       const lines=buffer.split('\n');buffer=lines.pop();
       for(const line of lines){
@@ -2864,7 +2877,12 @@ async function runPremiumSSE(prompt){
       ? `Timeout: backend demorou mais de 90s. Verifique se o Render está ativo em ${API_BASE}`
       : e.message;
     toast(`Streaming: ${msg}`,'error');
-    document.getElementById('judge-text').textContent=`⚠️ ${msg}\n\nVerifique o backend em ${API_BASE}`;
+    // [FIX v9.3] Ao falhar, ocultar enxame em skeleton e exibir erro no painel principal
+    // Antes: agents-container ficava visível com 16 cards pulsando infinitamente
+    document.getElementById('agents-container').style.display='none';
+    document.getElementById('free-result').style.display='block';
+    document.getElementById('free-result-text').textContent=`⚠️ ${msg}\n\nVerifique o backend em ${API_BASE}`;
+    document.querySelector('.free-upgrade') && (document.querySelector('.free-upgrade').style.display='none');
   }finally{
     setAnalyzeLoading(false); // garante liberação em qualquer cenário
   }
