@@ -2598,7 +2598,7 @@ async function runFreeAnalysis(prompt){
   // [FIX v9.1] Timeout 90s — cobre cold start completo do Render Free (pode levar até 90s).
   // Antes: 55s causava AbortError antes do serviço terminar de acordar, exibindo
   // "Sem conexão" quando na verdade era apenas lentidão de inicialização.
-  const _timeoutId = setTimeout(() => controller.abort(), 90000);
+  const _timeoutId = setTimeout(() => controller.abort(), 150000); // [FIX v9.4] 90s→150s: /api/analyze carrega legal_engine na 1ª chamada, pode levar >90s
 
   // [FIX v9.1] Mostrar aviso de warm-up após 12s sem resposta (era 8s)
   const _warmupTimer = setTimeout(()=>{
@@ -2636,7 +2636,7 @@ async function runFreeAnalysis(prompt){
     const isTimeout   = e.name==='AbortError';
 
     const errMsg = isTimeout
-      ? `⏳ O servidor está acordando (cold start do Render Free).\n\nIsso é normal na primeira requisição do dia — o serviço dorme após 15 min de inatividade.\n\n👉 Clique em ↺ Reconectar no topo e aguarde o badge ficar "API Online ✓", depois tente novamente.`
+      ? `⏳ A primeira análise do dia pode levar até 2 minutos (carregamento inicial).\n\nAguarde e tente novamente — o badge já está Online, o motor está aquecendo.`
       : isColdStart
       ? `🔌 Sem conexão com o backend.\n\nURL: ${API_BASE}\n\nSe for a primeira visita do dia, aguarde 60–90s (cold start Render Free) e clique ↺ Reconectar.\nSe o problema persistir, verifique se o serviço está ativo no painel do Render.`
       : `⚠️ Erro na análise: ${e.message}\n\nEndpoint: ${API_BASE}/api/analyze`;
